@@ -1,0 +1,116 @@
+backend:
+  name: git-gateway
+  branch: main
+
+media_folder: src/assets/images
+public_folder: /src/assets/images
+
+locale: de
+
+collections:
+  - name: apartments
+    label: Wohnungen
+    label_singular: Wohnung
+    folder: src/content/apartments
+    create: true
+    slug: "{{slug}}"
+    extension: md
+    format: frontmatter
+    fields:
+      - { label: Name, name: name, widget: string }
+      - label: Tagline
+        name: tagline
+        widget: object
+        fields:
+          - { label: Deutsch, name: de, widget: string }
+          - { label: English, name: en, widget: string }
+      - label: Beschreibung
+        name: description
+        widget: object
+        fields:
+          - { label: Deutsch, name: de, widget: text }
+          - { label: English, name: en, widget: text }
+      - { label: "Größe (m²)", name: size, widget: number, value_type: int }
+      - { label: Zimmer, name: rooms, widget: string }
+      - { label: Max. Bewohner, name: maxOccupants, widget: number, value_type: int }
+      - { label: "Miete (€/Monat)", name: pricePerMonth, widget: number, value_type: int }
+      - { label: "Nebenkosten (€/Monat)", name: utilitiesPerMonth, widget: number, value_type: int }
+      - label: Ausstattung
+        name: amenities
+        widget: list
+        field: { label: Ausstattung, name: amenity, widget: string }
+      - { label: Verfügbar, name: available, widget: boolean, default: true }
+      - { label: Verfügbar ab, name: availableFrom, widget: string, required: false }
+      - label: Bilder
+        name: images
+        widget: list
+        field: { label: Bild, name: image, widget: image }
+      - { label: Stockwerk, name: floor, widget: string }
+      - { label: Reihenfolge, name: order, widget: number, value_type: int }
+
+  - name: pages
+    label: Seiten
+    files:
+      - label: Startseite
+        name: home
+        file: src/content/pages/home.md
+        fields:
+          - { label: Titel, name: title, widget: hidden, default: home }
+          - label: Hero-Bereich
+            name: hero
+            widget: object
+            fields:
+              - label: Überschrift
+                name: headline
+                widget: object
+                fields:
+                  - { label: Deutsch, name: de, widget: string }
+                  - { label: English, name: en, widget: string }
+              - label: Unterüberschrift
+                name: subheadline
+                widget: object
+                fields:
+                  - { label: Deutsch, name: de, widget: string }
+                  - { label: English, name: en, widget: string }
+              - label: Call-to-Action
+                name: cta
+                widget: object
+                fields:
+                  - { label: Deutsch, name: de, widget: string }
+                  - { label: English, name: en, widget: string }
+          - label: Abschnitt-Unterüberschrift
+            name: sectionSubheadline
+            widget: object
+            fields:
+              - { label: Deutsch, name: de, widget: string }
+              - { label: English, name: en, widget: string }
+          - label: Features
+            name: features
+            widget: list
+            fields:
+              - { label: Icon (Emoji), name: icon, widget: string }
+              - label: Bezeichnung
+                name: label
+                widget: object
+                fields:
+                  - { label: Deutsch, name: de, widget: string }
+                  - { label: English, name: en, widget: string }
+
+  - name: settings
+    label: Einstellungen
+    files:
+      - label: Website-Einstellungen
+        name: site
+        file: src/content/settings/site.md
+        fields:
+          - { label: Name der Immobilie, name: propertyName, widget: string }
+          - { label: Name (Akzent), name: propertyNameAccent, widget: string }
+          - label: Adresse
+            name: address
+            widget: object
+            fields:
+              - { label: Straße, name: street, widget: string }
+              - { label: Stadt, name: city, widget: string }
+          - { label: E-Mail, name: email, widget: string }
+          - { label: Telefon, name: phone, widget: string }
+          - { label: Telefon (Anzeige), name: phoneDisplay, widget: string }
