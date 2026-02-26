@@ -1,0 +1,69 @@
+---
+import type { Language } from '../i18n/translations';
+import { translatePath } from '../i18n/utils';
+
+interface Props {
+  title: string;
+  description: string;
+  lang: Language;
+  canonicalUrl: string;
+  ogImage?: string;
+  type?: string;
+}
+
+const {
+  title,
+  description,
+  lang,
+  canonicalUrl,
+  ogImage = '/og-default.svg',
+  type = 'website',
+} = Astro.props;
+
+const siteUrl = Astro.site?.origin ?? 'https://example.com';
+
+// Build full canonical URL
+const fullCanonicalUrl = canonicalUrl.startsWith('http')
+  ? canonicalUrl
+  : `${siteUrl}${canonicalUrl}`;
+
+// Build full OG image URL
+const fullOgImageUrl = ogImage.startsWith('http')
+  ? ogImage
+  : `${siteUrl}${ogImage}`;
+
+// Build hreflang alternate URLs
+const currentPath = Astro.url.pathname;
+const dePath = translatePath(currentPath, 'de');
+const enPath = translatePath(currentPath, 'en');
+const fullDePath = `${siteUrl}${dePath}`;
+const fullEnPath = `${siteUrl}${enPath}`;
+
+// Map lang to OG locale
+const ogLocale = lang === 'de' ? 'de_DE' : 'en_US';
+const ogLocaleAlternate = lang === 'de' ? 'en_US' : 'de_DE';
+---
+
+<title>{title}</title>
+<meta name="description" content={description} />
+<link rel="canonical" href={fullCanonicalUrl} />
+
+<!-- Open Graph -->
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:image" content={fullOgImageUrl} />
+<meta property="og:url" content={fullCanonicalUrl} />
+<meta property="og:type" content={type} />
+<meta property="og:locale" content={ogLocale} />
+<meta property="og:locale:alternate" content={ogLocaleAlternate} />
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content={title} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={fullOgImageUrl} />
+
+<!-- Hreflang alternates for multilingual SEO -->
+<link rel="alternate" hreflang="de" href={fullDePath} />
+<link rel="alternate" hreflang="en" href={fullEnPath} />
+<link rel="alternate" hreflang="x-default" href={fullDePath} />

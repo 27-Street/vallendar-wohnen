@@ -2,16 +2,20 @@
 import type { Language } from '../i18n/translations';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
+import SEOHead from '../components/SEOHead.astro';
 import '../styles/global.css';
 
 interface Props {
   title: string;
   description: string;
   lang: Language;
+  ogImage?: string;
+  ogType?: string;
 }
 
-const { title, description, lang } = Astro.props;
+const { title, description, lang, ogImage, ogType } = Astro.props;
 const currentPath = Astro.url.pathname;
+const canonicalUrl = currentPath;
 ---
 
 <!doctype html>
@@ -19,11 +23,17 @@ const currentPath = Astro.url.pathname;
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content={description} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="icon" href="/favicon.ico" />
     <meta name="generator" content={Astro.generator} />
-    <title>{title}</title>
+    <SEOHead
+      title={title}
+      description={description}
+      lang={lang}
+      canonicalUrl={canonicalUrl}
+      ogImage={ogImage}
+      type={ogType}
+    />
   </head>
   <body class="flex min-h-screen flex-col">
     <Header lang={lang} currentPath={currentPath} />

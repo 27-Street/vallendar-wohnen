@@ -24,8 +24,8 @@ const total = apt.pricePerMonth + apt.utilitiesPerMonth;
 ---
 
 <BaseLayout
-  title={`${apt.name} — VallendarWohnen`}
-  description={apt.description[lang]}
+  title={`${apt.name} – ${apt.size} m², ab ${apt.pricePerMonth} €/Monat | VallendarWohnen`}
+  description={`${apt.name} in Vallendar: ${apt.description[lang]} ${apt.rooms}, ${apt.size} m², ab ${apt.pricePerMonth} €/Monat.`}
   lang={lang}
 >
   <!-- Hero Area -->
