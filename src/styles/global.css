@@ -95,21 +95,20 @@ textarea:focus-visible {
     border-color 0.3s ease;
 }
 
-/* Top-edge shine — the key to the aqua look */
+/* Top-half shine — subtle aqua-style light reflection */
 .btn-glass::before {
   content: "";
   position: absolute;
-  inset: 1px 20% auto 20%;
-  height: 40%;
+  inset: 1px 1px auto 1px;
+  height: 50%;
   border-radius: 9999px;
   background: linear-gradient(
     180deg,
-    rgba(255, 255, 255, 0.35) 0%,
+    rgba(255, 255, 255, 0.18) 0%,
     rgba(255, 255, 255, 0) 100%
   );
   pointer-events: none;
   z-index: 1;
-  transition: opacity 0.3s ease;
 }
 
 .btn-glass:hover {
