@@ -18,13 +18,19 @@ const otherLang: Language = lang === 'de' ? 'en' : 'de';
 const switchLangPath = translatePath(currentPath, otherLang);
 
 const apartmentAnchor = lang === 'de' ? '#wohnungen' : '#apartments';
+const homePath = translatePath('/', lang);
 const navLinks = [
-  { label: t.nav.home, href: translatePath('/', lang) },
-  { label: t.nav.apartments, href: `${translatePath('/', lang)}${apartmentAnchor}` },
+  { label: t.nav.home, href: homePath },
+  { label: t.nav.apartments, href: `${homePath}${apartmentAnchor}` },
   { label: t.nav.exchangeStudents, href: translatePath('/austauschstudierende', lang) },
   { label: t.nav.faq, href: translatePath('/faq', lang) },
   { label: t.nav.contact, href: translatePath('/kontakt', lang) },
 ];
+
+function isCurrentPage(href: string): boolean {
+  const cleanHref = href.split('#')[0];
+  return currentPath === cleanHref || currentPath === `${cleanHref}/`;
+}
 ---
 
 <header class="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-neutral-200">
@@ -35,11 +41,15 @@ const navLinks = [
     </a>
 
     <!-- Desktop Nav -->
-    <nav class="hidden items-center gap-6 md:flex">
+    <nav class="hidden items-center gap-6 md:flex" aria-label={lang === 'de' ? 'Hauptnavigation' : 'Main navigation'}>
       {navLinks.map((link) => (
         <a
           href={link.href}
-          class="text-sm font-medium text-neutral-600 transition-colors hover:text-accent-700"
+          class:list={[
+            'text-sm font-medium transition-colors hover:text-accent-700',
+            isCurrentPage(link.href) ? 'text-accent-700' : 'text-neutral-600',
+          ]}
+          aria-current={isCurrentPage(link.href) ? 'page' : undefined}
         >
           {link.label}
         </a>
@@ -63,10 +73,10 @@ const navLinks = [
         aria-expanded="false"
         class="inline-flex items-center justify-center rounded-md p-2 text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900 transition-colors"
       >
-        <svg id="menu-icon-open" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+        <svg id="menu-icon-open" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
           <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
         </svg>
-        <svg id="menu-icon-close" class="hidden h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+        <svg id="menu-icon-close" class="hidden h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
           <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
         </svg>
       </button>
@@ -75,11 +85,15 @@ const navLinks = [
 
   <!-- Mobile Menu -->
   <div id="mobile-menu" class="hidden border-t border-neutral-200 bg-white md:hidden">
-    <nav class="flex flex-col gap-1 px-4 py-3">
+    <nav class="flex flex-col gap-1 px-4 py-3" aria-label={lang === 'de' ? 'Hauptnavigation (mobil)' : 'Main navigation (mobile)'}>
       {navLinks.map((link) => (
         <a
           href={link.href}
-          class="rounded-md px-3 py-2 text-sm font-medium text-neutral-700 transition-colors hover:bg-neutral-100 hover:text-accent-700"
+          class:list={[
+            'rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-neutral-100 hover:text-accent-700',
+            isCurrentPage(link.href) ? 'bg-accent-50 text-accent-700' : 'text-neutral-700',
+          ]}
+          aria-current={isCurrentPage(link.href) ? 'page' : undefined}
         >
           {link.label}
         </a>

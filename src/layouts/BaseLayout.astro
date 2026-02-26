@@ -1,5 +1,6 @@
 ---
 import type { Language } from '../i18n/translations';
+import { getTranslation } from '../i18n/translations';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import SEOHead from '../components/SEOHead.astro';
@@ -14,6 +15,7 @@ interface Props {
 }
 
 const { title, description, lang, ogImage, ogType } = Astro.props;
+const t = getTranslation(lang);
 const currentPath = Astro.url.pathname;
 const canonicalUrl = currentPath;
 ---
@@ -37,6 +39,12 @@ const canonicalUrl = currentPath;
     <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
   </head>
   <body class="flex min-h-screen flex-col">
+    <a
+      href="#main-content"
+      class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-lg focus:bg-accent-700 focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-white focus:shadow-lg"
+    >
+      {t.a11y.skipToContent}
+    </a>
     <noscript>
       <div class="bg-accent-100 px-4 py-3 text-center text-sm text-accent-900">
         {lang === 'de'
@@ -45,7 +53,7 @@ const canonicalUrl = currentPath;
       </div>
     </noscript>
     <Header lang={lang} currentPath={currentPath} />
-    <main class="flex-1">
+    <main id="main-content" class="flex-1">
       <slot />
     </main>
     <Footer lang={lang} />

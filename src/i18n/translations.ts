@@ -102,6 +102,9 @@ export const translations = {
       datenschutz: 'Datenschutz',
       comingSoon: 'Wird ergänzt.',
     },
+    a11y: {
+      skipToContent: 'Zum Inhalt springen',
+    },
     footer: {
       copyright: 'Alle Rechte vorbehalten.',
     },
@@ -206,6 +209,9 @@ export const translations = {
       impressum: 'Imprint',
       datenschutz: 'Privacy Policy',
       comingSoon: 'Coming soon.',
+    },
+    a11y: {
+      skipToContent: 'Skip to content',
     },
     footer: {
       copyright: 'All rights reserved.',
