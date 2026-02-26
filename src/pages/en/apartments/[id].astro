@@ -74,19 +74,19 @@ const total = apt.pricePerMonth + apt.utilitiesPerMonth;
           </p>
 
           <div class="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-4">
-            <div class="rounded-xl bg-neutral-50 p-4 ring-1 ring-neutral-100">
+            <div class="rounded-xl bg-neutral-50 p-4 ring-1 ring-neutral-100 transition-shadow duration-200 hover:shadow-sm">
               <p class="text-xs font-medium text-neutral-500 uppercase tracking-wider">{t.apartment.size}</p>
               <p class="mt-1 text-lg font-bold text-neutral-900">{apt.size} m²</p>
             </div>
-            <div class="rounded-xl bg-neutral-50 p-4 ring-1 ring-neutral-100">
+            <div class="rounded-xl bg-neutral-50 p-4 ring-1 ring-neutral-100 transition-shadow duration-200 hover:shadow-sm">
               <p class="text-xs font-medium text-neutral-500 uppercase tracking-wider">{t.apartment.rooms}</p>
               <p class="mt-1 text-lg font-bold text-neutral-900">{apt.rooms}</p>
             </div>
-            <div class="rounded-xl bg-neutral-50 p-4 ring-1 ring-neutral-100">
+            <div class="rounded-xl bg-neutral-50 p-4 ring-1 ring-neutral-100 transition-shadow duration-200 hover:shadow-sm">
               <p class="text-xs font-medium text-neutral-500 uppercase tracking-wider">{t.apartment.floor}</p>
               <p class="mt-1 text-lg font-bold text-neutral-900">{apt.floor}</p>
             </div>
-            <div class="rounded-xl bg-neutral-50 p-4 ring-1 ring-neutral-100">
+            <div class="rounded-xl bg-neutral-50 p-4 ring-1 ring-neutral-100 transition-shadow duration-200 hover:shadow-sm">
               <p class="text-xs font-medium text-neutral-500 uppercase tracking-wider">{t.apartment.maxOccupants}</p>
               <p class="mt-1 text-lg font-bold text-neutral-900">{apt.maxOccupants}</p>
             </div>
@@ -130,7 +130,7 @@ const total = apt.pricePerMonth + apt.utilitiesPerMonth;
       <h2 class="text-2xl font-bold tracking-tight text-neutral-900">{t.apartment.amenities}</h2>
       <div class="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
         {apt.amenities.map((amenity) => (
-          <div class="flex items-center gap-3 rounded-xl bg-white p-4 ring-1 ring-neutral-200">
+          <div class="flex items-center gap-3 rounded-xl bg-white p-4 ring-1 ring-neutral-200 transition-all duration-200 hover:shadow-sm hover:ring-accent-200">
             <svg class="h-5 w-5 shrink-0 text-accent-600" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
             </svg>
