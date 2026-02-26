@@ -1,6 +1,13 @@
+# After deploying to Netlify, enable Identity in the Netlify dashboard
+# and invite Yannik as a user. Set registration to "Invite only" and
+# enable Git Gateway under Identity > Services.
 backend:
   name: git-gateway
   branch: main
+
+# Update these URLs after connecting a custom domain
+site_url: https://example.com
+display_url: https://example.com
 
 media_folder: src/assets/images
 public_folder: /src/assets/images
