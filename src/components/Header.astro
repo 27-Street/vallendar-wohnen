@@ -1,0 +1,114 @@
+---
+import type { Language } from '../i18n/translations';
+import { getTranslation } from '../i18n/translations';
+import { translatePath } from '../i18n/utils';
+
+interface Props {
+  lang: Language;
+  currentPath: string;
+}
+
+const { lang, currentPath } = Astro.props;
+const t = getTranslation(lang);
+const otherLang: Language = lang === 'de' ? 'en' : 'de';
+const switchLangPath = translatePath(currentPath, otherLang);
+
+const apartmentAnchor = lang === 'de' ? '#wohnungen' : '#apartments';
+const navLinks = [
+  { label: t.nav.home, href: translatePath('/', lang) },
+  { label: t.nav.apartments, href: `${translatePath('/', lang)}${apartmentAnchor}` },
+  { label: t.nav.contact, href: translatePath('/kontakt', lang) },
+];
+---
+
+<header class="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-neutral-200">
+  <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:px-6">
+    <!-- Logo / Property Name -->
+    <a href={translatePath('/', lang)} class="text-lg font-bold tracking-tight text-neutral-900 hover:text-accent-700 transition-colors">
+      Vallendar<span class="text-accent-600">Wohnen</span>
+    </a>
+
+    <!-- Desktop Nav -->
+    <nav class="hidden items-center gap-6 md:flex">
+      {navLinks.map((link) => (
+        <a
+          href={link.href}
+          class="text-sm font-medium text-neutral-600 transition-colors hover:text-accent-700"
+        >
+          {link.label}
+        </a>
+      ))}
+
+      <!-- Language Switcher -->
+      <a
+        href={switchLangPath}
+        class="ml-2 rounded-md border border-neutral-300 px-2.5 py-1 text-xs font-semibold uppercase tracking-wider text-neutral-600 transition-colors hover:border-accent-500 hover:text-accent-700"
+      >
+        {otherLang.toUpperCase()}
+      </a>
+    </nav>
+
+    <!-- Mobile Menu Toggle -->
+    <div class="md:hidden">
+      <button
+        id="mobile-menu-btn"
+        type="button"
+        aria-label="Toggle menu"
+        aria-expanded="false"
+        class="inline-flex items-center justify-center rounded-md p-2 text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900 transition-colors"
+      >
+        <svg id="menu-icon-open" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+        </svg>
+        <svg id="menu-icon-close" class="hidden h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Mobile Menu -->
+  <div id="mobile-menu" class="hidden border-t border-neutral-200 bg-white md:hidden">
+    <nav class="flex flex-col gap-1 px-4 py-3">
+      {navLinks.map((link) => (
+        <a
+          href={link.href}
+          class="rounded-md px-3 py-2 text-sm font-medium text-neutral-700 transition-colors hover:bg-neutral-100 hover:text-accent-700"
+        >
+          {link.label}
+        </a>
+      ))}
+      <a
+        href={switchLangPath}
+        class="mt-1 rounded-md border border-neutral-300 px-3 py-2 text-center text-xs font-semibold uppercase tracking-wider text-neutral-600 transition-colors hover:border-accent-500 hover:text-accent-700"
+      >
+        {otherLang === 'de' ? 'Deutsch' : 'English'}
+      </a>
+    </nav>
+  </div>
+</header>
+
+<script>
+  const btn = document.getElementById('mobile-menu-btn');
+  const menu = document.getElementById('mobile-menu');
+  const iconOpen = document.getElementById('menu-icon-open');
+  const iconClose = document.getElementById('menu-icon-close');
+
+  btn?.addEventListener('click', () => {
+    const expanded = btn.getAttribute('aria-expanded') === 'true';
+    btn.setAttribute('aria-expanded', String(!expanded));
+    menu?.classList.toggle('hidden');
+    iconOpen?.classList.toggle('hidden');
+    iconClose?.classList.toggle('hidden');
+  });
+
+  // Close mobile menu when a nav link is clicked (important for anchor links)
+  menu?.querySelectorAll('a').forEach((link) => {
+    link.addEventListener('click', () => {
+      menu.classList.add('hidden');
+      iconOpen?.classList.remove('hidden');
+      iconClose?.classList.add('hidden');
+      btn?.setAttribute('aria-expanded', 'false');
+    });
+  });
+</script>

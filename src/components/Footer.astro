@@ -1,0 +1,66 @@
+---
+import type { Language } from '../i18n/translations';
+import { getTranslation } from '../i18n/translations';
+import { translatePath } from '../i18n/utils';
+
+interface Props {
+  lang: Language;
+}
+
+const { lang } = Astro.props;
+const t = getTranslation(lang);
+const currentYear = new Date().getFullYear();
+---
+
+<footer class="border-t border-neutral-200 bg-neutral-900 text-neutral-300">
+  <div class="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:py-12">
+    <div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+      <!-- Brand + Address -->
+      <div>
+        <a href={translatePath('/', lang)} class="text-lg font-bold tracking-tight text-white">
+          Vallendar<span class="text-accent-400">Wohnen</span>
+        </a>
+        <address class="mt-3 not-italic text-sm leading-relaxed text-neutral-400">
+          Musterstraße 1<br />
+          56179 Vallendar
+        </address>
+      </div>
+
+      <!-- Contact -->
+      <div>
+        <h3 class="text-sm font-semibold uppercase tracking-wider text-neutral-200">{t.contact.heading}</h3>
+        <ul class="mt-3 space-y-2 text-sm text-neutral-400">
+          <li>
+            <span class="text-neutral-500">{t.contact.email}:</span>{' '}
+            <a href="mailto:info@vallendar-wohnen.de" class="transition-colors hover:text-accent-400">info@vallendar-wohnen.de</a>
+          </li>
+          <li>
+            <span class="text-neutral-500">{t.contact.phone}:</span>{' '}
+            <a href="tel:+4926194000000" class="transition-colors hover:text-accent-400">+49 261 94 000 000</a>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Legal Links -->
+      <div>
+        <h3 class="text-sm font-semibold uppercase tracking-wider text-neutral-200">Legal</h3>
+        <ul class="mt-3 space-y-2 text-sm text-neutral-400">
+          <li>
+            <a href={translatePath('/impressum', lang)} class="transition-colors hover:text-accent-400">
+              {t.legal.impressum}
+            </a>
+          </li>
+          <li>
+            <a href={translatePath('/datenschutz', lang)} class="transition-colors hover:text-accent-400">
+              {t.legal.datenschutz}
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="mt-8 border-t border-neutral-800 pt-6 text-center text-xs text-neutral-500">
+      &copy; {currentYear} VallendarWohnen. {t.footer.copyright}
+    </div>
+  </div>
+</footer>

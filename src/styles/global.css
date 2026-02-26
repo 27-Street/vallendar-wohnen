@@ -1,0 +1,48 @@
+@import "tailwindcss";
+
+@theme {
+  /* Deep teal accent — distinctive from HEER58's blue */
+  --color-accent-50: #effefa;
+  --color-accent-100: #c8fff1;
+  --color-accent-200: #91fee3;
+  --color-accent-300: #52f6d2;
+  --color-accent-400: #1ee4bc;
+  --color-accent-500: #06c8a3;
+  --color-accent-600: #01a286;
+  --color-accent-700: #06816c;
+  --color-accent-800: #0a6657;
+  --color-accent-900: #0d5448;
+  --color-accent-950: #00332d;
+
+  /* Warm neutral base */
+  --color-neutral-50: #fafaf9;
+  --color-neutral-100: #f5f5f4;
+  --color-neutral-200: #e7e5e4;
+  --color-neutral-300: #d6d3d1;
+  --color-neutral-400: #a8a29e;
+  --color-neutral-500: #78716c;
+  --color-neutral-600: #57534e;
+  --color-neutral-700: #44403c;
+  --color-neutral-800: #292524;
+  --color-neutral-900: #1c1917;
+  --color-neutral-950: #0c0a09;
+
+  /* Font family */
+  --font-sans: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  @apply bg-neutral-50 text-neutral-800 antialiased;
+}
+
+/* Focus-visible styles for keyboard navigation */
+a:focus-visible,
+button:focus-visible {
+  outline: 2px solid var(--color-accent-600);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
