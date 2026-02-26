@@ -21,9 +21,9 @@ amenities:
 available: true
 availableFrom: "2026-04-01"
 images:
-  - /images/apartments/rheinblick-1.jpg
-  - /images/apartments/rheinblick-2.jpg
-  - /images/apartments/rheinblick-3.jpg
+  - /images/apartments/rheinblick/living-room.svg
+  - /images/apartments/rheinblick/bedroom.svg
+  - /images/apartments/rheinblick/kitchen.svg
 floor: 2. OG
 order: 1
 ---

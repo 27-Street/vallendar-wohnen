@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" width="1200" height="800">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#91fee3"/>
+      <stop offset="50%" stop-color="#effefa"/>
+      <stop offset="100%" stop-color="#c8fff1"/>
+    </linearGradient>
+    <pattern id="diag" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <line x1="0" y1="0" x2="0" y2="20" stroke="#0d5448" stroke-width="0.5" opacity="0.05"/>
+    </pattern>
+  </defs>
+  <rect width="1200" height="800" fill="url(#bg)"/>
+  <rect width="1200" height="800" fill="url(#diag)"/>
+  <circle cx="250" cy="300" r="180" fill="#c8fff1" opacity="0.2"/>
+  <circle cx="950" cy="500" r="160" fill="#effefa" opacity="0.3"/>
+  <!-- Bath/shower icon -->
+  <g transform="translate(540, 260)" fill="none" stroke="#0d5448" stroke-width="3" opacity="0.28">
+    <ellipse cx="60" cy="80" rx="70" ry="35"/>
+    <path d="M-10 80 L-10 120 Q60 160 130 120 L130 80"/>
+    <rect x="55" y="0" width="10" height="45" rx="3"/>
+    <circle cx="60" cy="55" r="8"/>
+    <line x1="20" y1="130" x2="15" y2="155"/>
+    <line x1="100" y1="130" x2="105" y2="155"/>
+  </g>
+  <text x="600" y="480" text-anchor="middle" font-family="Inter, Segoe UI, system-ui, sans-serif" font-size="28" font-weight="600" fill="#0d5448" opacity="0.5">Zur Linde</text>
+  <text x="600" y="516" text-anchor="middle" font-family="Inter, Segoe UI, system-ui, sans-serif" font-size="16" fill="#06816c" opacity="0.4">Badezimmer · Professionelle Fotos folgen</text>
+</svg>

@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" width="1200" height="800">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#effefa"/>
+      <stop offset="100%" stop-color="#c8fff1"/>
+    </linearGradient>
+    <pattern id="dots" x="0" y="0" width="30" height="30" patternUnits="userSpaceOnUse">
+      <circle cx="15" cy="15" r="1.5" fill="#06816c" opacity="0.08"/>
+    </pattern>
+  </defs>
+  <rect width="1200" height="800" fill="url(#bg)"/>
+  <rect width="1200" height="800" fill="url(#dots)"/>
+  <!-- Decorative shapes -->
+  <circle cx="900" cy="200" r="180" fill="#91fee3" opacity="0.25"/>
+  <circle cx="300" cy="600" r="140" fill="#52f6d2" opacity="0.15"/>
+  <!-- Sofa icon -->
+  <g transform="translate(525, 280)" fill="none" stroke="#06816c" stroke-width="3" opacity="0.35">
+    <rect x="0" y="40" width="150" height="70" rx="12"/>
+    <rect x="-20" y="30" width="30" height="90" rx="8"/>
+    <rect x="140" y="30" width="30" height="90" rx="8"/>
+    <path d="M15 40 Q75 10 135 40"/>
+    <rect x="10" y="120" width="15" height="20" rx="4"/>
+    <rect x="125" y="120" width="15" height="20" rx="4"/>
+  </g>
+  <!-- Text -->
+  <text x="600" y="480" text-anchor="middle" font-family="Inter, Segoe UI, system-ui, sans-serif" font-size="28" font-weight="600" fill="#06816c" opacity="0.55">Rheinblick</text>
+  <text x="600" y="516" text-anchor="middle" font-family="Inter, Segoe UI, system-ui, sans-serif" font-size="16" fill="#01a286" opacity="0.45">Wohnzimmer · Professionelle Fotos folgen</text>
+</svg>

@@ -21,9 +21,9 @@ amenities:
 available: true
 availableFrom: "2026-04-01"
 images:
-  - /images/apartments/alte-muehle-1.jpg
-  - /images/apartments/alte-muehle-2.jpg
-  - /images/apartments/alte-muehle-3.jpg
+  - /images/apartments/alte-muehle/living-room.svg
+  - /images/apartments/alte-muehle/bedroom.svg
+  - /images/apartments/alte-muehle/kitchen.svg
 floor: EG
 order: 2
 ---

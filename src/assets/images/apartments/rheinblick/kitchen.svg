@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" width="1200" height="800">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#91fee3"/>
+      <stop offset="100%" stop-color="#effefa"/>
+    </linearGradient>
+    <pattern id="dots" x="0" y="0" width="30" height="30" patternUnits="userSpaceOnUse">
+      <circle cx="15" cy="15" r="1.5" fill="#06816c" opacity="0.08"/>
+    </pattern>
+  </defs>
+  <rect width="1200" height="800" fill="url(#bg)"/>
+  <rect width="1200" height="800" fill="url(#dots)"/>
+  <circle cx="850" cy="300" r="200" fill="#c8fff1" opacity="0.3"/>
+  <circle cx="350" cy="500" r="150" fill="#effefa" opacity="0.35"/>
+  <!-- Kitchen/flame icon -->
+  <g transform="translate(545, 270)" fill="none" stroke="#06816c" stroke-width="3" opacity="0.35">
+    <path d="M55 0 C55 40 90 60 90 100 C90 130 70 150 55 150 C40 150 20 130 20 100 C20 60 55 40 55 0Z"/>
+    <path d="M55 50 C55 70 70 80 70 100 C70 115 62 125 55 125 C48 125 40 115 40 100 C40 80 55 70 55 50Z"/>
+    <rect x="0" y="155" width="110" height="10" rx="3"/>
+  </g>
+  <text x="600" y="480" text-anchor="middle" font-family="Inter, Segoe UI, system-ui, sans-serif" font-size="28" font-weight="600" fill="#06816c" opacity="0.55">Rheinblick</text>
+  <text x="600" y="516" text-anchor="middle" font-family="Inter, Segoe UI, system-ui, sans-serif" font-size="16" fill="#01a286" opacity="0.45">Küche · Professionelle Fotos folgen</text>
+</svg>

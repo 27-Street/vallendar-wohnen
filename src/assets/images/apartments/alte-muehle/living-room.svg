@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" width="1200" height="800">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#effefa"/>
+      <stop offset="50%" stop-color="#c8fff1"/>
+      <stop offset="100%" stop-color="#effefa"/>
+    </linearGradient>
+    <pattern id="grid" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#0a6657" stroke-width="0.5" opacity="0.06"/>
+    </pattern>
+  </defs>
+  <rect width="1200" height="800" fill="url(#bg)"/>
+  <rect width="1200" height="800" fill="url(#grid)"/>
+  <ellipse cx="300" cy="200" rx="200" ry="180" fill="#52f6d2" opacity="0.12"/>
+  <ellipse cx="900" cy="600" rx="180" ry="160" fill="#91fee3" opacity="0.18"/>
+  <!-- Sofa icon -->
+  <g transform="translate(525, 280)" fill="none" stroke="#0a6657" stroke-width="3" opacity="0.3">
+    <rect x="0" y="40" width="150" height="70" rx="12"/>
+    <rect x="-20" y="30" width="30" height="90" rx="8"/>
+    <rect x="140" y="30" width="30" height="90" rx="8"/>
+    <path d="M15 40 Q75 10 135 40"/>
+    <rect x="10" y="120" width="15" height="20" rx="4"/>
+    <rect x="125" y="120" width="15" height="20" rx="4"/>
+  </g>
+  <text x="600" y="480" text-anchor="middle" font-family="Inter, Segoe UI, system-ui, sans-serif" font-size="28" font-weight="600" fill="#0a6657" opacity="0.5">Alte Mühle</text>
+  <text x="600" y="516" text-anchor="middle" font-family="Inter, Segoe UI, system-ui, sans-serif" font-size="16" fill="#06816c" opacity="0.4">Wohnbereich · Professionelle Fotos folgen</text>
+</svg>

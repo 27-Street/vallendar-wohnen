@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" width="1200" height="800">
+  <defs>
+    <linearGradient id="bg" x1="50%" y1="0%" x2="50%" y2="100%">
+      <stop offset="0%" stop-color="#effefa"/>
+      <stop offset="100%" stop-color="#c8fff1"/>
+    </linearGradient>
+    <pattern id="diag" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <line x1="0" y1="0" x2="0" y2="20" stroke="#0d5448" stroke-width="0.5" opacity="0.05"/>
+    </pattern>
+  </defs>
+  <rect width="1200" height="800" fill="url(#bg)"/>
+  <rect width="1200" height="800" fill="url(#diag)"/>
+  <rect x="100" y="100" width="300" height="250" rx="60" fill="#52f6d2" opacity="0.1" transform="rotate(-10 250 225)"/>
+  <rect x="800" y="450" width="280" height="220" rx="50" fill="#91fee3" opacity="0.14" transform="rotate(8 940 560)"/>
+  <!-- Sofa icon -->
+  <g transform="translate(525, 280)" fill="none" stroke="#0d5448" stroke-width="3" opacity="0.28">
+    <rect x="0" y="40" width="150" height="70" rx="12"/>
+    <rect x="-20" y="30" width="30" height="90" rx="8"/>
+    <rect x="140" y="30" width="30" height="90" rx="8"/>
+    <path d="M15 40 Q75 10 135 40"/>
+    <rect x="10" y="120" width="15" height="20" rx="4"/>
+    <rect x="125" y="120" width="15" height="20" rx="4"/>
+  </g>
+  <text x="600" y="480" text-anchor="middle" font-family="Inter, Segoe UI, system-ui, sans-serif" font-size="28" font-weight="600" fill="#0d5448" opacity="0.5">Zur Linde</text>
+  <text x="600" y="516" text-anchor="middle" font-family="Inter, Segoe UI, system-ui, sans-serif" font-size="16" fill="#06816c" opacity="0.4">Wohnbereich · Professionelle Fotos folgen</text>
+</svg>

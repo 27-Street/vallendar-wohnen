@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" width="1200" height="800">
+  <defs>
+    <linearGradient id="bg" x1="100%" y1="100%" x2="0%" y2="0%">
+      <stop offset="0%" stop-color="#c8fff1"/>
+      <stop offset="50%" stop-color="#effefa"/>
+      <stop offset="100%" stop-color="#c8fff1"/>
+    </linearGradient>
+    <pattern id="diag" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <line x1="0" y1="0" x2="0" y2="20" stroke="#0d5448" stroke-width="0.5" opacity="0.05"/>
+    </pattern>
+  </defs>
+  <rect width="1200" height="800" fill="url(#bg)"/>
+  <rect width="1200" height="800" fill="url(#diag)"/>
+  <rect x="750" y="80" width="350" height="280" rx="70" fill="#91fee3" opacity="0.12" transform="rotate(5 925 220)"/>
+  <rect x="100" y="500" width="300" height="240" rx="55" fill="#52f6d2" opacity="0.1" transform="rotate(-6 250 620)"/>
+  <!-- Bed icon -->
+  <g transform="translate(510, 270)" fill="none" stroke="#0d5448" stroke-width="3" opacity="0.28">
+    <rect x="0" y="50" width="180" height="80" rx="8"/>
+    <rect x="0" y="0" width="180" height="50" rx="8"/>
+    <rect x="10" y="10" width="70" height="30" rx="6"/>
+    <rect x="100" y="10" width="70" height="30" rx="6"/>
+    <rect x="5" y="130" width="15" height="20" rx="4"/>
+    <rect x="160" y="130" width="15" height="20" rx="4"/>
+  </g>
+  <text x="600" y="480" text-anchor="middle" font-family="Inter, Segoe UI, system-ui, sans-serif" font-size="28" font-weight="600" fill="#0d5448" opacity="0.5">Zur Linde</text>
+  <text x="600" y="516" text-anchor="middle" font-family="Inter, Segoe UI, system-ui, sans-serif" font-size="16" fill="#06816c" opacity="0.4">Schlafzimmer · Professionelle Fotos folgen</text>
+</svg>

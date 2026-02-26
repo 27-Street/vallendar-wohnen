@@ -19,9 +19,12 @@ const features = homePage.data.features!;
 <BaseLayout title="VallendarWohnen — Student Living" description="Furnished apartments for students in Vallendar near WHU." lang={lang}>
   <!-- Hero Section -->
   <section class="relative flex min-h-screen items-center justify-center overflow-hidden">
-    <!-- Background gradient with pattern -->
-    <div class="absolute inset-0 bg-gradient-to-br from-accent-950 via-accent-800 to-accent-950"></div>
-    <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(circle at 2px 2px, white 1px, transparent 0); background-size: 40px 40px;"></div>
+    <!-- Hero background image -->
+    <div class="absolute inset-0">
+      <img src="/images/hero/hero-placeholder.svg" alt="" class="h-full w-full object-cover" aria-hidden="true" />
+    </div>
+    <!-- Overlay for text readability -->
+    <div class="absolute inset-0 bg-accent-950/40"></div>
     <!-- Decorative blurred shapes -->
     <div class="absolute -top-40 -right-40 h-96 w-96 rounded-full bg-accent-400/20 blur-3xl"></div>
     <div class="absolute -bottom-40 -left-40 h-96 w-96 rounded-full bg-accent-500/15 blur-3xl"></div>

@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" width="1200" height="800">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#c8fff1"/>
+      <stop offset="100%" stop-color="#91fee3"/>
+    </linearGradient>
+    <pattern id="dots" x="0" y="0" width="30" height="30" patternUnits="userSpaceOnUse">
+      <circle cx="15" cy="15" r="1.5" fill="#06816c" opacity="0.08"/>
+    </pattern>
+  </defs>
+  <rect width="1200" height="800" fill="url(#bg)"/>
+  <rect width="1200" height="800" fill="url(#dots)"/>
+  <circle cx="200" cy="150" r="160" fill="#effefa" opacity="0.4"/>
+  <circle cx="1000" cy="650" r="120" fill="#52f6d2" opacity="0.2"/>
+  <!-- Bed icon -->
+  <g transform="translate(510, 270)" fill="none" stroke="#06816c" stroke-width="3" opacity="0.35">
+    <rect x="0" y="50" width="180" height="80" rx="8"/>
+    <rect x="0" y="0" width="180" height="50" rx="8"/>
+    <rect x="10" y="10" width="70" height="30" rx="6"/>
+    <rect x="100" y="10" width="70" height="30" rx="6"/>
+    <rect x="5" y="130" width="15" height="20" rx="4"/>
+    <rect x="160" y="130" width="15" height="20" rx="4"/>
+  </g>
+  <text x="600" y="480" text-anchor="middle" font-family="Inter, Segoe UI, system-ui, sans-serif" font-size="28" font-weight="600" fill="#06816c" opacity="0.55">Rheinblick</text>
+  <text x="600" y="516" text-anchor="middle" font-family="Inter, Segoe UI, system-ui, sans-serif" font-size="16" fill="#01a286" opacity="0.45">Schlafzimmer · Professionelle Fotos folgen</text>
+</svg>
