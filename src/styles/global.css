@@ -1,6 +1,6 @@
 @import "tailwindcss";
 @import "@fontsource-variable/inter";
-@import "@fontsource-variable/playfair-display";
+@import "@fontsource-variable/plus-jakarta-sans";
 
 @theme {
   /* Deep sage green — sophisticated, grounded, high-class */
@@ -31,7 +31,7 @@
 
   /* Font families — self-hosted via @fontsource (GDPR compliant) */
   --font-sans: "Inter Variable", "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
-  --font-serif: "Playfair Display Variable", "Playfair Display", Georgia, "Times New Roman", serif;
+  --font-serif: "Plus Jakarta Sans Variable", "Plus Jakarta Sans", system-ui, sans-serif;
 }
 
 html {
