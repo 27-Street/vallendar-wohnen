@@ -40,6 +40,7 @@ export const translations = {
     },
     availability: {
       available: 'Verfügbar',
+      availableFrom: 'Verfügbar ab',
       occupied: 'Vermietet',
     },
     features: {
@@ -134,6 +135,7 @@ export const translations = {
     },
     availability: {
       available: 'Available',
+      availableFrom: 'Available from',
       occupied: 'Occupied',
     },
     features: {

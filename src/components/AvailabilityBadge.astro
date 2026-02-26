@@ -4,31 +4,53 @@ import { getTranslation } from '../i18n/translations';
 
 interface Props {
   available: boolean;
+  availableFrom?: string;
   lang: Language;
   variant?: 'default' | 'hero';
 }
 
-const { available, lang, variant = 'default' } = Astro.props;
+const { available, availableFrom, lang, variant = 'default' } = Astro.props;
 const t = getTranslation(lang);
 
-const label = available ? t.availability.available : t.availability.occupied;
+const hasDate = available && availableFrom;
+const locale = lang === 'de' ? 'de-DE' : 'en-US';
+const formattedDate = hasDate
+  ? new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(availableFrom))
+  : '';
 
-const classes = {
-  default: available
-    ? 'bg-green-100 text-green-800'
-    : 'bg-red-100 text-red-800',
-  hero: available
-    ? 'bg-green-400/20 text-green-200'
-    : 'bg-red-400/20 text-red-200',
+const label = !available
+  ? t.availability.occupied
+  : hasDate
+    ? `${t.availability.availableFrom} ${formattedDate}`
+    : t.availability.available;
+
+const colorClasses = {
+  default: !available
+    ? 'bg-red-100 text-red-800'
+    : hasDate
+      ? 'bg-amber-100 text-amber-800'
+      : 'bg-green-100 text-green-800',
+  hero: !available
+    ? 'bg-red-400/20 text-red-200'
+    : hasDate
+      ? 'bg-amber-400/20 text-amber-200'
+      : 'bg-green-400/20 text-green-200',
 };
+
+const dotColor = !available
+  ? 'bg-red-500'
+  : hasDate
+    ? 'bg-amber-500'
+    : 'bg-green-500';
 ---
 
 <span
   class:list={[
-    'inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold',
-    variant === 'hero' ? 'px-4 py-1.5 text-sm' : '',
-    classes[variant],
+    'inline-flex items-center gap-1.5 rounded-full font-semibold',
+    variant === 'hero' ? 'px-4 py-1.5 text-sm' : 'px-3 py-1 text-xs',
+    colorClasses[variant],
   ]}
 >
+  <span class:list={['h-2 w-2 shrink-0 rounded-full', dotColor]}></span>
   {label}
 </span>
