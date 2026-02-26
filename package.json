@@ -6,7 +6,8 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "validate": "npx tsx scripts/validate-content.ts"
   },
   "dependencies": {
     "@iconify-json/lucide": "^1.2.94",
