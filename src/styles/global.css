@@ -69,7 +69,7 @@ textarea:focus-visible {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.875rem 2rem;
+  padding: 0.8rem 2rem 0.95rem;
   border-radius: 9999px;
   font-size: 0.875rem;
   font-weight: 600;
@@ -100,7 +100,7 @@ textarea:focus-visible {
   content: "";
   position: absolute;
   inset: 1px 1px auto 1px;
-  height: 50%;
+  height: 45%;
   border-radius: 9999px;
   background: linear-gradient(
     180deg,
