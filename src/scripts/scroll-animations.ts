@@ -22,6 +22,9 @@ function initScrollAnimations(): void {
     return;
   }
 
+  // Mark JS as ready so CSS hides elements for animation
+  document.documentElement.classList.add('js-ready');
+
   // Set up stagger delays for groups
   document
     .querySelectorAll<HTMLElement>('[data-animate-stagger]')
@@ -42,8 +45,8 @@ function initScrollAnimations(): void {
       });
     },
     {
-      threshold: 0.15,
-      rootMargin: '0px 0px -40px 0px',
+      threshold: 0.1,
+      rootMargin: '0px 0px -20px 0px',
     },
   );
 

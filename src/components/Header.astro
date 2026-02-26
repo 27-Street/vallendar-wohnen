@@ -28,8 +28,10 @@ const navLinks = [
 ];
 
 function isCurrentPage(href: string): boolean {
-  const cleanHref = href.split('#')[0];
-  return currentPath === cleanHref || currentPath === `${cleanHref}/`;
+  // Anchor-only links (e.g. /de/#wohnungen) target a section on another page,
+  // not a distinct page — never mark them as "current".
+  if (href.includes('#')) return false;
+  return currentPath === href || currentPath === `${href}/`;
 }
 ---
 
@@ -46,8 +48,10 @@ function isCurrentPage(href: string): boolean {
         <a
           href={link.href}
           class:list={[
-            'text-sm font-medium transition-colors hover:text-accent-700',
-            isCurrentPage(link.href) ? 'text-accent-700' : 'text-neutral-600',
+            'relative text-sm font-medium transition-colors hover:text-accent-700',
+            isCurrentPage(link.href)
+              ? 'text-accent-700 after:absolute after:inset-x-0 after:-bottom-3.5 after:h-0.5 after:rounded-full after:bg-accent-600'
+              : 'text-neutral-600',
           ]}
           aria-current={isCurrentPage(link.href) ? 'page' : undefined}
         >

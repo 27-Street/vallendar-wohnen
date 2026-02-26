@@ -34,6 +34,8 @@
 
 html {
   scroll-behavior: smooth;
+  /* Offset anchor targets so they clear the sticky header (~56px + breathing room) */
+  scroll-padding-top: 5rem;
 }
 
 body {
@@ -60,28 +62,30 @@ textarea:focus-visible {
 
 /* ── Scroll-triggered animations ── */
 
-/* Initial hidden states for each animation variant */
-[data-animate="fade-up"] {
+/* Initial hidden states — only apply when JS has loaded (html.js-ready).
+   Without JS, all content remains fully visible (progressive enhancement). */
+html.js-ready [data-animate="fade-up"] {
   opacity: 0;
   transform: translateY(24px);
 }
 
-[data-animate="fade-in"] {
+html.js-ready [data-animate="fade-in"] {
   opacity: 0;
 }
 
-[data-animate="slide-left"] {
+html.js-ready [data-animate="slide-left"] {
   opacity: 0;
   transform: translateX(-24px);
 }
 
-[data-animate="slide-right"] {
+html.js-ready [data-animate="slide-right"] {
   opacity: 0;
   transform: translateX(24px);
 }
 
-/* Visible state — applied by IntersectionObserver */
-[data-animate].animate-visible {
+/* Visible state — applied by IntersectionObserver.
+   Scoped under html.js-ready to win specificity over hidden states above. */
+html.js-ready [data-animate].animate-visible {
   opacity: 1;
   transform: none;
   transition:
