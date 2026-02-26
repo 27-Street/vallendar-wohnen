@@ -84,9 +84,7 @@ textarea:focus-visible {
   backdrop-filter: blur(16px) saturate(1.8);
   -webkit-backdrop-filter: blur(16px) saturate(1.8);
   box-shadow:
-    0 1px 0 0 rgba(255, 255, 255, 0.15) inset,
-    0 -1px 0 0 rgba(0, 0, 0, 0.08) inset,
-    0 4px 20px -4px rgba(0, 0, 0, 0.2);
+    0 1px 0 0 rgba(255, 255, 255, 0.15) inset;
   cursor: pointer;
   transition:
     transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1),
@@ -119,18 +117,13 @@ textarea:focus-visible {
   );
   border-color: rgba(255, 255, 255, 0.40);
   box-shadow:
-    0 1px 0 0 rgba(255, 255, 255, 0.25) inset,
-    0 -1px 0 0 rgba(0, 0, 0, 0.06) inset,
-    0 8px 32px -4px rgba(0, 0, 0, 0.25),
-    0 0 0 1px rgba(255, 255, 255, 0.08);
+    0 1px 0 0 rgba(255, 255, 255, 0.25) inset;
 }
 
 .btn-glass:active {
   transform: scale(0.965);
   box-shadow:
-    0 1px 0 0 rgba(255, 255, 255, 0.12) inset,
-    0 -1px 0 0 rgba(0, 0, 0, 0.10) inset,
-    0 2px 8px -2px rgba(0, 0, 0, 0.3);
+    0 1px 0 0 rgba(255, 255, 255, 0.10) inset;
 }
 
 .btn-glass:focus-visible {
