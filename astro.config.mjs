@@ -7,7 +7,7 @@ import sitemap from '@astrojs/sitemap';
 // https://astro.build/config
 // Update 'site' to the production domain once available
 export default defineConfig({
-  site: 'https://example.com',
+  site: 'https://lucky-cucurucho-b639b6.netlify.app',
   output: 'static',
   compressHTML: true,
   integrations: [icon(), sitemap({

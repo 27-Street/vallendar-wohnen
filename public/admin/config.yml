@@ -6,8 +6,8 @@ backend:
   branch: main
 
 # Update these URLs after connecting a custom domain
-site_url: https://example.com
-display_url: https://example.com
+site_url: https://lucky-cucurucho-b639b6.netlify.app
+display_url: https://lucky-cucurucho-b639b6.netlify.app
 
 media_folder: src/assets/images
 public_folder: /src/assets/images

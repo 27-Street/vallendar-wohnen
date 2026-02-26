@@ -6,4 +6,4 @@ Allow: /
 
 Disallow: /admin/
 
-Sitemap: https://example.com/sitemap-index.xml
+Sitemap: https://lucky-cucurucho-b639b6.netlify.app/sitemap-index.xml
