@@ -1,4 +1,5 @@
 ---
+import { getEntry } from 'astro:content';
 import type { Language } from '../i18n/translations';
 import { getTranslation } from '../i18n/translations';
 import { translatePath } from '../i18n/utils';
@@ -10,6 +11,9 @@ interface Props {
 
 const { lang, currentPath } = Astro.props;
 const t = getTranslation(lang);
+
+const siteSettings = await getEntry('settings', 'site');
+const site = siteSettings.data;
 const otherLang: Language = lang === 'de' ? 'en' : 'de';
 const switchLangPath = translatePath(currentPath, otherLang);
 
@@ -25,7 +29,7 @@ const navLinks = [
   <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:px-6">
     <!-- Logo / Property Name -->
     <a href={translatePath('/', lang)} class="text-lg font-bold tracking-tight text-neutral-900 hover:text-accent-700 transition-colors">
-      Vallendar<span class="text-accent-600">Wohnen</span>
+      {site.propertyName}<span class="text-accent-600">{site.propertyNameAccent}</span>
     </a>
 
     <!-- Desktop Nav -->

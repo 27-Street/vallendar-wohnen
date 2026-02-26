@@ -1,4 +1,5 @@
 ---
+import { getEntry } from 'astro:content';
 import type { Language } from '../i18n/translations';
 import { getTranslation } from '../i18n/translations';
 import { translatePath } from '../i18n/utils';
@@ -10,6 +11,9 @@ interface Props {
 const { lang } = Astro.props;
 const t = getTranslation(lang);
 const currentYear = new Date().getFullYear();
+
+const siteSettings = await getEntry('settings', 'site');
+const site = siteSettings.data;
 ---
 
 <footer class="border-t border-neutral-200 bg-neutral-900 text-neutral-300">
@@ -18,11 +22,11 @@ const currentYear = new Date().getFullYear();
       <!-- Brand + Address -->
       <div>
         <a href={translatePath('/', lang)} class="text-lg font-bold tracking-tight text-white">
-          Vallendar<span class="text-accent-400">Wohnen</span>
+          {site.propertyName}<span class="text-accent-400">{site.propertyNameAccent}</span>
         </a>
         <address class="mt-3 not-italic text-sm leading-relaxed text-neutral-400">
-          Musterstraße 1<br />
-          56179 Vallendar
+          {site.address.street}<br />
+          {site.address.city}
         </address>
       </div>
 
@@ -32,11 +36,11 @@ const currentYear = new Date().getFullYear();
         <ul class="mt-3 space-y-2 text-sm text-neutral-400">
           <li>
             <span class="text-neutral-500">{t.contact.email}:</span>{' '}
-            <a href="mailto:info@vallendar-wohnen.de" class="transition-colors hover:text-accent-400">info@vallendar-wohnen.de</a>
+            <a href={`mailto:${site.email}`} class="transition-colors hover:text-accent-400">{site.email}</a>
           </li>
           <li>
             <span class="text-neutral-500">{t.contact.phone}:</span>{' '}
-            <a href="tel:+4926194000000" class="transition-colors hover:text-accent-400">+49 261 94 000 000</a>
+            <a href={`tel:${site.phone}`} class="transition-colors hover:text-accent-400">{site.phoneDisplay}</a>
           </li>
         </ul>
       </div>
@@ -60,7 +64,7 @@ const currentYear = new Date().getFullYear();
     </div>
 
     <div class="mt-8 border-t border-neutral-800 pt-6 text-center text-xs text-neutral-500">
-      &copy; {currentYear} VallendarWohnen. {t.footer.copyright}
+      &copy; {currentYear} {site.propertyName}{site.propertyNameAccent}. {t.footer.copyright}
     </div>
   </div>
 </footer>

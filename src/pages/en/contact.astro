@@ -1,10 +1,14 @@
 ---
+import { getEntry } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { getTranslation } from '../../i18n/translations';
 import { translatePath } from '../../i18n/utils';
 
 const lang = 'en' as const;
 const t = getTranslation(lang);
+
+const siteSettings = await getEntry('settings', 'site');
+const site = siteSettings.data;
 ---
 
 <BaseLayout title="Contact — VallendarWohnen" description="Contact us for viewings and rental inquiries." lang={lang}>
@@ -40,8 +44,8 @@ const t = getTranslation(lang);
               <div>
                 <p class="text-sm font-semibold text-neutral-900">{t.contact.address}</p>
                 <address class="mt-1 not-italic text-sm leading-relaxed text-neutral-600">
-                  Musterstraße 1<br />
-                  56179 Vallendar
+                  {site.address.street}<br />
+                  {site.address.city}
                 </address>
               </div>
             </div>
@@ -55,8 +59,8 @@ const t = getTranslation(lang);
               </div>
               <div>
                 <p class="text-sm font-semibold text-neutral-900">{t.contact.email}</p>
-                <a href="mailto:info@vallendar-wohnen.de" class="mt-1 text-sm text-accent-700 transition-colors hover:text-accent-900">
-                  info@vallendar-wohnen.de
+                <a href={`mailto:${site.email}`} class="mt-1 text-sm text-accent-700 transition-colors hover:text-accent-900">
+                  {site.email}
                 </a>
               </div>
             </div>
@@ -70,8 +74,8 @@ const t = getTranslation(lang);
               </div>
               <div>
                 <p class="text-sm font-semibold text-neutral-900">{t.contact.phone}</p>
-                <a href="tel:+4926194000000" class="mt-1 text-sm text-accent-700 transition-colors hover:text-accent-900">
-                  +49 261 94 000 000
+                <a href={`tel:${site.phone}`} class="mt-1 text-sm text-accent-700 transition-colors hover:text-accent-900">
+                  {site.phoneDisplay}
                 </a>
               </div>
             </div>
@@ -92,7 +96,7 @@ const t = getTranslation(lang);
                 {t.contact.formPlaceholder}
               </p>
               <a
-                href="mailto:info@vallendar-wohnen.de"
+                href={`mailto:${site.email}`}
                 class="mt-6 inline-flex items-center gap-2 rounded-lg bg-accent-700 px-6 py-3 text-sm font-semibold text-white shadow-sm transition-all hover:bg-accent-800 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-accent-500 focus:ring-offset-2"
               >
                 Send Email

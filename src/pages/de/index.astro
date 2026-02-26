@@ -1,11 +1,19 @@
 ---
+import { getCollection, getEntry } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import ApartmentCard from '../../components/ApartmentCard.astro';
 import { getTranslation } from '../../i18n/translations';
-import { apartments } from '../../content/apartments';
 
 const lang = 'de' as const;
 const t = getTranslation(lang);
+
+const allApartments = await getCollection('apartments');
+const sortedApartments = allApartments.sort((a, b) => a.data.order - b.data.order);
+
+const homePage = await getEntry('pages', 'home');
+const hero = homePage.data.hero!;
+const sectionSubheadline = homePage.data.sectionSubheadline!;
+const features = homePage.data.features!;
 ---
 
 <BaseLayout title="VallendarWohnen — Studentisches Wohnen" description="Möblierte Apartments für Studierende in Vallendar bei WHU." lang={lang}>
@@ -20,16 +28,16 @@ const t = getTranslation(lang);
 
     <div class="relative z-10 mx-auto max-w-4xl px-4 text-center sm:px-6">
       <h1 class="text-4xl font-bold leading-tight tracking-tight text-white sm:text-5xl md:text-6xl lg:text-7xl">
-        {t.hero.headline}
+        {hero.headline[lang]}
       </h1>
       <p class="mx-auto mt-6 max-w-2xl text-lg text-accent-100/90 sm:text-xl">
-        {t.hero.subheadline}
+        {hero.subheadline[lang]}
       </p>
       <a
         href="#wohnungen"
         class="mt-10 inline-flex items-center gap-2 rounded-lg bg-white px-8 py-3.5 text-sm font-semibold text-accent-900 shadow-lg transition-all hover:bg-accent-50 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-accent-900"
       >
-        {t.hero.cta}
+        {hero.cta[lang]}
         <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 13.5 12 21m0 0-7.5-7.5M12 21V3" />
         </svg>
@@ -44,11 +52,11 @@ const t = getTranslation(lang);
         {t.sections.apartments}
       </h2>
       <p class="mx-auto mt-4 max-w-2xl text-center text-neutral-500">
-        Drei individuell eingerichtete Wohnungen in bester Lage — direkt gegenüber der WHU.
+        {sectionSubheadline[lang]}
       </p>
 
       <div class="mt-14 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-        {apartments.map((apt) => (
+        {sortedApartments.map((apt) => (
           <ApartmentCard apartment={apt} lang={lang} />
         ))}
       </div>
@@ -63,19 +71,12 @@ const t = getTranslation(lang);
       </h2>
 
       <div class="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {([
-          { icon: '🏫', label: t.features.nearWhu },
-          { icon: '🛋️', label: t.features.furnished },
-          { icon: '🍳', label: t.features.kitchen },
-          { icon: '📶', label: t.features.wifi },
-          { icon: '🧺', label: t.features.laundry },
-          { icon: '📅', label: t.features.flexible },
-        ]).map((feature) => (
+        {features.map((feature) => (
           <div class="flex items-center gap-4 rounded-xl bg-neutral-50 p-5 ring-1 ring-neutral-100">
             <span class="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-accent-100 text-2xl">
               {feature.icon}
             </span>
-            <span class="text-sm font-semibold text-neutral-800">{feature.label}</span>
+            <span class="text-sm font-semibold text-neutral-800">{feature.label[lang]}</span>
           </div>
         ))}
       </div>
