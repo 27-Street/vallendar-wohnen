@@ -120,20 +120,53 @@ After making these changes, commit and push. Netlify will automatically rebuild 
 | Netlify hosting (free tier) | **$0/month** |
 | Netlify Forms (free tier, up to 100 submissions/month) | **$0/month** |
 | Netlify Identity (free tier, up to 1,000 active users) | **$0/month** |
+| Analytics (self-hosted via Netlify Function) | **$0/month** |
 | SSL certificate (Let's Encrypt via Netlify) | **$0/month** |
 | Custom domain (.de) | **~$10-15/year** |
 | **Total annual cost** | **~$10-15/year** |
 
 This is well within the target budget of ~$10-15/year.
 
-## 7. Ongoing Maintenance
+## 7. Analytics
+
+The site includes a lightweight, cookie-free analytics solution. No cookies are set and no external tracking scripts are loaded, so no GDPR cookie consent banner is needed.
+
+### Current Setup: Self-Hosted Pageview Logger (Free)
+
+A Netlify Function at `/.netlify/functions/pageview` receives pageview beacons from the client-side script. Each pageview is logged with the page path, referrer, and language — no IP addresses, no cookies, no fingerprinting.
+
+**Viewing analytics data:**
+1. Go to the Netlify dashboard > **Functions** > **pageview** > **Logs**.
+2. Each log entry is a JSON object with `path`, `referrer`, `lang`, and `timestamp`.
+3. For basic reporting, use Netlify's log search or export logs for analysis.
+
+This runs entirely on Netlify's free tier with zero additional cost.
+
+### Upgrade Options
+
+If more detailed analytics are needed in the future, consider these alternatives:
+
+| Option | Cost | Features | GDPR |
+|--------|------|----------|------|
+| **Current (Netlify Function logs)** | Free | Pageviews, referrers, language | Fully compliant, no cookies |
+| **Netlify Analytics** | $9/month | Server-side, visitors, top pages, bandwidth | Fully compliant, no cookies |
+| **Plausible Analytics (cloud)** | €9/month | Dashboard, goals, UTM tracking, API | Fully compliant, no cookies |
+| **Plausible Analytics (self-hosted)** | Free (requires server) | Same as cloud | Fully compliant, no cookies |
+
+To switch to Plausible Cloud, replace the analytics script tag in `BaseLayout.astro` with:
+```html
+<script defer data-domain="your-domain.de" src="https://plausible.io/js/script.js"></script>
+```
+And remove the Netlify Function and client-side analytics script.
+
+## 8. Ongoing Maintenance
 
 - **Content updates:** Yannik logs into `/admin/` to edit apartment listings, prices, and availability. Changes are committed to Git automatically via the CMS.
 - **Code updates:** Push changes to the `main` branch. Netlify auto-deploys on every push.
 - **Domain renewal:** Renew the domain annually with the registrar.
-- **Monitoring:** Netlify provides basic analytics and deploy logs. Check the dashboard periodically for failed builds or form submission issues.
+- **Monitoring:** Check the Netlify dashboard periodically for failed builds, form submission issues, and pageview logs (under Functions > pageview).
 
-## Troubleshooting
+## 9. Troubleshooting
 
 | Issue | Solution |
 |-------|----------|
