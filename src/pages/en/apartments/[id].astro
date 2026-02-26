@@ -21,6 +21,42 @@ const t = getTranslation(lang);
 const { apartment } = Astro.props;
 const apt = apartment.data;
 const total = apt.pricePerMonth + apt.utilitiesPerMonth;
+
+const siteUrl = Astro.site?.origin ?? 'https://example.com';
+const apartmentJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Apartment",
+  "name": apt.name,
+  "description": apt.description[lang],
+  "url": `${siteUrl}/en/apartments/${apartment.id}`,
+  "floorSize": {
+    "@type": "QuantitativeValue",
+    "value": apt.size,
+    "unitCode": "MTK",
+    "unitText": "m²"
+  },
+  "numberOfRooms": apt.rooms,
+  "floorLevel": apt.floor,
+  "amenityFeature": apt.amenities.map((a) => ({
+    "@type": "LocationFeatureSpecification",
+    "name": a,
+    "value": true
+  })),
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "Musterstraße 1",
+    "addressLocality": "Vallendar",
+    "postalCode": "56179",
+    "addressCountry": "DE"
+  },
+  "offers": {
+    "@type": "Offer",
+    "priceCurrency": "EUR",
+    "price": apt.pricePerMonth,
+    "unitCode": "MON",
+    "description": `Rent €${apt.pricePerMonth} + Utilities €${apt.utilitiesPerMonth} = €${total}/month`
+  }
+};
 ---
 
 <BaseLayout
@@ -28,6 +64,8 @@ const total = apt.pricePerMonth + apt.utilitiesPerMonth;
   description={`${apt.name} in Vallendar: ${apt.description[lang]} ${apt.size} m², from €${apt.pricePerMonth}/month.`}
   lang={lang}
 >
+  <script type="application/ld+json" set:html={JSON.stringify(apartmentJsonLd)} />
+
   <!-- Hero Area -->
   <section class="bg-gradient-to-br from-accent-950 via-accent-800 to-accent-950 pb-16 pt-32">
     <div class="mx-auto max-w-6xl px-4 sm:px-6">

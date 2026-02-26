@@ -7,6 +7,24 @@ import { getTranslation } from '../../i18n/translations';
 const lang = 'de' as const;
 const t = getTranslation(lang);
 
+const siteUrl = Astro.site?.origin ?? 'https://example.com';
+const organizationJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "VallendarWohnen",
+  "url": `${siteUrl}/de/`,
+  "email": "info@vallendar-wohnen.de",
+  "telephone": "+4926194000000",
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "Musterstraße 1",
+    "addressLocality": "Vallendar",
+    "postalCode": "56179",
+    "addressCountry": "DE"
+  },
+  "description": "Möblierte Studentenwohnungen in Vallendar, direkt gegenüber der WHU."
+};
+
 const allApartments = await getCollection('apartments');
 const sortedApartments = allApartments.sort((a, b) => a.data.order - b.data.order);
 
@@ -17,6 +35,8 @@ const features = homePage.data.features!;
 ---
 
 <BaseLayout title="Möblierte Studentenwohnungen in Vallendar | VallendarWohnen" description="Möblierte Apartments für Studierende in Vallendar, direkt gegenüber der WHU. Ab 490 €/Monat, voll ausgestattet mit WLAN und Einbauküche." lang={lang}>
+  <script type="application/ld+json" set:html={JSON.stringify(organizationJsonLd)} />
+
   <!-- Hero Section -->
   <section class="relative flex min-h-screen items-center justify-center overflow-hidden">
     <!-- Hero background image -->
