@@ -1,0 +1,300 @@
+---
+import type { Language } from '../i18n/translations';
+import { getTranslation } from '../i18n/translations';
+
+interface Props {
+  lang: Language;
+  apartmentName?: string;
+  formName: string;
+}
+
+const { lang, apartmentName, formName } = Astro.props;
+const t = getTranslation(lang);
+
+const subjectDefault = apartmentName
+  ? `${t.form.subjectApartmentPrefix}: ${apartmentName}`
+  : '';
+---
+
+<div class="inquiry-form-wrapper" data-lang={lang}>
+  <form
+    name={formName}
+    method="POST"
+    data-netlify="true"
+    netlify
+    class="inquiry-form space-y-5"
+  >
+    <input type="hidden" name="form-name" value={formName} />
+
+    <!-- Name -->
+    <div>
+      <label for={`${formName}-name`} class="block text-sm font-medium text-neutral-700">
+        {t.form.name} <span class="text-red-500">*</span>
+      </label>
+      <input
+        type="text"
+        id={`${formName}-name`}
+        name="name"
+        required
+        placeholder={t.form.namePlaceholder}
+        class="mt-1.5 block w-full rounded-lg border border-neutral-300 bg-white px-4 py-2.5 text-sm text-neutral-900 placeholder:text-neutral-400 transition-colors focus:border-accent-500 focus:outline-none focus:ring-2 focus:ring-accent-500/20"
+      />
+      <p class="form-error mt-1.5 hidden text-xs text-red-600"></p>
+    </div>
+
+    <!-- Email -->
+    <div>
+      <label for={`${formName}-email`} class="block text-sm font-medium text-neutral-700">
+        {t.form.email} <span class="text-red-500">*</span>
+      </label>
+      <input
+        type="email"
+        id={`${formName}-email`}
+        name="email"
+        required
+        placeholder={t.form.emailPlaceholder}
+        class="mt-1.5 block w-full rounded-lg border border-neutral-300 bg-white px-4 py-2.5 text-sm text-neutral-900 placeholder:text-neutral-400 transition-colors focus:border-accent-500 focus:outline-none focus:ring-2 focus:ring-accent-500/20"
+      />
+      <p class="form-error mt-1.5 hidden text-xs text-red-600"></p>
+    </div>
+
+    <!-- Phone -->
+    <div>
+      <label for={`${formName}-phone`} class="block text-sm font-medium text-neutral-700">
+        {t.form.phone}
+      </label>
+      <input
+        type="tel"
+        id={`${formName}-phone`}
+        name="phone"
+        placeholder={t.form.phonePlaceholder}
+        class="mt-1.5 block w-full rounded-lg border border-neutral-300 bg-white px-4 py-2.5 text-sm text-neutral-900 placeholder:text-neutral-400 transition-colors focus:border-accent-500 focus:outline-none focus:ring-2 focus:ring-accent-500/20"
+      />
+    </div>
+
+    <!-- Subject -->
+    <div>
+      <label for={`${formName}-subject`} class="block text-sm font-medium text-neutral-700">
+        {t.form.subject}
+      </label>
+      <input
+        type="text"
+        id={`${formName}-subject`}
+        name="subject"
+        value={subjectDefault}
+        placeholder={t.form.subjectPlaceholder}
+        class="mt-1.5 block w-full rounded-lg border border-neutral-300 bg-white px-4 py-2.5 text-sm text-neutral-900 placeholder:text-neutral-400 transition-colors focus:border-accent-500 focus:outline-none focus:ring-2 focus:ring-accent-500/20"
+      />
+    </div>
+
+    <!-- Move-in Date & Duration row -->
+    <div class="grid gap-5 sm:grid-cols-2">
+      <!-- Move-in Date -->
+      <div>
+        <label for={`${formName}-move-in`} class="block text-sm font-medium text-neutral-700">
+          {t.form.moveInDate}
+        </label>
+        <input
+          type="date"
+          id={`${formName}-move-in`}
+          name="move-in-date"
+          class="mt-1.5 block w-full rounded-lg border border-neutral-300 bg-white px-4 py-2.5 text-sm text-neutral-900 placeholder:text-neutral-400 transition-colors focus:border-accent-500 focus:outline-none focus:ring-2 focus:ring-accent-500/20"
+        />
+      </div>
+
+      <!-- Duration -->
+      <div>
+        <label for={`${formName}-duration`} class="block text-sm font-medium text-neutral-700">
+          {t.form.duration}
+        </label>
+        <select
+          id={`${formName}-duration`}
+          name="duration"
+          class="mt-1.5 block w-full rounded-lg border border-neutral-300 bg-white px-4 py-2.5 text-sm text-neutral-900 transition-colors focus:border-accent-500 focus:outline-none focus:ring-2 focus:ring-accent-500/20"
+        >
+          <option value="">{t.form.durationPlaceholder}</option>
+          <option value="1-semester">{t.form.duration1Sem}</option>
+          <option value="2-semesters">{t.form.duration2Sem}</option>
+          <option value="1-year">{t.form.duration1Year}</option>
+          <option value="longer">{t.form.durationLonger}</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Message -->
+    <div>
+      <label for={`${formName}-message`} class="block text-sm font-medium text-neutral-700">
+        {t.form.message} <span class="text-red-500">*</span>
+      </label>
+      <textarea
+        id={`${formName}-message`}
+        name="message"
+        required
+        rows="4"
+        placeholder={t.form.messagePlaceholder}
+        class="mt-1.5 block w-full rounded-lg border border-neutral-300 bg-white px-4 py-2.5 text-sm text-neutral-900 placeholder:text-neutral-400 transition-colors resize-y focus:border-accent-500 focus:outline-none focus:ring-2 focus:ring-accent-500/20"
+      ></textarea>
+      <p class="form-error mt-1.5 hidden text-xs text-red-600"></p>
+    </div>
+
+    <!-- Submit -->
+    <button
+      type="submit"
+      class="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-accent-700 px-6 py-3 text-sm font-semibold text-white shadow-sm transition-all hover:bg-accent-800 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-accent-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed sm:w-auto"
+    >
+      {t.form.submit}
+      <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M6 12 3.269 3.125A59.769 59.769 0 0 1 21.485 12 59.768 59.768 0 0 1 3.27 20.875L5.999 12Zm0 0h7.5" />
+      </svg>
+    </button>
+  </form>
+
+  <!-- Success Message (hidden by default) -->
+  <div class="form-success hidden">
+    <div class="rounded-2xl bg-green-50 p-8 text-center ring-1 ring-green-200">
+      <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-green-100">
+        <svg class="h-7 w-7 text-green-600" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+        </svg>
+      </div>
+      <h3 class="mt-4 text-lg font-bold text-green-900" data-success-title>{t.form.successTitle}</h3>
+      <p class="mt-2 text-sm text-green-700" data-success-message>{t.form.successMessage}</p>
+    </div>
+  </div>
+
+  <!-- Error Message (hidden by default) -->
+  <div class="form-error-banner hidden">
+    <div class="rounded-2xl bg-red-50 p-8 text-center ring-1 ring-red-200">
+      <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-red-100">
+        <svg class="h-7 w-7 text-red-600" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+        </svg>
+      </div>
+      <h3 class="mt-4 text-lg font-bold text-red-900" data-error-title>{t.form.errorTitle}</h3>
+      <p class="mt-2 text-sm text-red-700" data-error-message>{t.form.errorMessage}</p>
+      <button
+        type="button"
+        class="form-retry mt-4 inline-flex items-center gap-2 rounded-lg bg-red-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+      >
+        {t.form.retry}
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('astro:page-load', () => {
+    document.querySelectorAll<HTMLDivElement>('.inquiry-form-wrapper').forEach((wrapper) => {
+      const form = wrapper.querySelector<HTMLFormElement>('.inquiry-form');
+      const successEl = wrapper.querySelector<HTMLDivElement>('.form-success');
+      const errorEl = wrapper.querySelector<HTMLDivElement>('.form-error-banner');
+      const retryBtn = wrapper.querySelector<HTMLButtonElement>('.form-retry');
+      const lang = wrapper.dataset.lang || 'de';
+
+      if (!form || !successEl || !errorEl) return;
+
+      const messages = {
+        de: {
+          required: 'Bitte füllen Sie dieses Feld aus.',
+          email: 'Bitte geben Sie eine gültige E-Mail-Adresse ein.',
+        },
+        en: {
+          required: 'Please fill out this field.',
+          email: 'Please enter a valid email address.',
+        },
+      };
+
+      const t = messages[lang as keyof typeof messages] || messages.de;
+
+      function clearErrors() {
+        form!.querySelectorAll('.form-error').forEach((el) => {
+          el.textContent = '';
+          el.classList.add('hidden');
+        });
+        form!.querySelectorAll('input, textarea').forEach((el) => {
+          el.classList.remove('border-red-500', 'ring-red-500/20');
+        });
+      }
+
+      function showFieldError(field: HTMLInputElement | HTMLTextAreaElement, message: string) {
+        field.classList.add('border-red-500');
+        field.classList.add('ring-red-500/20');
+        const errorEl = field.parentElement?.querySelector('.form-error');
+        if (errorEl) {
+          errorEl.textContent = message;
+          errorEl.classList.remove('hidden');
+        }
+      }
+
+      function validateForm(): boolean {
+        clearErrors();
+        let isValid = true;
+
+        const requiredFields = form!.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>(
+          'input[required], textarea[required]'
+        );
+
+        requiredFields.forEach((field) => {
+          if (!field.value.trim()) {
+            showFieldError(field, t.required);
+            isValid = false;
+          } else if (field.type === 'email' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(field.value)) {
+            showFieldError(field, t.email);
+            isValid = false;
+          }
+        });
+
+        return isValid;
+      }
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        if (!validateForm()) return;
+
+        const submitBtn = form.querySelector<HTMLButtonElement>('button[type="submit"]');
+        if (submitBtn) {
+          submitBtn.disabled = true;
+        }
+
+        const isLocal =
+          window.location.hostname === 'localhost' ||
+          window.location.hostname === '127.0.0.1';
+
+        if (isLocal) {
+          form.classList.add('hidden');
+          successEl!.classList.remove('hidden');
+          return;
+        }
+
+        try {
+          const formData = new FormData(form);
+          const response = await fetch(form.action || '/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: new URLSearchParams(formData as unknown as Record<string, string>).toString(),
+          });
+
+          if (response.ok) {
+            form.classList.add('hidden');
+            successEl!.classList.remove('hidden');
+          } else {
+            throw new Error('Submission failed');
+          }
+        } catch {
+          form.classList.add('hidden');
+          errorEl!.classList.remove('hidden');
+        } finally {
+          if (submitBtn) {
+            submitBtn.disabled = false;
+          }
+        }
+      });
+
+      retryBtn?.addEventListener('click', () => {
+        errorEl!.classList.add('hidden');
+        form.classList.remove('hidden');
+      });
+    });
+  });
+</script>
