@@ -27,11 +27,20 @@ const priceDisplay = lang === 'de'
   href={detailPath}
   class="group flex flex-col overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-neutral-200 transition-all hover:shadow-lg hover:ring-accent-300 focus:outline-none focus:ring-2 focus:ring-accent-500 focus:ring-offset-2"
 >
-  {/* Placeholder image area */}
+  {/* Image area */}
   <div class="relative aspect-[16/9] overflow-hidden bg-gradient-to-br from-accent-100 to-accent-200">
-    <div class="absolute inset-0 flex items-center justify-center">
-      <span class="text-sm font-medium text-accent-600/60">{t.apartment.photoPlaceholder}</span>
-    </div>
+    {apt.images && apt.images.length > 0 ? (
+      <img
+        src={apt.images[0]}
+        alt={apt.name}
+        loading="lazy"
+        class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+      />
+    ) : (
+      <div class="absolute inset-0 flex items-center justify-center">
+        <span class="text-sm font-medium text-accent-600/60">{t.apartment.photoPlaceholder}</span>
+      </div>
+    )}
     {/* Availability badge */}
     <div class="absolute top-3 right-3">
       <AvailabilityBadge available={apt.available} availableFrom={apt.availableFrom} lang={lang} />
