@@ -38,6 +38,13 @@ export const translations = {
       photoPlaceholder: 'Foto folgt',
       rentalCosts: 'Mietkosten',
     },
+    gallery: {
+      viewImage: 'Bild anzeigen',
+      photoComingSoon: 'Professionelle Fotos folgen',
+      close: 'Schließen',
+      previous: 'Vorheriges Bild',
+      next: 'Nächstes Bild',
+    },
     availability: {
       available: 'Verfügbar',
       availableFrom: 'Verfügbar ab',
@@ -132,6 +139,13 @@ export const translations = {
       inquiryCta: 'Contact us',
       photoPlaceholder: 'Photo coming soon',
       rentalCosts: 'Rental Costs',
+    },
+    gallery: {
+      viewImage: 'View image',
+      photoComingSoon: 'Professional photos coming soon',
+      close: 'Close',
+      previous: 'Previous image',
+      next: 'Next image',
     },
     availability: {
       available: 'Available',

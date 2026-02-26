@@ -1,0 +1,257 @@
+---
+import type { Language } from '../i18n/translations';
+import { getTranslation } from '../i18n/translations';
+
+interface Props {
+  images: string[];
+  apartmentName: string;
+  lang: Language;
+}
+
+const { images, apartmentName, lang } = Astro.props;
+const t = getTranslation(lang);
+
+const placeholderColors = [
+  { from: 'from-accent-100', to: 'to-accent-200' },
+  { from: 'from-accent-50', to: 'to-accent-100' },
+  { from: 'from-accent-100', to: 'to-accent-50' },
+  { from: 'from-accent-200', to: 'to-accent-100' },
+];
+
+const placeholderIcons = ['bed', 'kitchen', 'sofa', 'bath'] as const;
+
+const galleryId = `gallery-${apartmentName.toLowerCase().replace(/\s+/g, '-')}`;
+---
+
+<!-- Gallery Grid -->
+<div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 lg:grid-rows-2" id={galleryId}>
+  {images.map((src, i) => {
+    const colors = placeholderColors[i % placeholderColors.length];
+    const iconType = placeholderIcons[i % placeholderIcons.length];
+    return (
+      <button
+        type="button"
+        class:list={[
+          'gallery-thumb group relative overflow-hidden rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-500 focus-visible:ring-offset-2',
+          i === 0
+            ? 'sm:col-span-2 lg:row-span-2 aspect-[16/10] sm:aspect-auto sm:h-full'
+            : 'aspect-[4/3]',
+        ]}
+        data-index={i}
+        aria-label={`${apartmentName} — ${t.gallery.viewImage} ${i + 1}`}
+      >
+        {/* Placeholder */}
+        <div class:list={[
+          'absolute inset-0 flex flex-col items-center justify-center gap-3 bg-gradient-to-br transition-transform duration-300 group-hover:scale-105',
+          colors.from,
+          colors.to,
+        ]}>
+          <svg class="h-10 w-10 text-accent-400/40" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            {iconType === 'bed' && (
+              <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
+            )}
+            {iconType === 'kitchen' && (
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15.362 5.214A8.252 8.252 0 0112 21 8.25 8.25 0 016.038 7.048 8.287 8.287 0 009 9.6a8.983 8.983 0 013.361-6.867 8.21 8.21 0 003 2.48z" />
+            )}
+            {iconType === 'sofa' && (
+              <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 21v-4.875c0-.621.504-1.125 1.125-1.125h5.25c.621 0 1.125.504 1.125 1.125V21m0 0h4.5V3.545M12.75 21h7.5M10.5 21H3m1.5 0h0V10.5m0 0h12m-12 0V3.545M19.5 3.545a2.25 2.25 0 00-1.5-.795h-12a2.25 2.25 0 00-1.5.795" />
+            )}
+            {iconType === 'bath' && (
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
+            )}
+          </svg>
+          <div class="text-center px-4">
+            <p class="text-sm font-semibold text-accent-700/60">{apartmentName}</p>
+            <p class="mt-0.5 text-xs text-accent-500/50">{t.gallery.photoComingSoon}</p>
+          </div>
+        </div>
+
+        {/* Hover overlay */}
+        <div class="absolute inset-0 bg-accent-950/0 transition-colors duration-200 group-hover:bg-accent-950/10" />
+
+        {/* Expand icon */}
+        <div class="absolute bottom-2 right-2 rounded-lg bg-white/80 p-1.5 opacity-0 shadow-sm backdrop-blur-sm transition-opacity duration-200 group-hover:opacity-100">
+          <svg class="h-4 w-4 text-accent-700" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15" />
+          </svg>
+        </div>
+      </button>
+    );
+  })}
+</div>
+
+<!-- Mobile scroll indicators -->
+<div class="mt-3 flex justify-center gap-1.5 sm:hidden" aria-hidden="true">
+  {images.map((_, i) => (
+    <span class:list={[
+      'h-1.5 rounded-full transition-colors',
+      i === 0 ? 'w-4 bg-accent-500' : 'w-1.5 bg-accent-300',
+    ]} />
+  ))}
+</div>
+
+<!-- Lightbox Dialog -->
+<dialog
+  id={`${galleryId}-lightbox`}
+  class="gallery-lightbox m-0 h-full w-full max-h-full max-w-full bg-neutral-950/95 p-0 backdrop:bg-transparent"
+>
+  <div class="flex h-full w-full flex-col items-center justify-center">
+    <!-- Close button -->
+    <button
+      type="button"
+      class="lightbox-close absolute top-4 right-4 z-10 rounded-full bg-white/10 p-2.5 text-white/80 transition-colors hover:bg-white/20 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
+      aria-label={t.gallery.close}
+    >
+      <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+      </svg>
+    </button>
+
+    <!-- Counter -->
+    <div class="absolute top-4 left-4 z-10 rounded-full bg-white/10 px-3 py-1.5 text-sm font-medium text-white/80">
+      <span class="lightbox-current">1</span> / {images.length}
+    </div>
+
+    <!-- Navigation -->
+    {images.length > 1 && (
+      <>
+        <button
+          type="button"
+          class="lightbox-prev absolute left-4 top-1/2 z-10 -translate-y-1/2 rounded-full bg-white/10 p-3 text-white/80 transition-colors hover:bg-white/20 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
+          aria-label={t.gallery.previous}
+        >
+          <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+          </svg>
+        </button>
+        <button
+          type="button"
+          class="lightbox-next absolute right-4 top-1/2 z-10 -translate-y-1/2 rounded-full bg-white/10 p-3 text-white/80 transition-colors hover:bg-white/20 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
+          aria-label={t.gallery.next}
+        >
+          <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+          </svg>
+        </button>
+      </>
+    )}
+
+    <!-- Image display area -->
+    <div class="lightbox-content flex h-full w-full items-center justify-center px-16 py-20">
+      {images.map((src, i) => (
+        <div
+          class:list={[
+            'lightbox-slide absolute flex flex-col items-center justify-center gap-4',
+            i === 0 ? '' : 'hidden',
+          ]}
+          data-slide={i}
+        >
+          {/* Placeholder content for lightbox */}
+          <div class:list={[
+            'flex aspect-[16/10] w-full max-w-4xl flex-col items-center justify-center gap-4 rounded-2xl bg-gradient-to-br',
+            placeholderColors[i % placeholderColors.length].from,
+            placeholderColors[i % placeholderColors.length].to,
+          ]}>
+            <svg class="h-16 w-16 text-accent-400/40" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.41a2.25 2.25 0 013.182 0l2.909 2.91M18 7.5h.008v.008H18V7.5z" />
+            </svg>
+            <div class="text-center">
+              <p class="text-lg font-semibold text-accent-700/60">{apartmentName}</p>
+              <p class="mt-1 text-sm text-accent-500/50">{t.gallery.photoComingSoon}</p>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+</dialog>
+
+<script define:vars={{ galleryId, imageCount: images.length }}>
+  document.addEventListener('DOMContentLoaded', () => {
+    const gallery = document.getElementById(galleryId);
+    const dialog = document.getElementById(`${galleryId}-lightbox`);
+    if (!gallery || !dialog) return;
+
+    let currentIndex = 0;
+    const slides = dialog.querySelectorAll('.lightbox-slide');
+    const counter = dialog.querySelector('.lightbox-current');
+    const closeBtn = dialog.querySelector('.lightbox-close');
+    const prevBtn = dialog.querySelector('.lightbox-prev');
+    const nextBtn = dialog.querySelector('.lightbox-next');
+
+    function showSlide(index) {
+      currentIndex = (index + imageCount) % imageCount;
+      slides.forEach((slide, i) => {
+        slide.classList.toggle('hidden', i !== currentIndex);
+      });
+      if (counter) counter.textContent = String(currentIndex + 1);
+    }
+
+    // Open lightbox on thumbnail click
+    gallery.querySelectorAll('.gallery-thumb').forEach((thumb) => {
+      thumb.addEventListener('click', () => {
+        const index = parseInt(thumb.getAttribute('data-index') || '0', 10);
+        showSlide(index);
+        dialog.showModal();
+      });
+    });
+
+    // Close button
+    if (closeBtn) {
+      closeBtn.addEventListener('click', () => dialog.close());
+    }
+
+    // Click on backdrop (outside content) closes dialog
+    dialog.addEventListener('click', (e) => {
+      if (e.target === dialog) dialog.close();
+    });
+
+    // Navigation
+    if (prevBtn) {
+      prevBtn.addEventListener('click', () => showSlide(currentIndex - 1));
+    }
+    if (nextBtn) {
+      nextBtn.addEventListener('click', () => showSlide(currentIndex + 1));
+    }
+
+    // Keyboard navigation
+    dialog.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        showSlide(currentIndex - 1);
+      } else if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        showSlide(currentIndex + 1);
+      }
+    });
+  });
+</script>
+
+<style>
+  .gallery-lightbox::backdrop {
+    background: transparent;
+  }
+
+  .gallery-lightbox[open] {
+    animation: fadeIn 200ms ease-out;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  /* Mobile horizontal scroll */
+  @media (max-width: 639px) {
+    #gallery-grid-mobile {
+      display: flex;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+    }
+    #gallery-grid-mobile > * {
+      scroll-snap-align: start;
+      flex: 0 0 85%;
+    }
+  }
+</style>
