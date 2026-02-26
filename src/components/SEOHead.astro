@@ -16,7 +16,7 @@ const {
   description,
   lang,
   canonicalUrl,
-  ogImage = '/og-default.svg',
+  ogImage = '/og-default.png',
   type = 'website',
 } = Astro.props;
 
@@ -49,9 +49,13 @@ const ogLocaleAlternate = lang === 'de' ? 'en_US' : 'de_DE';
 <link rel="canonical" href={fullCanonicalUrl} />
 
 <!-- Open Graph -->
+<meta property="og:site_name" content="VallendarWohnen" />
 <meta property="og:title" content={title} />
 <meta property="og:description" content={description} />
 <meta property="og:image" content={fullOgImageUrl} />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:type" content="image/png" />
 <meta property="og:url" content={fullCanonicalUrl} />
 <meta property="og:type" content={type} />
 <meta property="og:locale" content={ogLocale} />

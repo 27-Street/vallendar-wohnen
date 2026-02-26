@@ -1,3 +1,46 @@
 ---
-return Astro.redirect('/de/');
+const siteUrl = Astro.site?.origin ?? 'https://lucky-cucurucho-b639b6.netlify.app';
+const ogImageUrl = `${siteUrl}/og-default.png`;
+const canonicalUrl = `${siteUrl}/de/`;
 ---
+
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Möblierte Studentenwohnungen in Vallendar | VallendarWohnen</title>
+    <meta name="description" content="Möblierte Apartments für Studierende in Vallendar, direkt gegenüber der WHU. Ab 490 €/Monat, voll ausgestattet mit WLAN und Einbauküche." />
+    <link rel="canonical" href={canonicalUrl} />
+
+    <!-- Open Graph -->
+    <meta property="og:site_name" content="VallendarWohnen" />
+    <meta property="og:title" content="Möblierte Studentenwohnungen in Vallendar | VallendarWohnen" />
+    <meta property="og:description" content="Möblierte Apartments für Studierende in Vallendar, direkt gegenüber der WHU. Ab 490 €/Monat, voll ausgestattet mit WLAN und Einbauküche." />
+    <meta property="og:image" content={ogImageUrl} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="de_DE" />
+    <meta property="og:locale:alternate" content="en_US" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Möblierte Studentenwohnungen in Vallendar | VallendarWohnen" />
+    <meta name="twitter:description" content="Möblierte Apartments für Studierende in Vallendar, direkt gegenüber der WHU. Ab 490 €/Monat, voll ausgestattet mit WLAN und Einbauküche." />
+    <meta name="twitter:image" content={ogImageUrl} />
+
+    <!-- Hreflang -->
+    <link rel="alternate" hreflang="de" href={`${siteUrl}/de/`} />
+    <link rel="alternate" hreflang="en" href={`${siteUrl}/en/`} />
+    <link rel="alternate" hreflang="x-default" href={`${siteUrl}/de/`} />
+
+    <!-- Redirect humans to /de/ -->
+    <meta http-equiv="refresh" content="0;url=/de/" />
+  </head>
+  <body>
+    <p>Redirecting to <a href="/de/">/de/</a>...</p>
+  </body>
+</html>

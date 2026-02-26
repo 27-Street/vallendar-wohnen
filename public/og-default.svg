@@ -1,20 +1,20 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
   <defs>
     <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#00332d"/>
-      <stop offset="50%" style="stop-color:#005c52"/>
-      <stop offset="100%" style="stop-color:#00332d"/>
+      <stop offset="0%" style="stop-color:#121c12"/>
+      <stop offset="50%" style="stop-color:#2d402b"/>
+      <stop offset="100%" style="stop-color:#121c12"/>
     </linearGradient>
   </defs>
   <rect width="1200" height="630" fill="url(#bg)"/>
-  <text x="600" y="280" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="72" font-weight="700" fill="#ffffff" letter-spacing="-1">
-    Vallendar<tspan fill="#1ee4bc">Wohnen</tspan>
+  <text x="600" y="270" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="72" font-weight="700" fill="#ffffff" letter-spacing="-1">
+    Vallendar<tspan fill="#9db89a">Wohnen</tspan>
   </text>
-  <text x="600" y="350" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="28" fill="#a7f3d0" letter-spacing="0.5">
+  <text x="600" y="340" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="28" fill="#c5d5c3" letter-spacing="0.5">
     Studentisches Wohnen in Vallendar
   </text>
-  <line x1="520" y1="390" x2="680" y2="390" stroke="#1ee4bc" stroke-width="2" opacity="0.5"/>
-  <text x="600" y="430" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="20" fill="#6ee7b7" opacity="0.8">
-    Student Apartments near WHU
+  <line x1="520" y1="380" x2="680" y2="380" stroke="#74986f" stroke-width="2" opacity="0.5"/>
+  <text x="600" y="420" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="20" fill="#9db89a" opacity="0.8">
+    Furnished Student Apartments near WHU
   </text>
 </svg>

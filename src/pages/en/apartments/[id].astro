@@ -64,6 +64,7 @@ const apartmentJsonLd = {
   title={`${apt.name} – ${apt.size} m², from €${apt.pricePerMonth}/month | VallendarWohnen`}
   description={`${apt.name} in Vallendar: ${apt.description[lang]} ${apt.size} m², from €${apt.pricePerMonth}/month.`}
   lang={lang}
+  ogImage={`/images/apartments/${apartment.id}/og.png`}
 >
   <script type="application/ld+json" set:html={JSON.stringify(apartmentJsonLd)} />
 

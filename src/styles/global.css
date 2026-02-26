@@ -1,6 +1,6 @@
 @import "tailwindcss";
 @import "@fontsource-variable/inter";
-@import "@fontsource-variable/source-serif-4";
+@import "@fontsource-variable/playfair-display";
 
 @theme {
   /* Deep sage green — sophisticated, grounded, high-class */
@@ -31,7 +31,7 @@
 
   /* Font families — self-hosted via @fontsource (GDPR compliant) */
   --font-sans: "Inter Variable", "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
-  --font-serif: "Source Serif 4 Variable", "Source Serif 4", Georgia, "Times New Roman", serif;
+  --font-serif: "Playfair Display Variable", "Playfair Display", Georgia, "Times New Roman", serif;
 }
 
 html {
