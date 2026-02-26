@@ -3,18 +3,18 @@
 @import "@fontsource-variable/source-serif-4";
 
 @theme {
-  /* Deep teal accent — distinctive from HEER58's blue */
-  --color-accent-50: #effefa;
-  --color-accent-100: #c8fff1;
-  --color-accent-200: #91fee3;
-  --color-accent-300: #52f6d2;
-  --color-accent-400: #1ee4bc;
-  --color-accent-500: #06c8a3;
-  --color-accent-600: #01a286;
-  --color-accent-700: #06816c;
-  --color-accent-800: #0a6657;
-  --color-accent-900: #0d5448;
-  --color-accent-950: #00332d;
+  /* Deep sage green — sophisticated, grounded, high-class */
+  --color-accent-50: #f4f7f4;
+  --color-accent-100: #e2eae1;
+  --color-accent-200: #c5d5c3;
+  --color-accent-300: #9db89a;
+  --color-accent-400: #74986f;
+  --color-accent-500: #557b50;
+  --color-accent-600: #42633e;
+  --color-accent-700: #364f33;
+  --color-accent-800: #2d402b;
+  --color-accent-900: #253525;
+  --color-accent-950: #121c12;
 
   /* Warm neutral base */
   --color-neutral-50: #fafaf9;

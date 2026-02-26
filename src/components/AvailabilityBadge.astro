@@ -26,31 +26,31 @@ const label = !available
 
 const colorClasses = {
   default: !available
-    ? 'bg-red-100 text-red-800'
+    ? 'bg-neutral-800/80 text-neutral-100 backdrop-blur-sm'
     : hasDate
-      ? 'bg-amber-100 text-amber-800'
-      : 'bg-green-100 text-green-800',
+      ? 'bg-white/90 text-neutral-700 backdrop-blur-sm ring-1 ring-neutral-200'
+      : 'bg-white/90 text-neutral-700 backdrop-blur-sm ring-1 ring-neutral-200',
   hero: !available
-    ? 'bg-red-400/20 text-red-200'
+    ? 'bg-neutral-900/60 text-neutral-200 backdrop-blur-sm'
     : hasDate
-      ? 'bg-amber-400/20 text-amber-200'
-      : 'bg-green-400/20 text-green-200',
+      ? 'bg-white/15 text-white/90 backdrop-blur-sm ring-1 ring-white/20'
+      : 'bg-white/15 text-white/90 backdrop-blur-sm ring-1 ring-white/20',
 };
 
 const dotColor = !available
-  ? 'bg-red-500'
+  ? 'bg-neutral-400'
   : hasDate
     ? 'bg-amber-500'
-    : 'bg-green-500';
+    : 'bg-emerald-500';
 ---
 
 <span
   class:list={[
-    'inline-flex items-center gap-1.5 rounded-full font-semibold',
-    variant === 'hero' ? 'px-4 py-1.5 text-sm' : 'px-3 py-1 text-xs',
+    'inline-flex items-center gap-1.5 rounded-full font-medium tracking-wide',
+    variant === 'hero' ? 'px-4 py-1.5 text-xs' : 'px-2.5 py-1 text-[11px] uppercase',
     colorClasses[variant],
   ]}
 >
-  <span class:list={['h-2 w-2 shrink-0 rounded-full', dotColor]}></span>
+  <span class:list={['h-1.5 w-1.5 shrink-0 rounded-full', dotColor]}></span>
   {label}
 </span>
