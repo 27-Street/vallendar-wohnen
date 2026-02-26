@@ -14,27 +14,27 @@ sectionSubheadline:
   de: Drei individuell eingerichtete Wohnungen in bester Lage — direkt gegenüber der WHU.
   en: Three individually furnished apartments in a prime location — directly across from WHU.
 features:
-  - icon: "\U0001F3EB"
+  - icon: "map-pin"
     label:
       de: 2 Min. zur WHU
       en: 2 Min. to WHU
-  - icon: "\U0001F6CB\uFE0F"
+  - icon: "sofa"
     label:
       de: Voll möbliert
       en: Fully Furnished
-  - icon: "\U0001F373"
+  - icon: "utensils"
     label:
       de: Einbauküche
       en: Fitted Kitchen
-  - icon: "\U0001F4F6"
+  - icon: "wifi"
     label:
       de: WLAN inklusive
       en: Wi-Fi Included
-  - icon: "\U0001F9FA"
+  - icon: "washing-machine"
     label:
       de: Waschmaschine
       en: Washing Machine
-  - icon: "\U0001F4C5"
+  - icon: "calendar-range"
     label:
       de: Flexible Mietdauer
       en: Flexible Lease Terms

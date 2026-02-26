@@ -19,7 +19,7 @@ intro:
     apartments are tailored to the needs of exchange students at WHU: fully
     equipped, flexibly rentable, and just a short walk from campus.
 highlights:
-  - icon: "🏠"
+  - icon: "home"
     title:
       de: Komplett möbliert
       en: Fully Furnished
@@ -30,7 +30,7 @@ highlights:
       en: >-
         Bed, desk, wardrobe, fitted kitchen with stove and fridge, washing
         machine — everything is ready. Just bring your suitcase.
-  - icon: "📅"
+  - icon: "calendar-check"
     title:
       de: Flexible Mietdauer
       en: Flexible Lease Terms
@@ -41,7 +41,7 @@ highlights:
       en: >-
         Rent from one semester onwards. Ideal for exchange programs of 4–6 months.
         Extensions are also possible.
-  - icon: "📍"
+  - icon: "map-pin"
     title:
       de: Direkt am Campus
       en: Right by Campus
@@ -52,7 +52,7 @@ highlights:
       en: >-
         Just 2 minutes' walk to WHU. No commuting, no stress — more time for
         studying and enjoying life.
-  - icon: "🌐"
+  - icon: "globe"
     title:
       de: WLAN & Nebenkosten inklusive
       en: Wi-Fi & Utilities Included
@@ -63,7 +63,7 @@ highlights:
       en: >-
         Fast internet and a flat-rate utility package (heating, water, electricity)
         are included — no billing surprises.
-  - icon: "🔑"
+  - icon: "key-round"
     title:
       de: Einfacher Einzug
       en: Easy Move-In
@@ -74,7 +74,7 @@ highlights:
       en: >-
         Key handover on your arrival day. We can also organize the entire move-in
         remotely with a video viewing and digital contract.
-  - icon: "🤝"
+  - icon: "handshake"
     title:
       de: Persönlicher Kontakt
       en: Personal Support

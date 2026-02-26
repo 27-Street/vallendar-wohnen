@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "@fontsource-variable/inter";
+@import "@fontsource-variable/source-serif-4";
 
 @theme {
   /* Deep teal accent — distinctive from HEER58's blue */
@@ -28,8 +29,9 @@
   --color-neutral-900: #1c1917;
   --color-neutral-950: #0c0a09;
 
-  /* Font family — self-hosted Inter via @fontsource (GDPR compliant) */
+  /* Font families — self-hosted via @fontsource (GDPR compliant) */
   --font-sans: "Inter Variable", "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --font-serif: "Source Serif 4 Variable", "Source Serif 4", Georgia, "Times New Roman", serif;
 }
 
 html {

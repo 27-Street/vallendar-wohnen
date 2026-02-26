@@ -19,9 +19,9 @@ amenities:
   - Kleiderschrank
 available: false
 images:
-  - /images/apartments/zur-linde/living-room.svg
-  - /images/apartments/zur-linde/bedroom.svg
-  - /images/apartments/zur-linde/bathroom.svg
+  - /images/apartments/zur-linde/living.webp
+  - /images/apartments/zur-linde/bedroom.webp
+  - /images/apartments/zur-linde/lounge.webp
 floor: 1. OG
 order: 3
 ---
