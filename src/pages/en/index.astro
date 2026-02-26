@@ -2,6 +2,7 @@
 import { getCollection, getEntry } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import ApartmentCard from '../../components/ApartmentCard.astro';
+import FAQAccordion from '../../components/FAQAccordion.astro';
 import { getTranslation } from '../../i18n/translations';
 
 const lang = 'en' as const;
@@ -32,6 +33,13 @@ const homePage = await getEntry('pages', 'home');
 const hero = homePage.data.hero!;
 const sectionSubheadline = homePage.data.sectionSubheadline!;
 const features = homePage.data.features!;
+
+const faqPage = await getEntry('pages', 'faq');
+const faqItems = faqPage.data.faq ?? [];
+const localizedFaq = faqItems.map((item) => ({
+  question: item.question[lang],
+  answer: item.answer[lang],
+}));
 ---
 
 <BaseLayout title="Furnished Student Apartments in Vallendar | VallendarWohnen" description="Furnished apartments for students in Vallendar, right across from WHU. From €490/month, fully equipped with Wi-Fi and fitted kitchen." lang={lang}>
@@ -105,4 +113,18 @@ const features = homePage.data.features!;
       </div>
     </div>
   </section>
+
+  <!-- FAQ Section -->
+  {localizedFaq.length > 0 && (
+    <section id="faq" class="bg-neutral-50 py-20 sm:py-28">
+      <div class="mx-auto max-w-3xl px-4 sm:px-6">
+        <h2 class="text-center text-3xl font-bold tracking-tight text-neutral-900 sm:text-4xl">
+          {t.sections.faq}
+        </h2>
+        <div class="mt-12">
+          <FAQAccordion items={localizedFaq} />
+        </div>
+      </div>
+    </section>
+  )}
 </BaseLayout>

@@ -5,6 +5,7 @@ export const translations = {
     nav: {
       home: 'Home',
       apartments: 'Wohnungen',
+      faq: 'FAQ',
       contact: 'Kontakt',
     },
     hero: {
@@ -15,6 +16,7 @@ export const translations = {
     sections: {
       apartments: 'Unsere Wohnungen',
       features: 'Ihre Vorteile',
+      faq: 'Häufige Fragen',
       contact: 'Kontakt',
     },
     apartment: {
@@ -107,6 +109,7 @@ export const translations = {
     nav: {
       home: 'Home',
       apartments: 'Apartments',
+      faq: 'FAQ',
       contact: 'Contact',
     },
     hero: {
@@ -117,6 +120,7 @@ export const translations = {
     sections: {
       apartments: 'Our Apartments',
       features: 'Your Benefits',
+      faq: 'Frequently Asked Questions',
       contact: 'Contact',
     },
     apartment: {

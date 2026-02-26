@@ -1,0 +1,37 @@
+---
+import { getEntry } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import FAQAccordion from '../../components/FAQAccordion.astro';
+import { getTranslation } from '../../i18n/translations';
+
+const lang = 'de' as const;
+const t = getTranslation(lang);
+
+const faqPage = await getEntry('pages', 'faq');
+const faqItems = faqPage.data.faq ?? [];
+const localizedFaq = faqItems.map((item) => ({
+  question: item.question[lang],
+  answer: item.answer[lang],
+}));
+---
+
+<BaseLayout title="Häufige Fragen | VallendarWohnen" description="Antworten auf die häufigsten Fragen zu unseren möblierten Studentenwohnungen in Vallendar: Mietbedingungen, Ausstattung, Buchung und mehr." lang={lang}>
+  <!-- Page Header -->
+  <section class="bg-gradient-to-br from-accent-950 via-accent-800 to-accent-950 pb-16 pt-32">
+    <div class="mx-auto max-w-6xl px-4 sm:px-6">
+      <h1 class="text-4xl font-bold tracking-tight text-white sm:text-5xl">
+        {t.sections.faq}
+      </h1>
+      <p class="mt-4 text-lg text-accent-100/80">
+        Alles, was Sie vor einer Anfrage wissen sollten.
+      </p>
+    </div>
+  </section>
+
+  <!-- FAQ Content -->
+  <section class="bg-white py-16 sm:py-20">
+    <div class="mx-auto max-w-3xl px-4 sm:px-6">
+      <FAQAccordion items={localizedFaq} />
+    </div>
+  </section>
+</BaseLayout>

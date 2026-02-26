@@ -33,6 +33,7 @@ const routeMap: Record<string, Record<Language, string>> = {
   contact: { de: 'kontakt', en: 'contact' },
   imprint: { de: 'impressum', en: 'imprint' },
   privacy: { de: 'datenschutz', en: 'privacy' },
+  faq: { de: 'faq', en: 'faq' },
 };
 
 /**

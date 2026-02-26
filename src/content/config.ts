@@ -40,6 +40,10 @@ const pages = defineCollection({
       icon: z.string(),
       label: bilingualString,
     })).optional(),
+    faq: z.array(z.object({
+      question: bilingualString,
+      answer: bilingualString,
+    })).optional(),
   }),
 });
 

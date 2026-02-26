@@ -103,6 +103,28 @@ collections:
                   - { label: Deutsch, name: de, widget: string }
                   - { label: English, name: en, widget: string }
 
+      - label: FAQ
+        name: faq
+        file: src/content/pages/faq.md
+        fields:
+          - { label: Titel, name: title, widget: hidden, default: faq }
+          - label: FAQ-Einträge
+            name: faq
+            widget: list
+            fields:
+              - label: Frage
+                name: question
+                widget: object
+                fields:
+                  - { label: Deutsch, name: de, widget: string }
+                  - { label: English, name: en, widget: string }
+              - label: Antwort
+                name: answer
+                widget: object
+                fields:
+                  - { label: Deutsch, name: de, widget: text }
+                  - { label: English, name: en, widget: text }
+
   - name: settings
     label: Einstellungen
     files:
