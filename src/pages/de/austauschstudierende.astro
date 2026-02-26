@@ -1,0 +1,118 @@
+---
+import { getEntry } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getTranslation } from '../../i18n/translations';
+import { translatePath } from '../../i18n/utils';
+
+const lang = 'de' as const;
+const t = getTranslation(lang);
+
+const page = await getEntry('pages', 'exchange-students');
+const d = page.data;
+---
+
+<BaseLayout title="Für Austauschstudierende | VallendarWohnen" description="Möblierte Apartments für Austauschstudierende an der WHU in Vallendar — komplett eingerichtet, flexible Mietdauer, einfache Buchung auch aus dem Ausland." lang={lang}>
+  <!-- Page Header -->
+  <section class="bg-gradient-to-br from-accent-950 via-accent-800 to-accent-950 pb-16 pt-32">
+    <div class="mx-auto max-w-6xl px-4 sm:px-6">
+      <h1 class="text-4xl font-bold tracking-tight text-white sm:text-5xl">
+        {d.heading![lang]}
+      </h1>
+      <p class="mt-4 text-lg text-accent-100/80">
+        {d.subheading![lang]}
+      </p>
+    </div>
+  </section>
+
+  <!-- Intro Section -->
+  <section class="bg-white py-16 sm:py-20">
+    <div class="mx-auto max-w-3xl px-4 sm:px-6">
+      <p class="text-lg leading-relaxed text-neutral-700">
+        {d.intro![lang]}
+      </p>
+    </div>
+  </section>
+
+  <!-- Highlights Grid -->
+  {d.highlights && d.highlights.length > 0 && (
+    <section class="bg-neutral-50 py-16 sm:py-20">
+      <div class="mx-auto max-w-6xl px-4 sm:px-6">
+        <h2 class="text-center text-3xl font-bold tracking-tight text-neutral-900 sm:text-4xl">
+          {t.sections.features}
+        </h2>
+        <div class="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+          {d.highlights.map((item) => (
+            <div class="rounded-xl bg-white p-6 ring-1 ring-neutral-200 transition-all duration-200 hover:shadow-md hover:ring-accent-200">
+              <span class="flex h-12 w-12 items-center justify-center rounded-lg bg-accent-100 text-2xl">
+                {item.icon}
+              </span>
+              <h3 class="mt-4 text-base font-semibold text-neutral-900">
+                {item.title[lang]}
+              </h3>
+              <p class="mt-2 text-sm leading-relaxed text-neutral-600">
+                {item.description[lang]}
+              </p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+
+  <!-- What's Included & What to Bring -->
+  <section class="bg-white py-16 sm:py-20">
+    <div class="mx-auto max-w-3xl px-4 sm:px-6">
+      <h2 class="text-2xl font-bold tracking-tight text-neutral-900 sm:text-3xl">
+        Was ist enthalten?
+      </h2>
+      <p class="mt-6 text-base leading-relaxed text-neutral-700">
+        {d.whatsIncluded![lang]}
+      </p>
+    </div>
+  </section>
+
+  <!-- About Vallendar -->
+  <section class="bg-neutral-50 py-16 sm:py-20">
+    <div class="mx-auto max-w-3xl px-4 sm:px-6">
+      <h2 class="text-2xl font-bold tracking-tight text-neutral-900 sm:text-3xl">
+        Über Vallendar
+      </h2>
+      <p class="mt-6 text-base leading-relaxed text-neutral-700">
+        {d.aboutVallendar![lang]}
+      </p>
+    </div>
+  </section>
+
+  <!-- Remote Booking -->
+  <section class="bg-white py-16 sm:py-20">
+    <div class="mx-auto max-w-3xl px-4 sm:px-6">
+      <h2 class="text-2xl font-bold tracking-tight text-neutral-900 sm:text-3xl">
+        Buchung aus dem Ausland
+      </h2>
+      <p class="mt-6 text-base leading-relaxed text-neutral-700">
+        {d.remoteBooking![lang]}
+      </p>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="bg-gradient-to-br from-accent-950 via-accent-800 to-accent-950 py-16 sm:py-20">
+    <div class="mx-auto max-w-3xl px-4 text-center sm:px-6">
+      <h2 class="text-3xl font-bold tracking-tight text-white sm:text-4xl">
+        Bereit für Ihr Semester in Vallendar?
+      </h2>
+      <p class="mx-auto mt-4 max-w-xl text-accent-100/80">
+        Senden Sie uns eine unverbindliche Anfrage — wir melden uns innerhalb von 24 Stunden.
+      </p>
+      <a
+        href={translatePath('/kontakt', lang)}
+        class="mt-8 inline-flex items-center gap-2 rounded-lg bg-white px-8 py-3.5 text-sm font-semibold text-accent-900 shadow-lg transition-all hover:bg-accent-50 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-accent-900"
+      >
+        {d.ctaText![lang]}
+        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
+        </svg>
+      </a>
+    </div>
+  </section>
+</BaseLayout>

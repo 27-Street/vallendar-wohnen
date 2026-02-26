@@ -103,6 +103,71 @@ collections:
                   - { label: Deutsch, name: de, widget: string }
                   - { label: English, name: en, widget: string }
 
+      - label: Austauschstudierende
+        name: exchange-students
+        file: src/content/pages/exchange-students.md
+        fields:
+          - { label: Titel, name: title, widget: hidden, default: exchange-students }
+          - label: Überschrift
+            name: heading
+            widget: object
+            fields:
+              - { label: Deutsch, name: de, widget: string }
+              - { label: English, name: en, widget: string }
+          - label: Unterüberschrift
+            name: subheading
+            widget: object
+            fields:
+              - { label: Deutsch, name: de, widget: string }
+              - { label: English, name: en, widget: string }
+          - label: Einleitung
+            name: intro
+            widget: object
+            fields:
+              - { label: Deutsch, name: de, widget: text }
+              - { label: English, name: en, widget: text }
+          - label: Highlights
+            name: highlights
+            widget: list
+            fields:
+              - { label: Icon (Emoji), name: icon, widget: string }
+              - label: Titel
+                name: title
+                widget: object
+                fields:
+                  - { label: Deutsch, name: de, widget: string }
+                  - { label: English, name: en, widget: string }
+              - label: Beschreibung
+                name: description
+                widget: object
+                fields:
+                  - { label: Deutsch, name: de, widget: text }
+                  - { label: English, name: en, widget: text }
+          - label: Was ist enthalten
+            name: whatsIncluded
+            widget: object
+            fields:
+              - { label: Deutsch, name: de, widget: text }
+              - { label: English, name: en, widget: text }
+          - label: Über Vallendar
+            name: aboutVallendar
+            widget: object
+            fields:
+              - { label: Deutsch, name: de, widget: text }
+              - { label: English, name: en, widget: text }
+          - label: Buchung aus dem Ausland
+            name: remoteBooking
+            widget: object
+            fields:
+              - { label: Deutsch, name: de, widget: text }
+              - { label: English, name: en, widget: text }
+          - label: CTA-Text
+            name: ctaText
+            widget: object
+            fields:
+              - { label: Deutsch, name: de, widget: string }
+              - { label: English, name: en, widget: string }
+
       - label: FAQ
         name: faq
         file: src/content/pages/faq.md

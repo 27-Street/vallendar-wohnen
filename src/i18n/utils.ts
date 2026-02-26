@@ -34,6 +34,7 @@ const routeMap: Record<string, Record<Language, string>> = {
   imprint: { de: 'impressum', en: 'imprint' },
   privacy: { de: 'datenschutz', en: 'privacy' },
   faq: { de: 'faq', en: 'faq' },
+  exchangeStudents: { de: 'austauschstudierende', en: 'exchange-students' },
 };
 
 /**

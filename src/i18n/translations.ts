@@ -5,6 +5,7 @@ export const translations = {
     nav: {
       home: 'Home',
       apartments: 'Wohnungen',
+      exchangeStudents: 'Austauschstudierende',
       faq: 'FAQ',
       contact: 'Kontakt',
     },
@@ -109,6 +110,7 @@ export const translations = {
     nav: {
       home: 'Home',
       apartments: 'Apartments',
+      exchangeStudents: 'Exchange Students',
       faq: 'FAQ',
       contact: 'Contact',
     },

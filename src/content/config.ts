@@ -44,6 +44,19 @@ const pages = defineCollection({
       question: bilingualString,
       answer: bilingualString,
     })).optional(),
+    // Exchange students page fields
+    heading: bilingualString.optional(),
+    subheading: bilingualString.optional(),
+    intro: bilingualString.optional(),
+    highlights: z.array(z.object({
+      icon: z.string(),
+      title: bilingualString,
+      description: bilingualString,
+    })).optional(),
+    whatsIncluded: bilingualString.optional(),
+    aboutVallendar: bilingualString.optional(),
+    remoteBooking: bilingualString.optional(),
+    ctaText: bilingualString.optional(),
   }),
 });
 
