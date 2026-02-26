@@ -57,3 +57,43 @@ textarea:focus-visible {
   background-color: var(--color-accent-200);
   color: var(--color-accent-950);
 }
+
+/* ── Scroll-triggered animations ── */
+
+/* Initial hidden states for each animation variant */
+[data-animate="fade-up"] {
+  opacity: 0;
+  transform: translateY(24px);
+}
+
+[data-animate="fade-in"] {
+  opacity: 0;
+}
+
+[data-animate="slide-left"] {
+  opacity: 0;
+  transform: translateX(-24px);
+}
+
+[data-animate="slide-right"] {
+  opacity: 0;
+  transform: translateX(24px);
+}
+
+/* Visible state — applied by IntersectionObserver */
+[data-animate].animate-visible {
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity 400ms ease-out,
+    transform 400ms ease-out;
+}
+
+/* Disable animations when user prefers reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  [data-animate] {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+}

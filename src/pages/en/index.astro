@@ -79,16 +79,18 @@ const localizedFaq = faqItems.map((item) => ({
   <!-- Apartment Cards Section -->
   <section id="apartments" class="bg-neutral-50 py-20 sm:py-28">
     <div class="mx-auto max-w-6xl px-4 sm:px-6">
-      <h2 class="text-center text-3xl font-bold tracking-tight text-neutral-900 sm:text-4xl">
+      <h2 data-animate="fade-in" class="text-center text-3xl font-bold tracking-tight text-neutral-900 sm:text-4xl">
         {t.sections.apartments}
       </h2>
-      <p class="mx-auto mt-4 max-w-2xl text-center text-neutral-500">
+      <p data-animate="fade-in" class="mx-auto mt-4 max-w-2xl text-center text-neutral-500">
         {sectionSubheadline[lang]}
       </p>
 
-      <div class="mt-14 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+      <div data-animate-stagger class="mt-14 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
         {sortedApartments.map((apt) => (
-          <ApartmentCard apartment={apt} lang={lang} />
+          <div data-animate="fade-up">
+            <ApartmentCard apartment={apt} lang={lang} />
+          </div>
         ))}
       </div>
     </div>
@@ -97,13 +99,13 @@ const localizedFaq = faqItems.map((item) => ({
   <!-- Features / Highlights Section -->
   <section class="bg-white py-20 sm:py-28">
     <div class="mx-auto max-w-6xl px-4 sm:px-6">
-      <h2 class="text-center text-3xl font-bold tracking-tight text-neutral-900 sm:text-4xl">
+      <h2 data-animate="fade-in" class="text-center text-3xl font-bold tracking-tight text-neutral-900 sm:text-4xl">
         {t.sections.features}
       </h2>
 
-      <div class="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      <div data-animate-stagger class="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {features.map((feature) => (
-          <div class="flex items-center gap-4 rounded-xl bg-neutral-50 p-5 ring-1 ring-neutral-100 transition-all duration-200 hover:shadow-md hover:ring-accent-200">
+          <div data-animate="fade-in" class="flex items-center gap-4 rounded-xl bg-neutral-50 p-5 ring-1 ring-neutral-100 transition-all duration-200 hover:shadow-md hover:ring-accent-200">
             <span class="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-accent-100 text-2xl">
               {feature.icon}
             </span>
@@ -118,10 +120,10 @@ const localizedFaq = faqItems.map((item) => ({
   {localizedFaq.length > 0 && (
     <section id="faq" class="bg-neutral-50 py-20 sm:py-28">
       <div class="mx-auto max-w-3xl px-4 sm:px-6">
-        <h2 class="text-center text-3xl font-bold tracking-tight text-neutral-900 sm:text-4xl">
+        <h2 data-animate="fade-in" class="text-center text-3xl font-bold tracking-tight text-neutral-900 sm:text-4xl">
           {t.sections.faq}
         </h2>
-        <div class="mt-12">
+        <div data-animate="fade-up" class="mt-12">
           <FAQAccordion items={localizedFaq} />
         </div>
       </div>
