@@ -8,6 +8,8 @@ import sitemap from '@astrojs/sitemap';
 // Update 'site' to the production domain once available
 export default defineConfig({
   site: 'https://example.com',
+  output: 'static',
+  compressHTML: true,
   integrations: [icon(), sitemap({
     i18n: {
       defaultLocale: 'de',

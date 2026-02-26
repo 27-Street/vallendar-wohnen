@@ -37,6 +37,13 @@ const canonicalUrl = currentPath;
     <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
   </head>
   <body class="flex min-h-screen flex-col">
+    <noscript>
+      <div class="bg-accent-100 px-4 py-3 text-center text-sm text-accent-900">
+        {lang === 'de'
+          ? 'Einige Funktionen (Bildergalerie, Kontaktformular) benötigen JavaScript.'
+          : 'Some features (image gallery, contact form) require JavaScript.'}
+      </div>
+    </noscript>
     <Header lang={lang} currentPath={currentPath} />
     <main class="flex-1">
       <slot />
