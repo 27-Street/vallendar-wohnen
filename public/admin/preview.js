@@ -3,7 +3,6 @@
   if (!cms) return;
 
   const h = window.h || (window.React && window.React.createElement);
-  const ReactApi = window.React;
   if (!h) {
     console.error('[cms-preview] Missing element factory (window.h).');
     return;
@@ -207,74 +206,38 @@
       .filter((entry) => entry.image);
   };
 
-  const asArray = (value) => {
-    if (!value) return [];
-    if (Array.isArray(value)) return value;
-    if (typeof value.toArray === 'function') return value.toArray();
-    return [];
-  };
-
-  const toApartmentCardData = (entry, lang) => {
-    const data = toJS(entry && entry.get && entry.get('data'), {});
-    if (!data || typeof data !== 'object') return null;
-
-    const images = normalizeImages(data.images || []);
-    const primaryImage = images.find((item) => item.isPrimary) || images[0];
-
-    return {
-      name: data.name || 'Wohnung',
-      tagline: localized(data.tagline, lang),
-      size: asNumber(data.size),
-      rooms: localized(data.rooms, lang),
-      pricePerMonth: asNumber(data.pricePerMonth),
-      image: primaryImage?.image || '',
-      available: Boolean(data.available),
-      availableFrom: data.availableFrom || '',
-      order: asNumber(data.order) || Number.MAX_SAFE_INTEGER,
-    };
-  };
-
-  const useHomeApartments = (getCollection, lang) => {
-    if (
-      !ReactApi
-      || typeof ReactApi.useState !== 'function'
-      || typeof ReactApi.useEffect !== 'function'
-    ) {
-      return [];
-    }
-
-    const [apartments, setApartments] = ReactApi.useState([]);
-    ReactApi.useEffect(() => {
-      let cancelled = false;
-      if (typeof getCollection !== 'function') {
-        setApartments([]);
-        return undefined;
-      }
-
-      Promise.resolve(getCollection('apartments'))
-        .then((entries) => {
-          if (cancelled) return;
-          const normalized = asArray(entries)
-            .map((entry) => toApartmentCardData(entry, lang))
-            .filter(Boolean)
-            .sort((a, b) => a.order - b.order);
-          setApartments((previous) => {
-            const before = JSON.stringify(previous);
-            const after = JSON.stringify(normalized);
-            return before === after ? previous : normalized;
-          });
-        })
-        .catch(() => {
-          if (!cancelled) setApartments([]);
-        });
-
-      return () => {
-        cancelled = true;
-      };
-    }, [lang]);
-
-    return apartments;
-  };
+  const HOME_PREVIEW_FALLBACK_APARTMENTS = [
+    {
+      name: 'Rheinblick',
+      tagline: 'Wohnen mit Weitblick',
+      size: 42,
+      rooms: '2 Zimmer',
+      pricePerMonth: 620,
+      image: '/images/apartments/rheinblick/living.webp',
+      available: true,
+      availableFrom: '2026-04-01',
+    },
+    {
+      name: 'Alte Muehle',
+      tagline: 'Gemuetlichkeit trifft Stil',
+      size: 38,
+      rooms: '1.5 Zimmer',
+      pricePerMonth: 580,
+      image: '/images/apartments/alte-muehle/living.webp',
+      available: true,
+      availableFrom: '2026-04-01',
+    },
+    {
+      name: 'Zur Linde',
+      tagline: 'Kompakt und mittendrin',
+      size: 35,
+      rooms: '1 Zimmer',
+      pricePerMonth: 490,
+      image: '/images/apartments/zur-linde/living.webp',
+      available: false,
+      availableFrom: '',
+    },
+  ];
 
   const formatDate = (value) => {
     if (!value) return '';
@@ -534,7 +497,7 @@
     ),
   );
 
-  const HomePreview = ({ entry, getAsset, getCollection }) => {
+  const HomePreview = ({ entry, getAsset }) => {
     const data = toJS(entry && entry.get && entry.get('data'), {});
     const lang = 'de';
 
@@ -545,7 +508,7 @@
     const sectionSubheadline = localized(data.sectionSubheadline, lang);
     const features = Array.isArray(data.features) ? data.features : [];
     const editorialBlocks = Array.isArray(data.editorialBlocks) ? data.editorialBlocks : [];
-    const apartments = useHomeApartments(getCollection, lang);
+    const apartments = HOME_PREVIEW_FALLBACK_APARTMENTS;
 
     return previewShell([
       h(
@@ -584,13 +547,7 @@
           h(
             'div',
             { className: 'mt-14 grid gap-8 sm:grid-cols-2 lg:grid-cols-3' },
-            apartments.length > 0
-              ? apartments.map((apartment, index) => apartmentCard(apartment, getAsset, index))
-              : h(
-                'div',
-                { className: 'rounded-2xl border border-dashed border-neutral-300 bg-white p-6 text-sm text-neutral-500 sm:col-span-2 lg:col-span-3' },
-                'Keine Wohnungen gefunden. Bitte pruefen Sie die Apartments-Collection.',
-              ),
+            apartments.map((apartment, index) => apartmentCard(apartment, getAsset, index)),
           ),
         ),
       ),
