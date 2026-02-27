@@ -62,4 +62,11 @@ seo:
     de: Möblierte 2-Zimmer-Wohnung mit Rheinblick, Balkon und Einbauküche. Direkt bei der WHU.
     en: Furnished 2-room apartment with Rhine views, balcony, and fitted kitchen. Right by WHU.
   ogImage: /images/apartments/rheinblick/og.png
+  ogImageAlt:
+    de: Rheinblick Studentenwohnung mit Balkon in Vallendar
+    en: Rheinblick student apartment with balcony in Vallendar
+  keywords:
+    - rheinblick vallendar
+    - 2 room apartment whu
+    - furnished student apartment vallendar
 ---

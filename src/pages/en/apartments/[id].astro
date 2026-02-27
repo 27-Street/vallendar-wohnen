@@ -8,7 +8,7 @@ import ImageGallery from '../../../components/ImageGallery.astro';
 import InquiryForm from '../../../components/InquiryForm.astro';
 import RichText from '../../../components/RichText.astro';
 import { getTranslation } from '../../../i18n/translations';
-import { translatePath } from '../../../i18n/utils';
+import { getSiteOrigin } from '../../../lib/seo';
 
 export const getStaticPaths: GetStaticPaths = async () => {
   const apartments = await getCollection('apartments');
@@ -30,21 +30,23 @@ const seoDescription = apt.seo?.description?.[lang]?.trim()
   || `${apt.name} in Vallendar: ${plainDescription} ${apt.size} m², from €${apt.pricePerMonth}/month.`;
 const primaryImage = apt.images.find((image) => image.isPrimary) ?? apt.images[0];
 const seoImage = apt.seo?.ogImage?.trim() || primaryImage?.image || `/og-default.png`;
+const seoImageAlt = apt.seo?.ogImageAlt?.[lang] || `${apt.name} in Vallendar`;
+const parsedRoomCount = Number.parseFloat(apt.rooms[lang].replace(',', '.').match(/\d+(\.\d+)?/)?.[0] ?? '0');
 
-const siteUrl = Astro.site?.origin ?? 'https://lucky-cucurucho-b639b6.netlify.app';
+const siteOrigin = getSiteOrigin(Astro.site);
 const apartmentJsonLd = {
   "@context": "https://schema.org",
   "@type": "Apartment",
   "name": apt.name,
   "description": plainDescription,
-  "url": `${siteUrl}/en/apartments/${apartment.id}`,
+  "url": `${siteOrigin}/en/apartments/${apartment.id}/`,
   "floorSize": {
     "@type": "QuantitativeValue",
     "value": apt.size,
     "unitCode": "MTK",
     "unitText": "m²"
   },
-  "numberOfRooms": apt.rooms[lang],
+  "numberOfRooms": parsedRoomCount || undefined,
   "floorLevel": apt.floor[lang],
   "amenityFeature": apt.amenities.map((a) => ({
     "@type": "LocationFeatureSpecification",
@@ -61,8 +63,16 @@ const apartmentJsonLd = {
   "offers": {
     "@type": "Offer",
     "priceCurrency": "EUR",
-    "price": apt.pricePerMonth,
+    "price": Number(apt.pricePerMonth.toFixed(2)),
     "unitCode": "MON",
+    "availability": apt.available ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+    "url": `${siteOrigin}/en/apartments/${apartment.id}/`,
+    "priceSpecification": {
+      "@type": "UnitPriceSpecification",
+      "price": Number(apt.pricePerMonth.toFixed(2)),
+      "priceCurrency": "EUR",
+      "unitCode": "MON"
+    },
     "description": `Rent €${apt.pricePerMonth} + Utilities €${apt.utilitiesPerMonth} = €${total}/month`
   }
 };
@@ -73,9 +83,9 @@ const apartmentJsonLd = {
   description={seoDescription}
   lang={lang}
   ogImage={seoImage}
+  ogImageAlt={seoImageAlt}
+  structuredData={[apartmentJsonLd]}
 >
-  <script type="application/ld+json" set:html={JSON.stringify(apartmentJsonLd)} />
-
   <!-- Hero Area -->
   <section class="bg-gradient-to-br from-accent-950 via-accent-800 to-accent-950 pb-16 pt-32">
     <div class="mx-auto max-w-6xl px-4 sm:px-6">
@@ -179,6 +189,18 @@ const apartmentJsonLd = {
             <span class="min-w-0 break-words text-sm font-medium text-neutral-800">{amenity[lang]}</span>
           </div>
         ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="bg-white py-8">
+    <div class="mx-auto max-w-6xl px-4 sm:px-6">
+      <div class="rounded-2xl border border-neutral-200 bg-neutral-50 p-6">
+        <h2 class="font-serif text-xl font-bold text-neutral-900">New to Vallendar?</h2>
+        <p class="mt-2 text-sm text-neutral-600">Our exchange guides cover arrival, budgeting, and semester setup.</p>
+        <a href="/en/guides/" class="mt-4 inline-flex text-sm font-semibold text-accent-700 hover:text-accent-900">
+          View guides →
+        </a>
       </div>
     </div>
   </section>

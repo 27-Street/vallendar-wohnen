@@ -61,4 +61,16 @@ faq:
     answer:
       de: Die Schlüsselübergabe erfolgt persönlich am vereinbarten Einzugstag. Wir zeigen Ihnen die Wohnung, erklären alles Wichtige und stehen bei Fragen zur Verfügung.
       en: Key handover takes place in person on the agreed move-in day. We'll show you around the apartment, explain everything important, and be available for any questions.
+  - question:
+      de: Kann ich die Wohnung aus dem Ausland buchen?
+      en: Can I secure an apartment while I'm still abroad?
+    answer:
+      de: Ja. Wir bieten digitale Besichtigungen und eine vollständige Abwicklung vor Ihrer Anreise an. Senden Sie uns dafür Ihren geplanten Einzugstermin und Ihre Aufenthaltsdauer.
+      en: Yes. We offer remote viewings and a full booking process before your arrival. Send us your intended move-in date and planned duration.
+  - question:
+      de: Gibt es Tipps für Austauschstudierende vor Semesterstart?
+      en: Do you provide planning tips before the semester starts?
+    answer:
+      de: Ja, im Bereich "Guides" finden Sie strukturierte Leitfäden zu Anreise, Anmeldung, Budget und Wohnungssuche in Vallendar.
+      en: Yes, our "Guides" section contains practical playbooks on arrival planning, registration steps, budgeting, and housing search in Vallendar.
 ---

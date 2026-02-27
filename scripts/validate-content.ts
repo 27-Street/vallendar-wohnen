@@ -8,6 +8,7 @@ const ROOT = resolve(import.meta.dirname, '..');
 const APARTMENTS_DIR = join(ROOT, 'src/content/apartments');
 const PAGES_DIR = join(ROOT, 'src/content/pages');
 const SETTINGS_DIR = join(ROOT, 'src/content/settings');
+const GUIDES_DIR = join(ROOT, 'src/content/guides');
 const DECAP_CONFIG_PATH = join(ROOT, 'public/admin/config.yml');
 
 const nonEmptyString = z.string().refine((value) => value.trim().length > 0, 'Must not be empty');
@@ -21,6 +22,10 @@ const seoSchema = z.object({
   title: bilingualString,
   description: bilingualString,
   ogImage: nonEmptyString.optional(),
+  ogImageAlt: bilingualString.optional(),
+  noindex: z.boolean().optional(),
+  canonicalPath: nonEmptyString.optional(),
+  keywords: z.array(nonEmptyString).optional(),
 }).strict();
 
 const optionalBilingualCaption = z.object({
@@ -126,6 +131,26 @@ const exchangeStudentsPageSchema = z.object({
   ctaText: bilingualString,
 }).strict();
 
+const guideSchema = z.object({
+  title: bilingualString,
+  description: bilingualString,
+  excerpt: bilingualString,
+  publishedAt: nonEmptyString,
+  readingMinutes: z.number().int().positive(),
+  category: z.enum(['exchange', 'living', 'logistics']),
+  order: z.number().int().positive(),
+  heroImage: nonEmptyString.optional(),
+  sections: z.array(z.object({
+    heading: bilingualString,
+    body: bilingualString,
+  }).strict()).min(1),
+  faq: z.array(z.object({
+    question: bilingualString,
+    answer: bilingualString,
+  }).strict()).optional(),
+  seo: seoSchema.optional(),
+}).strict();
+
 const settingsSchema = z.object({
   propertyName: nonEmptyString,
   propertyNameAccent: nonEmptyString,
@@ -181,6 +206,32 @@ function assertPathExists(result: ValidationResult, field: string, path: string)
   const diskPath = resolvePublicPath(path);
   if (!existsSync(diskPath)) {
     result.errors.push(`  [${field}] Missing file on disk: ${path} (expected at ${diskPath})`);
+  }
+}
+
+function assertSeoCompleteness(
+  result: ValidationResult,
+  fieldPrefix: string,
+  seo: z.infer<typeof seoSchema> | undefined,
+): void {
+  if (!seo) {
+    result.errors.push(`  [${fieldPrefix}] SEO object is required for this content type.`);
+    return;
+  }
+
+  const titleDe = seo.title.de.trim();
+  const titleEn = seo.title.en.trim();
+  const descriptionDe = seo.description.de.trim();
+  const descriptionEn = seo.description.en.trim();
+
+  if (!titleDe || !titleEn) {
+    result.errors.push(`  [${fieldPrefix}.title] SEO title must be filled in DE and EN.`);
+  }
+  if (!descriptionDe || !descriptionEn) {
+    result.errors.push(`  [${fieldPrefix}.description] SEO description must be filled in DE and EN.`);
+  }
+  if (!seo.keywords || seo.keywords.length === 0) {
+    result.warnings.push(`  [${fieldPrefix}.keywords] Add keyword targets to support SEO planning.`);
   }
 }
 
@@ -318,6 +369,8 @@ for (const file of getMdFiles(APARTMENTS_DIR)) {
     result.errors.push('  [images] Multiple primary images selected; only one is allowed.');
   }
 
+  assertSeoCompleteness(result, 'seo', parsed.data.seo);
+
   if (parsed.data.seo?.ogImage) {
     assertPathExists(result, 'seo.ogImage', parsed.data.seo.ogImage);
   }
@@ -338,6 +391,8 @@ for (const file of getMdFiles(PAGES_DIR)) {
       assertPathExists(result, 'hero.images.desktop', parsed.data.hero.images.desktop);
       assertPathExists(result, 'hero.images.tablet', parsed.data.hero.images.tablet);
       assertPathExists(result, 'hero.images.mobile', parsed.data.hero.images.mobile);
+
+      assertSeoCompleteness(result, 'seo', parsed.data.seo);
 
       if (parsed.data.seo?.ogImage) {
         assertPathExists(result, 'seo.ogImage', parsed.data.seo.ogImage);
@@ -362,6 +417,30 @@ for (const file of getMdFiles(PAGES_DIR)) {
     if (!parsed.success) addZodErrors(result, parsed.error.issues);
   } else {
     result.errors.push('  [file] Unsupported page file for strict validation.');
+  }
+
+  collectResult(result);
+}
+
+for (const file of getMdFiles(GUIDES_DIR)) {
+  const result = createResult(file);
+  const data = extractFrontmatter(file);
+  const parsed = guideSchema.safeParse(data);
+
+  if (!parsed.success) {
+    addZodErrors(result, parsed.error.issues);
+    collectResult(result);
+    continue;
+  }
+
+  if (parsed.data.heroImage) {
+    assertPathExists(result, 'heroImage', parsed.data.heroImage);
+  }
+
+  assertSeoCompleteness(result, 'seo', parsed.data.seo);
+
+  if (parsed.data.seo?.ogImage) {
+    assertPathExists(result, 'seo.ogImage', parsed.data.seo.ogImage);
   }
 
   collectResult(result);

@@ -90,9 +90,10 @@ Change the `site` property from the placeholder to the real domain:
 site: 'https://www.your-domain.de',
 ```
 
-### `public/robots.txt`
+### `src/pages/robots.txt.ts`
 
-Update the Sitemap URL:
+`robots.txt` is generated dynamically from `Astro.site`. Update only `astro.config.mjs` and redeploy.
+Then verify that `/robots.txt` contains:
 
 ```
 Sitemap: https://www.your-domain.de/sitemap-index.xml
@@ -109,7 +110,11 @@ display_url: https://www.your-domain.de
 
 ### SEO / Open Graph
 
-The `SEOHead.astro` component derives canonical URLs and OG URLs from `Astro.site`, so updating `astro.config.mjs` is sufficient for most SEO tags. Verify by checking the deployed HTML source for correct `og:url` and `canonical` values.
+`SEOHead.astro`, `robots.txt`, and sitemap routes derive absolute URLs from `Astro.site`, so updating `astro.config.mjs` is the primary production-domain switch. Verify by checking:
+- `/robots.txt`
+- `/sitemap-index.xml`
+- `/sitemap.xml`
+- HTML source for `canonical` and `og:url`
 
 After making these changes, commit and push. Netlify will automatically rebuild and deploy.
 
@@ -134,6 +139,8 @@ The site includes a lightweight, cookie-free analytics solution. No cookies are 
 ### Current Setup: Self-Hosted Pageview Logger (Free)
 
 A Netlify Function at `/.netlify/functions/pageview` receives pageview beacons from the client-side script. Each pageview is logged with the page path, referrer, and language — no IP addresses, no cookies, no fingerprinting.
+
+Inquiry forms also emit a conversion event (`type: "inquiry_submit"`) including non-PII attribution fields such as landing path, traffic channel, and UTM values. This supports weekly qualified-organic inquiry reporting.
 
 **Viewing analytics data:**
 1. Go to the Netlify dashboard > **Functions** > **pageview** > **Logs**.

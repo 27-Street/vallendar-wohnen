@@ -1,9 +1,0 @@
-# robots.txt for VallendarWohnen
-# Update Sitemap URL once the production domain is set
-
-User-agent: *
-Allow: /
-
-Disallow: /admin/
-
-Sitemap: https://lucky-cucurucho-b639b6.netlify.app/sitemap-index.xml

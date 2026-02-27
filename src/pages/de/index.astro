@@ -6,28 +6,13 @@ import ApartmentCard from '../../components/ApartmentCard.astro';
 import FAQAccordion from '../../components/FAQAccordion.astro';
 import RichText from '../../components/RichText.astro';
 import { getTranslation } from '../../i18n/translations';
+import { buildLocalBusinessSchema, buildOrganizationSchema, buildWebsiteSchema, getSiteOrigin } from '../../lib/seo';
 import { translatePath } from '../../i18n/utils';
 
 const lang = 'de' as const;
 const t = getTranslation(lang);
 
-const siteUrl = Astro.site?.origin ?? 'https://lucky-cucurucho-b639b6.netlify.app';
-const organizationJsonLd = {
-  "@context": "https://schema.org",
-  "@type": "Organization",
-  "name": "VallendarWohnen",
-  "url": `${siteUrl}/de/`,
-  "email": "info@vallendar-wohnen.de",
-  "telephone": "+4926194000000",
-  "address": {
-    "@type": "PostalAddress",
-    "streetAddress": "Musterstraße 1",
-    "addressLocality": "Vallendar",
-    "postalCode": "56179",
-    "addressCountry": "DE"
-  },
-  "description": "Möblierte Studentenwohnungen in Vallendar, direkt gegenüber der WHU."
-};
+const siteOrigin = getSiteOrigin(Astro.site);
 
 const allApartments = await getCollection('apartments');
 const sortedApartments = allApartments.sort((a, b) => a.data.order - b.data.order);
@@ -45,6 +30,11 @@ const localizedFaq = faqItems.map((item) => ({
   question: item.question[lang],
   answer: item.answer[lang],
 }));
+const structuredData = [
+  buildOrganizationSchema(siteOrigin, lang),
+  buildLocalBusinessSchema(siteOrigin, lang),
+  buildWebsiteSchema(siteOrigin, lang),
+];
 
 const apartmentsAnchorId = 'wohnungen';
 const availableApartmentCount = sortedApartments.filter((apt) => apt.data.available).length;
@@ -89,9 +79,15 @@ const conceptCards = [
   title={(seo?.title?.[lang]?.trim() || "Möblierte Studentenwohnungen in Vallendar | VallendarWohnen")}
   description={(seo?.description?.[lang]?.trim() || "Möblierte Apartments für Studierende in Vallendar, direkt gegenüber der WHU. Ab 490 €/Monat, voll ausgestattet mit WLAN und Einbauküche.")}
   ogImage={(seo?.ogImage?.trim() || undefined)}
+  ogImageAlt={(seo?.ogImageAlt?.[lang] || "Möblierte Studentenwohnungen in Vallendar")}
+  structuredData={structuredData}
   lang={lang}
 >
-  <script type="application/ld+json" set:html={JSON.stringify(organizationJsonLd)} />
+  <Fragment slot="head">
+    <link rel="preload" as="image" href={hero.images.mobile} media="(max-width: 640px)" />
+    <link rel="preload" as="image" href={hero.images.tablet} media="(max-width: 1024px)" />
+    <link rel="preload" as="image" href={hero.images.desktop} media="(min-width: 1025px)" fetchpriority="high" />
+  </Fragment>
 
   <!-- Hero Section -->
   <section class="bg-neutral-100 pb-16 pt-28 sm:pb-20 sm:pt-32">
@@ -138,6 +134,11 @@ const conceptCards = [
           <img
             src={hero.images.desktop}
             alt="Innenansicht einer möblierten Studentenwohnung in Vallendar"
+            width="2400"
+            height="1350"
+            loading="eager"
+            decoding="async"
+            fetchpriority="high"
             class="h-full w-full object-cover"
           />
         </picture>

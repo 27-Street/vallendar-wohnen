@@ -149,6 +149,16 @@ collections:
               - { label: Deutsch, name: de, widget: text, required: false }
               - { label: English, name: en, widget: text, required: false }
           - { label: OpenGraph Bild (optional), name: ogImage, widget: image, required: false }
+          - label: OpenGraph Alt-Text (optional)
+            name: ogImageAlt
+            widget: object
+            required: false
+            fields:
+              - { label: Deutsch, name: de, widget: string, required: false }
+              - { label: English, name: en, widget: string, required: false }
+          - { label: Canonical Pfad (optional), name: canonicalPath, widget: string, required: false, hint: "z. B. /de/wohnungen/rheinblick/" }
+          - { label: Noindex (optional), name: noindex, widget: boolean, required: false, default: false }
+          - { label: Keywords (optional), name: keywords, widget: list, required: false, hint: "Ziel-Keywords für SEO-Planung." }
 
   - name: pages
     label: Seiten
@@ -317,6 +327,16 @@ collections:
                   - { label: Deutsch, name: de, widget: text, required: false }
                   - { label: English, name: en, widget: text, required: false }
               - { label: OpenGraph Bild (optional), name: ogImage, widget: image, required: false }
+              - label: OpenGraph Alt-Text (optional)
+                name: ogImageAlt
+                widget: object
+                required: false
+                fields:
+                  - { label: Deutsch, name: de, widget: string, required: false }
+                  - { label: English, name: en, widget: string, required: false }
+              - { label: Canonical Pfad (optional), name: canonicalPath, widget: string, required: false, hint: "z. B. /de/" }
+              - { label: Noindex (optional), name: noindex, widget: boolean, required: false, default: false }
+              - { label: Keywords (optional), name: keywords, widget: list, required: false, hint: "Ziel-Keywords für SEO-Planung." }
 
       - label: Austauschstudierende
         name: exchange-students
@@ -423,3 +443,104 @@ collections:
           - { label: E-Mail, name: email, widget: string }
           - { label: Telefon, name: phone, widget: string }
           - { label: Telefon (Anzeige), name: phoneDisplay, widget: string }
+
+  - name: guides
+    label: Guides
+    label_singular: Guide
+    folder: src/content/guides
+    create: true
+    slug: "{{slug}}"
+    extension: md
+    format: frontmatter
+    summary: "{{fields.title.de}}"
+    fields:
+      - label: Titel
+        name: title
+        widget: object
+        fields:
+          - { label: Deutsch, name: de, widget: string, required: true }
+          - { label: English, name: en, widget: string, required: true }
+      - label: Beschreibung
+        name: description
+        widget: object
+        fields:
+          - { label: Deutsch, name: de, widget: text, required: true }
+          - { label: English, name: en, widget: text, required: true }
+      - label: Kurztext
+        name: excerpt
+        widget: object
+        fields:
+          - { label: Deutsch, name: de, widget: text, required: true }
+          - { label: English, name: en, widget: text, required: true }
+      - { label: Veröffentlichungsdatum, name: publishedAt, widget: string, required: true, hint: "YYYY-MM-DD" }
+      - { label: Lesezeit (Minuten), name: readingMinutes, widget: number, value_type: int, min: 1 }
+      - label: Kategorie
+        name: category
+        widget: select
+        options:
+          - { label: Exchange, value: exchange }
+          - { label: Living, value: living }
+          - { label: Logistics, value: logistics }
+      - { label: Reihenfolge, name: order, widget: number, value_type: int, min: 1 }
+      - { label: Hero-Bild (optional), name: heroImage, widget: image, required: false }
+      - label: Abschnitte
+        name: sections
+        widget: list
+        min: 1
+        fields:
+          - label: Überschrift
+            name: heading
+            widget: object
+            fields:
+              - { label: Deutsch, name: de, widget: string, required: true }
+              - { label: English, name: en, widget: string, required: true }
+          - label: Inhalt
+            name: body
+            widget: object
+            fields:
+              - { label: Deutsch, name: de, widget: markdown, modes: [rich_text, raw], required: true }
+              - { label: English, name: en, widget: markdown, modes: [rich_text, raw], required: true }
+      - label: FAQ (optional)
+        name: faq
+        widget: list
+        required: false
+        fields:
+          - label: Frage
+            name: question
+            widget: object
+            fields:
+              - { label: Deutsch, name: de, widget: string, required: true }
+              - { label: English, name: en, widget: string, required: true }
+          - label: Antwort
+            name: answer
+            widget: object
+            fields:
+              - { label: Deutsch, name: de, widget: text, required: true }
+              - { label: English, name: en, widget: text, required: true }
+      - label: SEO
+        name: seo
+        widget: object
+        required: true
+        collapsed: true
+        fields:
+          - label: SEO-Titel
+            name: title
+            widget: object
+            fields:
+              - { label: Deutsch, name: de, widget: string, required: true }
+              - { label: English, name: en, widget: string, required: true }
+          - label: SEO-Beschreibung
+            name: description
+            widget: object
+            fields:
+              - { label: Deutsch, name: de, widget: text, required: true }
+              - { label: English, name: en, widget: text, required: true }
+          - label: OpenGraph Alt-Text (optional)
+            name: ogImageAlt
+            widget: object
+            required: false
+            fields:
+              - { label: Deutsch, name: de, widget: string, required: false }
+              - { label: English, name: en, widget: string, required: false }
+          - { label: OpenGraph Bild (optional), name: ogImage, widget: image, required: false }
+          - { label: Keywords, name: keywords, widget: list, required: true }

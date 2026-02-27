@@ -8,6 +8,8 @@
     "preview": "astro preview",
     "astro": "astro",
     "validate": "npx tsx scripts/validate-content.ts",
+    "seo:audit": "npx tsx scripts/seo-audit.ts",
+    "links:audit": "npx tsx scripts/internal-link-audit.ts",
     "migrate:cms-v2": "npx tsx scripts/migrate-cms-v2.ts"
   },
   "dependencies": {

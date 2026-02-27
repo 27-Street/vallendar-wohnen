@@ -61,4 +61,11 @@ seo:
     de: Kompakte möblierte Wohnung in zentraler Lage, ideal für ein fokussiertes Studium an der WHU.
     en: Compact furnished apartment in a central location, ideal for focused studies at WHU.
   ogImage: /images/apartments/zur-linde/og.png
+  ogImageAlt:
+    de: Kompakte Studentenwohnung Zur Linde in Vallendar
+    en: Compact Zur Linde student apartment in Vallendar
+  keywords:
+    - zur linde vallendar
+    - compact student apartment whu
+    - furnished housing vallendar
 ---
