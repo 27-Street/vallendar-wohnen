@@ -9,10 +9,17 @@
 </head>
 <body>
   <script src="https://unpkg.com/decap-cms-app@3.10.1/dist/decap-cms-app.js"></script>
+  <script>
+    window.CMS = window.CMS || window.DecapCmsApp;
+  </script>
   <script src="/admin/media-backend.js"></script>
   <script src="/admin/preview.js"></script>
   <script>
-    window.CMS.init();
+    if (!window.CMS) {
+      console.error('[cms-admin] CMS global not found.');
+    } else {
+      window.CMS.init();
+    }
   </script>
 </body>
 </html>

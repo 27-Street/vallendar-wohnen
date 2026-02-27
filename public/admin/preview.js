@@ -1,5 +1,6 @@
 (function () {
-  if (!window.CMS) return;
+  const cms = window.CMS || window.DecapCmsApp;
+  if (!cms) return;
 
   const h = window.h || (window.React && window.React.createElement);
   const ReactApi = window.React;
@@ -12,7 +13,7 @@
   const registerStyleOnce = (href) => {
     if (!href || styleRegistry.has(href)) return;
     styleRegistry.add(href);
-    window.CMS.registerPreviewStyle(href);
+    cms.registerPreviewStyle(href);
   };
 
   registerStyleOnce('/admin/preview.css');
@@ -817,7 +818,7 @@
     ]);
   };
 
-  window.CMS.registerPreviewTemplate('apartments', ApartmentPreview);
-  window.CMS.registerPreviewTemplate('home', HomePreview);
-  window.CMS.registerPreviewTemplate('pages', PagesPreview);
+  cms.registerPreviewTemplate('apartments', ApartmentPreview);
+  cms.registerPreviewTemplate('home', HomePreview);
+  cms.registerPreviewTemplate('pages', PagesPreview);
 })();
