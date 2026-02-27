@@ -159,14 +159,31 @@ To switch to Plausible Cloud, replace the analytics script tag in `BaseLayout.as
 ```
 And remove the Netlify Function and client-side analytics script.
 
-## 8. Ongoing Maintenance
+## 8. CMS Editorial Workflow & Preview Expectations
+
+The CMS is configured with `publish_mode: editorial_workflow`, which means content moves through draft/review-style states instead of direct publish-by-default.
+
+### Expected editor flow
+
+1. Log in at `/admin/`.
+2. Edit content and click **Save** (creates/updates a draft state).
+3. Review the entry and publish when ready.
+4. Publishing writes commits through Git Gateway and triggers a Netlify deploy.
+
+### Preview expectations
+
+- Draft content is visible in the CMS editorial interface.
+- Live site pages only change after publish + successful Netlify deploy.
+- If an image path or bilingual field is invalid, local/CI validation should fail before production deployment.
+
+## 9. Ongoing Maintenance
 
 - **Content updates:** Yannik logs into `/admin/` to edit apartment listings, prices, and availability. Changes are committed to Git automatically via the CMS.
 - **Code updates:** Push changes to the `main` branch. Netlify auto-deploys on every push.
 - **Domain renewal:** Renew the domain annually with the registrar.
 - **Monitoring:** Check the Netlify dashboard periodically for failed builds, form submission issues, and pageview logs (under Functions > pageview).
 
-## 9. Troubleshooting
+## 10. Troubleshooting
 
 | Issue | Solution |
 |-------|----------|

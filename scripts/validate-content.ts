@@ -1,61 +1,131 @@
 import { z } from 'zod';
 import { readFileSync, readdirSync, existsSync } from 'node:fs';
-import { join, resolve } from 'node:path';
+import { basename, join, resolve } from 'node:path';
 import { parse as parseYaml } from 'yaml';
+import { FEATURE_ICON_OPTIONS } from '../src/content/cms-shared';
 
 const ROOT = resolve(import.meta.dirname, '..');
+const APARTMENTS_DIR = join(ROOT, 'src/content/apartments');
+const PAGES_DIR = join(ROOT, 'src/content/pages');
+const SETTINGS_DIR = join(ROOT, 'src/content/settings');
+const DECAP_CONFIG_PATH = join(ROOT, 'public/admin/config.yml');
 
-// ── Schemas (mirrored from src/content/config.ts) ──────────────────────────
+const nonEmptyString = z.string().refine((value) => value.trim().length > 0, 'Must not be empty');
 
 const bilingualString = z.object({
-  de: z.string().min(1, 'German translation must not be empty'),
-  en: z.string().min(1, 'English translation must not be empty'),
-});
+  de: nonEmptyString,
+  en: nonEmptyString,
+}).strict();
+
+const seoSchema = z.object({
+  title: bilingualString,
+  description: bilingualString,
+  ogImage: nonEmptyString.optional(),
+}).strict();
 
 const apartmentSchema = z.object({
-  name: z.string().min(1),
+  name: nonEmptyString,
   tagline: bilingualString,
   description: bilingualString,
   size: z.number().positive(),
-  rooms: z.string().min(1),
+  rooms: bilingualString,
   maxOccupants: z.number().int().positive(),
   pricePerMonth: z.number().positive(),
   utilitiesPerMonth: z.number().positive(),
-  amenities: z.array(z.string().min(1)).min(1),
+  amenities: z.array(bilingualString).min(1),
   available: z.boolean(),
-  availableFrom: z.string().optional(),
-  images: z.array(z.string().min(1)).min(1),
-  floor: z.string().min(1),
+  availableFrom: z.union([
+    z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Expected YYYY-MM-DD'),
+    z.date(),
+  ]).optional(),
+  images: z.array(nonEmptyString).min(1),
+  floor: bilingualString,
   order: z.number().int().positive(),
-});
+  seo: seoSchema.optional(),
+}).strict();
 
-const pageSchema = z.object({
-  title: z.string().min(1),
+const editorialBlockSchema = z.discriminatedUnion('type', [
+  z.object({
+    type: z.literal('richText'),
+    body: bilingualString,
+  }).strict(),
+  z.object({
+    type: z.literal('callout'),
+    title: bilingualString,
+    body: bilingualString,
+    tone: z.enum(['info', 'success', 'warning']),
+  }).strict(),
+  z.object({
+    type: z.literal('ctaRow'),
+    text: bilingualString,
+    buttonLabel: bilingualString,
+    buttonHref: bilingualString,
+  }).strict(),
+]);
+
+const homePageSchema = z.object({
+  title: z.literal('home'),
   hero: z.object({
     headline: bilingualString,
     subheadline: bilingualString,
     cta: bilingualString,
-  }).optional(),
-  sectionSubheadline: bilingualString.optional(),
-  features: z.array(z.object({
-    icon: z.string().min(1),
-    label: bilingualString,
-  })).optional(),
-});
+  }).strict(),
+  sectionSubheadline: bilingualString,
+  features: z.array(
+    z.object({
+      icon: z.enum(FEATURE_ICON_OPTIONS),
+      label: bilingualString,
+    }).strict(),
+  ).min(1),
+  editorialBlocks: z.array(editorialBlockSchema).optional(),
+  seo: seoSchema.optional(),
+}).strict();
+
+const faqPageSchema = z.object({
+  title: z.literal('faq'),
+  faq: z.array(
+    z.object({
+      question: bilingualString,
+      answer: bilingualString,
+    }).strict(),
+  ).min(1),
+}).strict();
+
+const exchangeStudentsPageSchema = z.object({
+  title: z.literal('exchange-students'),
+  heading: bilingualString,
+  subheading: bilingualString,
+  intro: bilingualString,
+  highlights: z.array(
+    z.object({
+      icon: nonEmptyString,
+      title: bilingualString,
+      description: bilingualString,
+    }).strict(),
+  ).min(1),
+  whatsIncluded: bilingualString,
+  aboutVallendar: bilingualString,
+  remoteBooking: bilingualString,
+  ctaText: bilingualString,
+}).strict();
 
 const settingsSchema = z.object({
-  propertyName: z.string().min(1),
-  propertyNameAccent: z.string().min(1),
+  propertyName: nonEmptyString,
+  propertyNameAccent: nonEmptyString,
   address: z.object({
-    street: z.string().min(1),
-    city: z.string().min(1),
-  }),
+    street: nonEmptyString,
+    city: nonEmptyString,
+  }).strict(),
   email: z.string().email(),
-  phone: z.string().min(1),
-  phoneDisplay: z.string().min(1),
-});
+  phone: nonEmptyString,
+  phoneDisplay: nonEmptyString,
+}).strict();
 
-// ── Helpers ─────────────────────────────────────────────────────────────────
+interface ValidationResult {
+  file: string;
+  errors: string[];
+  warnings: string[];
+}
 
 function extractFrontmatter(filePath: string): Record<string, unknown> {
   const raw = readFileSync(filePath, 'utf-8');
@@ -69,151 +139,169 @@ function extractFrontmatter(filePath: string): Record<string, unknown> {
 function getMdFiles(dir: string): string[] {
   if (!existsSync(dir)) return [];
   return readdirSync(dir)
-    .filter((f) => f.endsWith('.md'))
-    .map((f) => join(dir, f));
+    .filter((entry) => entry.endsWith('.md'))
+    .map((entry) => join(dir, entry));
 }
 
-interface ValidationResult {
-  file: string;
-  errors: string[];
-  warnings: string[];
+function createResult(file: string): ValidationResult {
+  return { file, errors: [], warnings: [] };
+}
+
+function addZodErrors(result: ValidationResult, issues: z.ZodIssue[]): void {
+  for (const issue of issues) {
+    result.errors.push(`  [${issue.path.join('.')}] ${issue.message}`);
+  }
+}
+
+function resolvePublicPath(path: string): string {
+  if (/^https?:\/\//.test(path)) return path;
+  if (path.startsWith('/')) return join(ROOT, 'public', path.slice(1));
+  return join(ROOT, path);
+}
+
+function assertPathExists(result: ValidationResult, field: string, path: string): void {
+  if (/^https?:\/\//.test(path)) return;
+  const diskPath = resolvePublicPath(path);
+  if (!existsSync(diskPath)) {
+    result.errors.push(`  [${field}] Missing file on disk: ${path} (expected at ${diskPath})`);
+  }
+}
+
+function validateDecapConfig(): ValidationResult {
+  const result = createResult(DECAP_CONFIG_PATH);
+
+  const data = parseYaml(readFileSync(DECAP_CONFIG_PATH, 'utf-8')) as Record<string, unknown>;
+  const publishMode = data.publish_mode;
+  if (publishMode !== 'editorial_workflow') {
+    result.errors.push('  [publish_mode] Expected "editorial_workflow".');
+  }
+
+  if (data.media_folder !== 'public/images/uploads') {
+    result.errors.push('  [media_folder] Expected "public/images/uploads".');
+  }
+
+  if (data.public_folder !== '/images/uploads') {
+    result.errors.push('  [public_folder] Expected "/images/uploads".');
+  }
+
+  const collections = Array.isArray(data.collections) ? data.collections as Array<Record<string, unknown>> : [];
+  const pagesCollection = collections.find((collection) => collection.name === 'pages');
+  const files = Array.isArray(pagesCollection?.files) ? pagesCollection?.files as Array<Record<string, unknown>> : [];
+  const homeFile = files.find((entry) => entry.name === 'home');
+  const homeFields = Array.isArray(homeFile?.fields) ? homeFile?.fields as Array<Record<string, unknown>> : [];
+  const featuresField = homeFields.find((field) => field.name === 'features');
+  const featureFields = Array.isArray(featuresField?.fields) ? featuresField?.fields as Array<Record<string, unknown>> : [];
+  const iconField = featureFields.find((field) => field.name === 'icon');
+  const options = Array.isArray(iconField?.options) ? iconField?.options as Array<Record<string, unknown>> : [];
+  const optionValues = options
+    .map((option) => option.value)
+    .filter((value): value is string => typeof value === 'string');
+
+  const expected = [...FEATURE_ICON_OPTIONS];
+  const sameLength = optionValues.length === expected.length;
+  const sameValues = sameLength && optionValues.every((value, index) => value === expected[index]);
+
+  if (!sameValues) {
+    result.errors.push(`  [collections.pages.home.features.icon.options] Expected icon options: ${expected.join(', ')}`);
+  }
+
+  return result;
 }
 
 const results: ValidationResult[] = [];
 let hasErrors = false;
 
-function validate(
-  file: string,
-  schema: z.ZodType,
-  data: Record<string, unknown>,
-): ValidationResult {
-  const result: ValidationResult = { file, errors: [], warnings: [] };
-  const parsed = schema.safeParse(data);
+function collectResult(result: ValidationResult): void {
+  if (result.errors.length > 0) hasErrors = true;
+  results.push(result);
+}
+
+console.log('=== Content Collection Validation (CMS V2) ===\n');
+
+collectResult(validateDecapConfig());
+
+for (const file of getMdFiles(APARTMENTS_DIR)) {
+  const result = createResult(file);
+  const data = extractFrontmatter(file);
+  const parsed = apartmentSchema.safeParse(data);
+
   if (!parsed.success) {
-    for (const issue of parsed.error.issues) {
-      result.errors.push(`  [${issue.path.join('.')}] ${issue.message}`);
-    }
+    addZodErrors(result, parsed.error.issues);
+    collectResult(result);
+    continue;
   }
-  return result;
-}
 
-function checkImagePaths(
-  data: Record<string, unknown>,
-  file: string,
-): string[] {
-  const warnings: string[] = [];
-  const images = data.images as string[] | undefined;
-  if (!images) return warnings;
+  parsed.data.images.forEach((image, index) => assertPathExists(result, `images[${index}]`, image));
 
-  for (const img of images) {
-    // Images in frontmatter use /images/... which maps to public/images/...
-    const onDisk = join(ROOT, 'public', img);
-    if (!existsSync(onDisk)) {
-      warnings.push(`  Image not found on disk: ${img} (expected at ${onDisk})`);
-    }
+  if (parsed.data.seo?.ogImage) {
+    assertPathExists(result, 'seo.ogImage', parsed.data.seo.ogImage);
   }
-  return warnings;
+
+  collectResult(result);
 }
 
-// ── Validate Apartments ─────────────────────────────────────────────────────
-
-console.log('=== Content Collection Validation ===\n');
-
-const apartmentDir = join(ROOT, 'src/content/apartments');
-const apartmentFiles = getMdFiles(apartmentDir);
-
-if (apartmentFiles.length === 0) {
-  console.log('WARNING: No apartment files found!\n');
-}
-
-for (const file of apartmentFiles) {
+for (const file of getMdFiles(PAGES_DIR)) {
+  const result = createResult(file);
   const data = extractFrontmatter(file);
-  const result = validate(file, apartmentSchema, data);
+  const name = basename(file);
 
-  // Check bilingual fields are non-empty
-  for (const field of ['tagline', 'description'] as const) {
-    const obj = data[field] as { de?: string; en?: string } | undefined;
-    if (obj) {
-      if (!obj.de?.trim()) result.errors.push(`  [${field}.de] Missing German translation`);
-      if (!obj.en?.trim()) result.errors.push(`  [${field}.en] Missing English translation`);
-    }
-  }
-
-  // Check image paths exist on disk
-  result.warnings.push(...checkImagePaths(data, file));
-
-  if (result.errors.length > 0) hasErrors = true;
-  results.push(result);
-}
-
-// ── Validate Pages ──────────────────────────────────────────────────────────
-
-const pagesDir = join(ROOT, 'src/content/pages');
-const pageFiles = getMdFiles(pagesDir);
-
-for (const file of pageFiles) {
-  const data = extractFrontmatter(file);
-  const result = validate(file, pageSchema, data);
-
-  // Check bilingual fields in hero
-  const hero = data.hero as { headline?: { de?: string; en?: string }; subheadline?: { de?: string; en?: string }; cta?: { de?: string; en?: string } } | undefined;
-  if (hero) {
-    for (const sub of ['headline', 'subheadline', 'cta'] as const) {
-      const obj = hero[sub];
-      if (obj) {
-        if (!obj.de?.trim()) result.errors.push(`  [hero.${sub}.de] Missing German translation`);
-        if (!obj.en?.trim()) result.errors.push(`  [hero.${sub}.en] Missing English translation`);
+  if (name === 'home.md') {
+    const parsed = homePageSchema.safeParse(data);
+    if (!parsed.success) {
+      addZodErrors(result, parsed.error.issues);
+    } else {
+      if (parsed.data.seo?.ogImage) {
+        assertPathExists(result, 'seo.ogImage', parsed.data.seo.ogImage);
       }
+
+      parsed.data.editorialBlocks?.forEach((block, index) => {
+        if (block.type === 'ctaRow') {
+          if (!block.buttonHref.de.startsWith('/de/')) {
+            result.warnings.push(`  [editorialBlocks[${index}].buttonHref.de] Expected DE links to start with /de/`);
+          }
+          if (!block.buttonHref.en.startsWith('/en/')) {
+            result.warnings.push(`  [editorialBlocks[${index}].buttonHref.en] Expected EN links to start with /en/`);
+          }
+        }
+      });
     }
+  } else if (name === 'faq.md') {
+    const parsed = faqPageSchema.safeParse(data);
+    if (!parsed.success) addZodErrors(result, parsed.error.issues);
+  } else if (name === 'exchange-students.md') {
+    const parsed = exchangeStudentsPageSchema.safeParse(data);
+    if (!parsed.success) addZodErrors(result, parsed.error.issues);
+  } else {
+    result.errors.push('  [file] Unsupported page file for strict validation.');
   }
 
-  // Check bilingual fields in features
-  const features = data.features as Array<{ label?: { de?: string; en?: string } }> | undefined;
-  if (features) {
-    features.forEach((feat, i) => {
-      if (!feat.label?.de?.trim()) result.errors.push(`  [features[${i}].label.de] Missing German translation`);
-      if (!feat.label?.en?.trim()) result.errors.push(`  [features[${i}].label.en] Missing English translation`);
-    });
-  }
-
-  if (result.errors.length > 0) hasErrors = true;
-  results.push(result);
+  collectResult(result);
 }
 
-// ── Validate Settings ───────────────────────────────────────────────────────
-
-const settingsDir = join(ROOT, 'src/content/settings');
-const settingsFiles = getMdFiles(settingsDir);
-
-if (settingsFiles.length === 0) {
-  console.log('WARNING: No settings files found!\n');
-}
-
-for (const file of settingsFiles) {
+for (const file of getMdFiles(SETTINGS_DIR)) {
+  const result = createResult(file);
   const data = extractFrontmatter(file);
-  const result = validate(file, settingsSchema, data);
-  if (result.errors.length > 0) hasErrors = true;
-  results.push(result);
+  const parsed = settingsSchema.safeParse(data);
+  if (!parsed.success) addZodErrors(result, parsed.error.issues);
+  collectResult(result);
 }
 
-// ── Report ──────────────────────────────────────────────────────────────────
-
-for (const r of results) {
-  const status = r.errors.length === 0 ? '✓ PASS' : '✗ FAIL';
-  const shortPath = r.file.replace(ROOT + '/', '');
+for (const result of results) {
+  const status = result.errors.length === 0 ? '✓ PASS' : '✗ FAIL';
+  const shortPath = result.file.replace(`${ROOT}/`, '');
   console.log(`${status}  ${shortPath}`);
-  for (const err of r.errors) console.log(err);
-  for (const warn of r.warnings) console.log(`  ⚠ ${warn}`);
+  for (const error of result.errors) console.log(error);
+  for (const warning of result.warnings) console.log(`  ⚠ ${warning}`);
 }
 
-console.log(`\n=== Summary ===`);
+console.log('\n=== Summary ===');
 console.log(`Files validated: ${results.length}`);
-console.log(`Errors: ${results.reduce((n, r) => n + r.errors.length, 0)}`);
-console.log(`Warnings: ${results.reduce((n, r) => n + r.warnings.length, 0)}`);
+console.log(`Errors: ${results.reduce((count, result) => count + result.errors.length, 0)}`);
+console.log(`Warnings: ${results.reduce((count, result) => count + result.warnings.length, 0)}`);
 
 if (hasErrors) {
   console.log('\n❌ Validation FAILED\n');
   process.exit(1);
-} else {
-  console.log('\n✅ Validation PASSED\n');
 }
+
+console.log('\n✅ Validation PASSED\n');

@@ -6,6 +6,7 @@ import BaseLayout from '../../../layouts/BaseLayout.astro';
 import AvailabilityBadge from '../../../components/AvailabilityBadge.astro';
 import ImageGallery from '../../../components/ImageGallery.astro';
 import InquiryForm from '../../../components/InquiryForm.astro';
+import RichText from '../../../components/RichText.astro';
 import { getTranslation } from '../../../i18n/translations';
 import { translatePath } from '../../../i18n/utils';
 
@@ -22,13 +23,19 @@ const t = getTranslation(lang);
 const { apartment } = Astro.props;
 const apt = apartment.data;
 const total = apt.pricePerMonth + apt.utilitiesPerMonth;
+const plainDescription = apt.description[lang].replace(/[#*_`>-]/g, '').replace(/\n+/g, ' ').trim();
+const seoTitle = apt.seo?.title?.[lang]?.trim()
+  || `${apt.name} – ${apt.size} m², ab ${apt.pricePerMonth} €/Monat | VallendarWohnen`;
+const seoDescription = apt.seo?.description?.[lang]?.trim()
+  || `${apt.name} in Vallendar: ${plainDescription} ${apt.rooms[lang]}, ${apt.size} m², ab ${apt.pricePerMonth} €/Monat.`;
+const seoImage = apt.seo?.ogImage?.trim() || `/images/apartments/${apartment.id}/og.png`;
 
 const siteUrl = Astro.site?.origin ?? 'https://lucky-cucurucho-b639b6.netlify.app';
 const apartmentJsonLd = {
   "@context": "https://schema.org",
   "@type": "Apartment",
   "name": apt.name,
-  "description": apt.description[lang],
+  "description": plainDescription,
   "url": `${siteUrl}/de/wohnungen/${apartment.id}`,
   "floorSize": {
     "@type": "QuantitativeValue",
@@ -36,11 +43,11 @@ const apartmentJsonLd = {
     "unitCode": "MTK",
     "unitText": "m²"
   },
-  "numberOfRooms": apt.rooms,
-  "floorLevel": apt.floor,
+  "numberOfRooms": apt.rooms[lang],
+  "floorLevel": apt.floor[lang],
   "amenityFeature": apt.amenities.map((a) => ({
     "@type": "LocationFeatureSpecification",
-    "name": a,
+    "name": a[lang],
     "value": true
   })),
   "address": {
@@ -61,10 +68,10 @@ const apartmentJsonLd = {
 ---
 
 <BaseLayout
-  title={`${apt.name} – ${apt.size} m², ab ${apt.pricePerMonth} €/Monat | VallendarWohnen`}
-  description={`${apt.name} in Vallendar: ${apt.description[lang]} ${apt.rooms}, ${apt.size} m², ab ${apt.pricePerMonth} €/Monat.`}
+  title={seoTitle}
+  description={seoDescription}
   lang={lang}
-  ogImage={`/images/apartments/${apartment.id}/og.png`}
+  ogImage={seoImage}
 >
   <script type="application/ld+json" set:html={JSON.stringify(apartmentJsonLd)} />
 
@@ -107,9 +114,7 @@ const apartmentJsonLd = {
           <h2 class="font-serif text-2xl font-bold text-neutral-900">
             {apt.name}
           </h2>
-          <p class="mt-4 text-neutral-600 leading-relaxed">
-            {apt.description[lang]}
-          </p>
+          <RichText content={apt.description[lang]} className="mt-4" />
 
           <div class="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-4">
             <div class="rounded-xl bg-neutral-50 p-4 ring-1 ring-neutral-100 transition-shadow duration-200 hover:shadow-sm">
@@ -118,11 +123,11 @@ const apartmentJsonLd = {
             </div>
             <div class="rounded-xl bg-neutral-50 p-4 ring-1 ring-neutral-100 transition-shadow duration-200 hover:shadow-sm">
               <p class="text-xs font-medium text-neutral-500 uppercase tracking-wider">{t.apartment.rooms}</p>
-              <p class="mt-1 text-lg font-bold text-neutral-900">{apt.rooms}</p>
+              <p class="mt-1 text-lg font-bold text-neutral-900">{apt.rooms[lang]}</p>
             </div>
             <div class="rounded-xl bg-neutral-50 p-4 ring-1 ring-neutral-100 transition-shadow duration-200 hover:shadow-sm">
               <p class="text-xs font-medium text-neutral-500 uppercase tracking-wider">{t.apartment.floor}</p>
-              <p class="mt-1 text-lg font-bold text-neutral-900">{apt.floor}</p>
+              <p class="mt-1 text-lg font-bold text-neutral-900">{apt.floor[lang]}</p>
             </div>
             <div class="rounded-xl bg-neutral-50 p-4 ring-1 ring-neutral-100 transition-shadow duration-200 hover:shadow-sm">
               <p class="text-xs font-medium text-neutral-500 uppercase tracking-wider">{t.apartment.maxOccupants}</p>
@@ -170,7 +175,7 @@ const apartmentJsonLd = {
         {apt.amenities.map((amenity) => (
           <div class="flex items-center gap-3 rounded-xl bg-white p-4 ring-1 ring-neutral-200 transition-all duration-200 hover:shadow-sm hover:ring-accent-200">
             <Icon name="lucide:check" class="h-5 w-5 shrink-0 text-accent-600" />
-            <span class="min-w-0 break-words text-sm font-medium text-neutral-800">{amenity}</span>
+            <span class="min-w-0 break-words text-sm font-medium text-neutral-800">{amenity[lang]}</span>
           </div>
         ))}
       </div>

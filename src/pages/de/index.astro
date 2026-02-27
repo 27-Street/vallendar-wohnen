@@ -4,6 +4,7 @@ import { Icon } from 'astro-icon/components';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import ApartmentCard from '../../components/ApartmentCard.astro';
 import FAQAccordion from '../../components/FAQAccordion.astro';
+import RichText from '../../components/RichText.astro';
 import { getTranslation } from '../../i18n/translations';
 
 const lang = 'de' as const;
@@ -34,6 +35,8 @@ const homePage = await getEntry('pages', 'home');
 const hero = homePage.data.hero!;
 const sectionSubheadline = homePage.data.sectionSubheadline!;
 const features = homePage.data.features!;
+const editorialBlocks = homePage.data.editorialBlocks ?? [];
+const seo = homePage.data.seo;
 
 const faqPage = await getEntry('pages', 'faq');
 const faqItems = faqPage.data.faq ?? [];
@@ -43,7 +46,12 @@ const localizedFaq = faqItems.map((item) => ({
 }));
 ---
 
-<BaseLayout title="Möblierte Studentenwohnungen in Vallendar | VallendarWohnen" description="Möblierte Apartments für Studierende in Vallendar, direkt gegenüber der WHU. Ab 490 €/Monat, voll ausgestattet mit WLAN und Einbauküche." lang={lang}>
+<BaseLayout
+  title={(seo?.title?.[lang]?.trim() || "Möblierte Studentenwohnungen in Vallendar | VallendarWohnen")}
+  description={(seo?.description?.[lang]?.trim() || "Möblierte Apartments für Studierende in Vallendar, direkt gegenüber der WHU. Ab 490 €/Monat, voll ausgestattet mit WLAN und Einbauküche.")}
+  ogImage={(seo?.ogImage?.trim() || undefined)}
+  lang={lang}
+>
   <script type="application/ld+json" set:html={JSON.stringify(organizationJsonLd)} />
 
   <!-- Hero Section -->
@@ -82,9 +90,7 @@ const localizedFaq = faqItems.map((item) => ({
       <h2 data-animate="fade-in" class="text-center font-serif text-3xl font-bold text-neutral-900 sm:text-4xl">
         {t.sections.apartments}
       </h2>
-      <p data-animate="fade-in" class="mx-auto mt-4 max-w-2xl text-center text-neutral-500">
-        {sectionSubheadline[lang]}
-      </p>
+      <RichText content={sectionSubheadline[lang]} className="mx-auto mt-4 max-w-2xl text-center" />
 
       <div data-animate-stagger class="mt-14 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
         {sortedApartments.map((apt) => (
@@ -95,6 +101,45 @@ const localizedFaq = faqItems.map((item) => ({
       </div>
     </div>
   </section>
+
+  {editorialBlocks.length > 0 && (
+    <section class="bg-white py-16 sm:py-20">
+      <div class="mx-auto max-w-4xl px-4 sm:px-6">
+        <div class="space-y-5">
+          {editorialBlocks.map((block) => (
+            block.type === 'richText' ? (
+              <div class="editorial-block editorial-block-info">
+                <RichText content={block.body[lang]} />
+              </div>
+            ) : block.type === 'callout' ? (
+              <div class:list={[
+                'editorial-block',
+                block.tone === 'success'
+                  ? 'editorial-block-success'
+                  : block.tone === 'warning'
+                    ? 'editorial-block-warning'
+                    : 'editorial-block-info',
+              ]}>
+                <h3 class="font-serif text-xl font-bold text-neutral-900">{block.title[lang]}</h3>
+                <RichText content={block.body[lang]} className="mt-3" />
+              </div>
+            ) : (
+              <div class="editorial-block editorial-block-info flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <p class="text-sm font-medium text-neutral-800">{block.text[lang]}</p>
+                <a
+                  href={block.buttonHref[lang]}
+                  class="inline-flex items-center gap-2 rounded-full bg-accent-700 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-accent-800"
+                >
+                  {block.buttonLabel[lang]}
+                  <Icon name="lucide:arrow-right" class="h-4 w-4" />
+                </a>
+              </div>
+            )
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
 
   <!-- Features / Highlights Section -->
   <section class="bg-white py-20 sm:py-28">

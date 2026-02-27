@@ -7,7 +7,8 @@
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
-    "validate": "npx tsx scripts/validate-content.ts"
+    "validate": "npx tsx scripts/validate-content.ts",
+    "migrate:cms-v2": "npx tsx scripts/migrate-cms-v2.ts"
   },
   "dependencies": {
     "@astrojs/sitemap": "^3.7.0",
@@ -15,9 +16,12 @@
     "@fontsource-variable/plus-jakarta-sans": "^5.2.8",
     "@iconify-json/lucide": "^1.2.94",
     "@tailwindcss/vite": "^4.2.1",
+    "@types/sanitize-html": "^2.16.0",
     "astro": "^5.17.1",
     "astro-icon": "^1.1.5",
     "decap-cms-app": "^3.10.1",
+    "marked": "^17.0.3",
+    "sanitize-html": "^2.17.1",
     "tailwindcss": "^4.2.1"
   }
 }

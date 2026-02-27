@@ -1,0 +1,58 @@
+---
+import { marked } from 'marked';
+import sanitizeHtml from 'sanitize-html';
+
+interface Props {
+  content: string;
+  className?: string;
+}
+
+const { content, className = '' } = Astro.props;
+
+const rawHtml = marked.parse(content ?? '', {
+  gfm: true,
+  breaks: true,
+}) as string;
+
+const sanitizedHtml = sanitizeHtml(rawHtml, {
+  allowedTags: [
+    ...sanitizeHtml.defaults.allowedTags,
+    'h1',
+    'h2',
+    'h3',
+    'h4',
+    'h5',
+    'h6',
+    'img',
+  ],
+  allowedAttributes: {
+    ...sanitizeHtml.defaults.allowedAttributes,
+    a: ['href', 'name', 'target', 'rel'],
+    img: ['src', 'alt', 'title', 'loading'],
+  },
+  allowedSchemes: ['http', 'https', 'mailto', 'tel'],
+  transformTags: {
+    a: (_tagName, attribs) => {
+      const href = attribs.href ?? '';
+      const isExternal = /^https?:\/\//.test(href);
+      return {
+        tagName: 'a',
+        attribs: {
+          ...attribs,
+          rel: 'noopener noreferrer',
+          ...(isExternal ? { target: '_blank' } : {}),
+        },
+      };
+    },
+    img: (_tagName, attribs) => ({
+      tagName: 'img',
+      attribs: {
+        ...attribs,
+        loading: attribs.loading ?? 'lazy',
+      },
+    }),
+  },
+});
+---
+
+<div class:list={['richtext', className]} set:html={sanitizedHtml} />

@@ -5,12 +5,15 @@ backend:
   name: git-gateway
   branch: main
 
+publish_mode: editorial_workflow
+
 # Update these URLs after connecting a custom domain
 site_url: https://lucky-cucurucho-b639b6.netlify.app
 display_url: https://lucky-cucurucho-b639b6.netlify.app
 
-media_folder: src/assets/images
-public_folder: /src/assets/images
+# Uploaded media is stored in /public and served at /images/uploads
+media_folder: public/images/uploads
+public_folder: /images/uploads
 
 locale: de
 
@@ -23,37 +26,101 @@ collections:
     slug: "{{slug}}"
     extension: md
     format: frontmatter
+    summary: "{{name}}"
     fields:
-      - { label: Name, name: name, widget: string }
+      - { label: Name, name: name, widget: string, hint: "Interner Wohnungsname (z. B. Rheinblick)." }
+
       - label: Tagline
         name: tagline
         widget: object
         fields:
-          - { label: Deutsch, name: de, widget: string }
-          - { label: English, name: en, widget: string }
-      - label: Beschreibung
+          - { label: Deutsch, name: de, widget: string, required: true }
+          - { label: English, name: en, widget: string, required: true }
+
+      - label: Beschreibung (WYSIWYG)
         name: description
         widget: object
+        hint: "Erlaubt: Absätze, Überschriften, Listen, Links, Hervorhebungen."
         fields:
-          - { label: Deutsch, name: de, widget: text }
-          - { label: English, name: en, widget: text }
-      - { label: "Größe (m²)", name: size, widget: number, value_type: int }
-      - { label: Zimmer, name: rooms, widget: string }
-      - { label: Max. Bewohner, name: maxOccupants, widget: number, value_type: int }
-      - { label: "Miete (€/Monat)", name: pricePerMonth, widget: number, value_type: int }
-      - { label: "Nebenkosten (€/Monat)", name: utilitiesPerMonth, widget: number, value_type: int }
+          -
+            label: Deutsch
+            name: de
+            widget: markdown
+            modes: [rich_text, raw]
+            required: true
+          -
+            label: English
+            name: en
+            widget: markdown
+            modes: [rich_text, raw]
+            required: true
+
+      - { label: "Größe (m²)", name: size, widget: number, value_type: int, min: 1 }
+
+      - label: Zimmer
+        name: rooms
+        widget: object
+        fields:
+          - { label: Deutsch, name: de, widget: string, required: true }
+          - { label: English, name: en, widget: string, required: true }
+
+      - { label: Max. Bewohner, name: maxOccupants, widget: number, value_type: int, min: 1 }
+      - { label: "Miete (€/Monat)", name: pricePerMonth, widget: number, value_type: int, min: 1 }
+      - { label: "Nebenkosten (€/Monat)", name: utilitiesPerMonth, widget: number, value_type: int, min: 1 }
+
       - label: Ausstattung
         name: amenities
         widget: list
-        field: { label: Ausstattung, name: amenity, widget: string }
+        summary: "{{fields.de}} / {{fields.en}}"
+        hint: "Jeder Eintrag muss auf Deutsch und Englisch gepflegt sein."
+        fields:
+          - { label: Deutsch, name: de, widget: string, required: true }
+          - { label: English, name: en, widget: string, required: true }
+
       - { label: Verfügbar, name: available, widget: boolean, default: true }
-      - { label: Verfügbar ab, name: availableFrom, widget: string, required: false }
+      -
+        label: Verfügbar ab
+        name: availableFrom
+        widget: date
+        required: false
+        format: "YYYY-MM-DD"
+        date_format: "DD.MM.YYYY"
+        time_format: false
+
       - label: Bilder
         name: images
         widget: list
-        field: { label: Bild, name: image, widget: image }
-      - { label: Stockwerk, name: floor, widget: string }
-      - { label: Reihenfolge, name: order, widget: number, value_type: int }
+        hint: "Mehrere Bilder möglich. Neue Uploads landen unter /images/uploads."
+        field: { label: Bild, widget: image, required: true }
+
+      - label: Stockwerk
+        name: floor
+        widget: object
+        fields:
+          - { label: Deutsch, name: de, widget: string, required: true }
+          - { label: English, name: en, widget: string, required: true }
+
+      - { label: Reihenfolge, name: order, widget: number, value_type: int, min: 1 }
+
+      - label: SEO (optional)
+        name: seo
+        widget: object
+        required: false
+        collapsed: true
+        fields:
+          - label: SEO-Titel
+            name: title
+            widget: object
+            fields:
+              - { label: Deutsch, name: de, widget: string, required: false }
+              - { label: English, name: en, widget: string, required: false }
+          - label: SEO-Beschreibung
+            name: description
+            widget: object
+            fields:
+              - { label: Deutsch, name: de, widget: text, required: false }
+              - { label: English, name: en, widget: text, required: false }
+          - { label: OpenGraph Bild (optional), name: ogImage, widget: image, required: false }
 
   - name: pages
     label: Seiten
@@ -63,6 +130,7 @@ collections:
         file: src/content/pages/home.md
         fields:
           - { label: Titel, name: title, widget: hidden, default: home }
+
           - label: Hero-Bereich
             name: hero
             widget: object
@@ -85,23 +153,133 @@ collections:
                 fields:
                   - { label: Deutsch, name: de, widget: string }
                   - { label: English, name: en, widget: string }
-          - label: Abschnitt-Unterüberschrift
+
+          - label: Abschnitt-Unterüberschrift (WYSIWYG)
             name: sectionSubheadline
             widget: object
+            hint: "Erlaubt: Absätze, Links, Hervorhebungen."
             fields:
-              - { label: Deutsch, name: de, widget: string }
-              - { label: English, name: en, widget: string }
+              -
+                label: Deutsch
+                name: de
+                widget: markdown
+                modes: [rich_text, raw]
+              -
+                label: English
+                name: en
+                widget: markdown
+                modes: [rich_text, raw]
+
           - label: Features
             name: features
             widget: list
             fields:
-              - { label: Icon (Emoji), name: icon, widget: string }
+              -
+                label: Icon
+                name: icon
+                widget: select
+                options:
+                  - { label: "map-pin", value: "map-pin" }
+                  - { label: "sofa", value: "sofa" }
+                  - { label: "utensils", value: "utensils" }
+                  - { label: "wifi", value: "wifi" }
+                  - { label: "washing-machine", value: "washing-machine" }
+                  - { label: "calendar-range", value: "calendar-range" }
               - label: Bezeichnung
                 name: label
                 widget: object
                 fields:
                   - { label: Deutsch, name: de, widget: string }
                   - { label: English, name: en, widget: string }
+
+          - label: Redaktions-Blöcke
+            name: editorialBlocks
+            widget: list
+            required: false
+            hint: "Feste Blocktypen (kein freier Page Builder). Reihenfolge entspricht Ausgabe im Frontend."
+            types:
+              - label: Rich Text
+                name: richText
+                widget: object
+                fields:
+                  - { label: Typ, name: type, widget: hidden, default: richText }
+                  -
+                    label: Inhalt
+                    name: body
+                    widget: object
+                    fields:
+                      - { label: Deutsch, name: de, widget: markdown, modes: [rich_text, raw] }
+                      - { label: English, name: en, widget: markdown, modes: [rich_text, raw] }
+              - label: Callout
+                name: callout
+                widget: object
+                fields:
+                  - { label: Typ, name: type, widget: hidden, default: callout }
+                  -
+                    label: Variante
+                    name: tone
+                    widget: select
+                    options:
+                      - { label: Hinweis, value: info }
+                      - { label: Erfolg, value: success }
+                      - { label: Achtung, value: warning }
+                    default: info
+                  - label: Titel
+                    name: title
+                    widget: object
+                    fields:
+                      - { label: Deutsch, name: de, widget: string }
+                      - { label: English, name: en, widget: string }
+                  - label: Text
+                    name: body
+                    widget: object
+                    fields:
+                      - { label: Deutsch, name: de, widget: markdown, modes: [rich_text, raw] }
+                      - { label: English, name: en, widget: markdown, modes: [rich_text, raw] }
+              - label: CTA Zeile
+                name: ctaRow
+                widget: object
+                fields:
+                  - { label: Typ, name: type, widget: hidden, default: ctaRow }
+                  - label: Text
+                    name: text
+                    widget: object
+                    fields:
+                      - { label: Deutsch, name: de, widget: string }
+                      - { label: English, name: en, widget: string }
+                  - label: Button Label
+                    name: buttonLabel
+                    widget: object
+                    fields:
+                      - { label: Deutsch, name: de, widget: string }
+                      - { label: English, name: en, widget: string }
+                  - label: Button Link
+                    name: buttonHref
+                    widget: object
+                    hint: "Verwenden Sie lokalisierte Pfade, z. B. /de/kontakt bzw. /en/contact."
+                    fields:
+                      - { label: Deutsch, name: de, widget: string }
+                      - { label: English, name: en, widget: string }
+
+          - label: SEO (optional)
+            name: seo
+            widget: object
+            required: false
+            collapsed: true
+            fields:
+              - label: SEO-Titel
+                name: title
+                widget: object
+                fields:
+                  - { label: Deutsch, name: de, widget: string, required: false }
+                  - { label: English, name: en, widget: string, required: false }
+              - label: SEO-Beschreibung
+                name: description
+                widget: object
+                fields:
+                  - { label: Deutsch, name: de, widget: text, required: false }
+                  - { label: English, name: en, widget: text, required: false }
+              - { label: OpenGraph Bild (optional), name: ogImage, widget: image, required: false }
 
       - label: Austauschstudierende
         name: exchange-students
@@ -130,7 +308,7 @@ collections:
             name: highlights
             widget: list
             fields:
-              - { label: Icon (Emoji), name: icon, widget: string }
+              - { label: Icon, name: icon, widget: string }
               - label: Titel
                 name: title
                 widget: object
