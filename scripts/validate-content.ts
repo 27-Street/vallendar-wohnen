@@ -212,6 +212,10 @@ function validateDecapConfig(): ValidationResult {
   const apartmentFields = Array.isArray(apartmentsCollection?.fields)
     ? apartmentsCollection.fields as Array<Record<string, unknown>>
     : [];
+  const availableFromField = apartmentFields.find((field) => field.name === 'availableFrom');
+  if (availableFromField?.widget !== 'datetime') {
+    result.errors.push('  [collections.apartments.availableFrom.widget] Expected "datetime" (date-only mode via time_format: false).');
+  }
   const imagesField = apartmentFields.find((field) => field.name === 'images');
   const imageSubFields = Array.isArray(imagesField?.fields) ? imagesField.fields as Array<Record<string, unknown>> : [];
   const imageSubFieldNames = imageSubFields
