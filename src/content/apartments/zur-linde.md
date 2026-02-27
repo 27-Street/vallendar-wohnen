@@ -40,9 +40,15 @@ amenities:
     en: Wardrobe
 available: false
 images:
-  - /images/apartments/zur-linde/living.webp
-  - /images/apartments/zur-linde/bedroom.webp
-  - /images/apartments/zur-linde/lounge.webp
+  - image: /images/apartments/zur-linde/living.webp
+    kind: living
+    isPrimary: true
+  - image: /images/apartments/zur-linde/bedroom.webp
+    kind: bedroom
+    isPrimary: false
+  - image: /images/apartments/zur-linde/lounge.webp
+    kind: living
+    isPrimary: false
 floor:
   de: 1. OG
   en: 1st floor

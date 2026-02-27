@@ -11,9 +11,10 @@ publish_mode: editorial_workflow
 site_url: https://lucky-cucurucho-b639b6.netlify.app
 display_url: https://lucky-cucurucho-b639b6.netlify.app
 
-# Uploaded media is stored in /public and served at /images/uploads
-media_folder: public/images/uploads
-public_folder: /images/uploads
+# All media is managed under /public/images and served at /images
+# so existing apartment/hero assets are available in the CMS media picker.
+media_folder: public/images
+public_folder: /images
 
 locale: de
 
@@ -27,6 +28,9 @@ collections:
     extension: md
     format: frontmatter
     summary: "{{name}}"
+    preview_path: "de/wohnungen/{{slug}}"
+    media_folder: public/images/apartments
+    public_folder: /images/apartments
     fields:
       - { label: Name, name: name, widget: string, hint: "Interner Wohnungsname (z. B. Rheinblick)." }
 
@@ -90,8 +94,32 @@ collections:
       - label: Bilder
         name: images
         widget: list
-        hint: "Mehrere Bilder möglich. Neue Uploads landen unter /images/uploads."
-        field: { label: Bild, name: image, widget: image, required: true }
+        min: 1
+        summary: "{{fields.kind}} - {{fields.image}}"
+        hint: "Pro Wohnung eine eigene Bilder-Sammlung mit Bildtyp, Datei und optionaler Beschriftung."
+        fields:
+          - { label: Bilddatei, name: image, widget: image, required: true }
+          -
+            label: Bildtyp
+            name: kind
+            widget: select
+            default: other
+            options:
+              - { label: Wohnzimmer, value: living }
+              - { label: Schlafzimmer, value: bedroom }
+              - { label: Küche, value: kitchen }
+              - { label: Bad, value: bathroom }
+              - { label: Arbeitsbereich, value: workspace }
+              - { label: Außenbereich, value: exterior }
+              - { label: Sonstiges, value: other }
+          - label: Bildunterschrift (optional)
+            name: caption
+            widget: object
+            required: false
+            fields:
+              - { label: Deutsch, name: de, widget: string, required: false }
+              - { label: English, name: en, widget: string, required: false }
+          - { label: Primäres Bild (Karte/SEO Fallback), name: isPrimary, widget: boolean, required: false, default: false }
 
       - label: Stockwerk
         name: floor
@@ -128,6 +156,7 @@ collections:
       - label: Startseite
         name: home
         file: src/content/pages/home.md
+        preview_path: "de/"
         fields:
           - { label: Titel, name: title, widget: hidden, default: home }
 

@@ -3,13 +3,22 @@ import type { Language } from '../i18n/translations';
 import { getTranslation } from '../i18n/translations';
 
 interface Props {
-  images: string[];
+  images: Array<{
+    image: string;
+    kind: string;
+    caption?: {
+      de: string;
+      en: string;
+    };
+    isPrimary?: boolean;
+  }>;
   apartmentName: string;
   lang: Language;
 }
 
 const { images, apartmentName, lang } = Astro.props;
 const t = getTranslation(lang);
+const orderedImages = [...images].sort((a, b) => Number(Boolean(b.isPrimary)) - Number(Boolean(a.isPrimary)));
 
 const galleryId = `gallery-${apartmentName.toLowerCase().replace(/\s+/g, '-').normalize('NFD').replace(/[\u0300-\u036f]/g, '')}`;
 
@@ -18,7 +27,7 @@ const isPlaceholder = (src: string) => src.endsWith('.svg');
 
 <!-- Gallery Grid -->
 <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 lg:grid-rows-2" id={galleryId}>
-  {images.map((src, i) => (
+  {orderedImages.map((entry, i) => (
     <button
       type="button"
       class:list={[
@@ -30,7 +39,7 @@ const isPlaceholder = (src: string) => src.endsWith('.svg');
       data-index={i}
       aria-label={`${apartmentName} — ${t.gallery.viewImage} ${i + 1}`}
     >
-      {isPlaceholder(src) ? (
+      {isPlaceholder(entry.image) ? (
         <div class="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-gradient-to-br from-accent-100 to-accent-200 transition-transform duration-300 group-hover:scale-105">
           <div class="text-center px-4">
             <p class="text-sm font-semibold text-accent-700/60">{apartmentName}</p>
@@ -39,8 +48,8 @@ const isPlaceholder = (src: string) => src.endsWith('.svg');
         </div>
       ) : (
         <img
-          src={src}
-          alt={`${apartmentName} — ${i + 1}`}
+          src={entry.image}
+          alt={entry.caption?.[lang] ? `${apartmentName} — ${entry.caption[lang]}` : `${apartmentName} — ${i + 1}`}
           loading={i === 0 ? 'eager' : 'lazy'}
           class="absolute inset-0 h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
         />
@@ -79,11 +88,11 @@ const isPlaceholder = (src: string) => src.endsWith('.svg');
 
     <!-- Counter -->
     <div class="absolute top-4 left-4 z-10 rounded-full bg-white/10 px-3 py-1.5 text-sm font-medium text-white/80">
-      <span class="lightbox-current">1</span> / {images.length}
+      <span class="lightbox-current">1</span> / {orderedImages.length}
     </div>
 
     <!-- Navigation -->
-    {images.length > 1 && (
+    {orderedImages.length > 1 && (
       <>
         <button
           type="button"
@@ -108,7 +117,7 @@ const isPlaceholder = (src: string) => src.endsWith('.svg');
 
     <!-- Image display area -->
     <div class="lightbox-content flex h-full w-full items-center justify-center px-4 py-16 sm:px-16 sm:py-20">
-      {images.map((src, i) => (
+      {orderedImages.map((entry, i) => (
         <div
           class:list={[
             'lightbox-slide absolute flex items-center justify-center',
@@ -116,7 +125,7 @@ const isPlaceholder = (src: string) => src.endsWith('.svg');
           ]}
           data-slide={i}
         >
-          {isPlaceholder(src) ? (
+          {isPlaceholder(entry.image) ? (
             <div class="flex aspect-[16/10] w-full max-w-4xl flex-col items-center justify-center gap-4 rounded-2xl bg-gradient-to-br from-accent-100 to-accent-200">
               <div class="text-center">
                 <p class="text-lg font-semibold text-accent-700/60">{apartmentName}</p>
@@ -125,8 +134,8 @@ const isPlaceholder = (src: string) => src.endsWith('.svg');
             </div>
           ) : (
             <img
-              src={src}
-              alt={`${apartmentName} — ${i + 1}`}
+              src={entry.image}
+              alt={entry.caption?.[lang] ? `${apartmentName} — ${entry.caption[lang]}` : `${apartmentName} — ${i + 1}`}
               class="max-h-[80vh] max-w-full rounded-lg object-contain"
             />
           )}
@@ -136,7 +145,7 @@ const isPlaceholder = (src: string) => src.endsWith('.svg');
   </div>
 </dialog>
 
-<script define:vars={{ galleryId, imageCount: images.length }}>
+<script define:vars={{ galleryId, imageCount: orderedImages.length }}>
   document.addEventListener('DOMContentLoaded', () => {
     const gallery = document.getElementById(galleryId);
     const dialog = document.getElementById(`${galleryId}-lightbox`);

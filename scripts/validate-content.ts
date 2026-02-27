@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import { basename, join, resolve } from 'node:path';
 import { parse as parseYaml } from 'yaml';
-import { FEATURE_ICON_OPTIONS } from '../src/content/cms-shared';
+import { APARTMENT_IMAGE_KIND_OPTIONS, FEATURE_ICON_OPTIONS } from '../src/content/cms-shared';
 
 const ROOT = resolve(import.meta.dirname, '..');
 const APARTMENTS_DIR = join(ROOT, 'src/content/apartments');
@@ -23,6 +23,18 @@ const seoSchema = z.object({
   ogImage: nonEmptyString.optional(),
 }).strict();
 
+const optionalBilingualCaption = z.object({
+  de: z.string().optional(),
+  en: z.string().optional(),
+}).strict();
+
+const apartmentImageSchema = z.object({
+  image: nonEmptyString,
+  kind: z.enum(APARTMENT_IMAGE_KIND_OPTIONS),
+  caption: optionalBilingualCaption.optional(),
+  isPrimary: z.boolean().optional(),
+}).strict();
+
 const apartmentSchema = z.object({
   name: nonEmptyString,
   tagline: bilingualString,
@@ -38,7 +50,7 @@ const apartmentSchema = z.object({
     z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Expected YYYY-MM-DD'),
     z.date(),
   ]).optional(),
-  images: z.array(nonEmptyString).min(1),
+  images: z.array(apartmentImageSchema).min(1),
   floor: bilingualString,
   order: z.number().int().positive(),
   seo: seoSchema.optional(),
@@ -181,15 +193,48 @@ function validateDecapConfig(): ValidationResult {
     result.errors.push('  [publish_mode] Expected "editorial_workflow".');
   }
 
-  if (data.media_folder !== 'public/images/uploads') {
-    result.errors.push('  [media_folder] Expected "public/images/uploads".');
+  if (data.media_folder !== 'public/images') {
+    result.errors.push('  [media_folder] Expected "public/images".');
   }
 
-  if (data.public_folder !== '/images/uploads') {
-    result.errors.push('  [public_folder] Expected "/images/uploads".');
+  if (data.public_folder !== '/images') {
+    result.errors.push('  [public_folder] Expected "/images".');
   }
 
   const collections = Array.isArray(data.collections) ? data.collections as Array<Record<string, unknown>> : [];
+  const apartmentsCollection = collections.find((collection) => collection.name === 'apartments');
+  if (apartmentsCollection?.media_folder !== 'public/images/apartments') {
+    result.errors.push('  [collections.apartments.media_folder] Expected "public/images/apartments".');
+  }
+  if (apartmentsCollection?.public_folder !== '/images/apartments') {
+    result.errors.push('  [collections.apartments.public_folder] Expected "/images/apartments".');
+  }
+  const apartmentFields = Array.isArray(apartmentsCollection?.fields)
+    ? apartmentsCollection.fields as Array<Record<string, unknown>>
+    : [];
+  const imagesField = apartmentFields.find((field) => field.name === 'images');
+  const imageSubFields = Array.isArray(imagesField?.fields) ? imagesField.fields as Array<Record<string, unknown>> : [];
+  const imageSubFieldNames = imageSubFields
+    .map((field) => field.name)
+    .filter((name): name is string => typeof name === 'string');
+  const requiredImageSubFields = ['image', 'kind', 'caption', 'isPrimary'];
+  const hasStructuredImageFields = requiredImageSubFields.every((requiredField) => imageSubFieldNames.includes(requiredField));
+  if (!hasStructuredImageFields) {
+    result.errors.push('  [collections.apartments.images] Expected structured image fields: image, kind, caption, isPrimary.');
+  }
+
+  const kindField = imageSubFields.find((field) => field.name === 'kind');
+  const kindOptions = Array.isArray(kindField?.options) ? kindField.options as Array<Record<string, unknown>> : [];
+  const kindOptionValues = kindOptions
+    .map((option) => option.value)
+    .filter((value): value is string => typeof value === 'string');
+  const expectedKindOptions = [...APARTMENT_IMAGE_KIND_OPTIONS];
+  const sameKindLength = kindOptionValues.length === expectedKindOptions.length;
+  const sameKindValues = sameKindLength && kindOptionValues.every((value, index) => value === expectedKindOptions[index]);
+  if (!sameKindValues) {
+    result.errors.push(`  [collections.apartments.images.kind.options] Expected image kind options: ${expectedKindOptions.join(', ')}`);
+  }
+
   const pagesCollection = collections.find((collection) => collection.name === 'pages');
   const files = Array.isArray(pagesCollection?.files) ? pagesCollection?.files as Array<Record<string, unknown>> : [];
   const homeFile = files.find((entry) => entry.name === 'home');
@@ -250,7 +295,24 @@ for (const file of getMdFiles(APARTMENTS_DIR)) {
     continue;
   }
 
-  parsed.data.images.forEach((image, index) => assertPathExists(result, `images[${index}]`, image));
+  parsed.data.images.forEach((imageEntry, index) => {
+    assertPathExists(result, `images[${index}].image`, imageEntry.image);
+
+    if (imageEntry.caption) {
+      const hasCaptionDe = (imageEntry.caption.de ?? '').trim().length > 0;
+      const hasCaptionEn = (imageEntry.caption.en ?? '').trim().length > 0;
+      if (hasCaptionDe !== hasCaptionEn) {
+        result.warnings.push(`  [images[${index}].caption] Provide DE and EN captions together, or leave both empty.`);
+      }
+    }
+  });
+
+  const primaryImageCount = parsed.data.images.filter((image) => image.isPrimary).length;
+  if (primaryImageCount === 0) {
+    result.warnings.push('  [images] No primary image selected; first image will be used as fallback.');
+  } else if (primaryImageCount > 1) {
+    result.errors.push('  [images] Multiple primary images selected; only one is allowed.');
+  }
 
   if (parsed.data.seo?.ogImage) {
     assertPathExists(result, 'seo.ogImage', parsed.data.seo.ogImage);

@@ -1,6 +1,6 @@
 import { defineCollection, z } from 'astro:content';
 import { glob } from 'astro/loaders';
-import { FEATURE_ICON_OPTIONS } from './cms-shared';
+import { APARTMENT_IMAGE_KIND_OPTIONS, FEATURE_ICON_OPTIONS } from './cms-shared';
 
 const bilingualString = z.object({
   de: z.string(),
@@ -64,6 +64,35 @@ const amenitiesSchema = z.union([z.array(bilingualString), z.array(z.string())])
   return value;
 }));
 
+const apartmentImageSchema = z.object({
+  image: z.string(),
+  kind: z.enum(APARTMENT_IMAGE_KIND_OPTIONS),
+  caption: bilingualString.optional(),
+  isPrimary: z.boolean().optional(),
+});
+
+const apartmentImagesSchema = z.union([z.array(apartmentImageSchema), z.array(z.string())]).transform((values) => values.map((value, index) => {
+  if (typeof value === 'string') {
+    const lowerPath = value.toLowerCase();
+    let kind: (typeof APARTMENT_IMAGE_KIND_OPTIONS)[number] = 'other';
+
+    if (lowerPath.includes('living') || lowerPath.includes('lounge')) kind = 'living';
+    else if (lowerPath.includes('bedroom')) kind = 'bedroom';
+    else if (lowerPath.includes('kitchen')) kind = 'kitchen';
+    else if (lowerPath.includes('bath')) kind = 'bathroom';
+    else if (lowerPath.includes('work') || lowerPath.includes('desk')) kind = 'workspace';
+    else if (lowerPath.includes('exterior') || lowerPath.includes('outside')) kind = 'exterior';
+
+    return {
+      image: value,
+      kind,
+      isPrimary: index === 0,
+    };
+  }
+
+  return value;
+}));
+
 const apartments = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/apartments' }),
   schema: z.object({
@@ -78,7 +107,7 @@ const apartments = defineCollection({
     amenities: amenitiesSchema,
     available: z.boolean(),
     availableFrom: availableFromSchema.optional(),
-    images: z.array(z.string()),
+    images: apartmentImagesSchema,
     floor: floorSchema,
     order: z.number(),
     seo: seoSchema.optional(),

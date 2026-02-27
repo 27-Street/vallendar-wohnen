@@ -76,8 +76,21 @@ For CTA links, use localized paths:
 ## 6. Image Upload Rules
 
 Uploaded files go to:
-- Disk path: `public/images/uploads`
-- Public URL: `/images/uploads/...`
+- Disk path: `public/images`
+- Public URL: `/images/...`
+
+Existing media availability:
+- Existing assets under `public/images` (for example `apartments/*` and `hero/*`) are available in the CMS media picker.
+- You can reuse existing files or upload new ones in the same media tree.
+
+Apartment image collections:
+- Every apartment has its own `Bilder` collection.
+- Each image entry includes:
+  - `Bilddatei`
+  - `Bildtyp` (living, bedroom, kitchen, etc.)
+  - optional bilingual caption
+  - `Primäres Bild` flag
+- The primary image is used for card/SEO fallback. If no primary image is set, the first image is used.
 
 Recommendations:
 - Use descriptive filenames.

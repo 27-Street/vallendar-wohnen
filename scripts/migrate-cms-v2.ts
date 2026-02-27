@@ -55,6 +55,19 @@ const AMENITY_TRANSLATIONS: Record<string, string> = {
   Fahrradstellplatz: 'Bicycle parking',
 };
 
+type ApartmentImageKind = 'living' | 'bedroom' | 'kitchen' | 'bathroom' | 'workspace' | 'exterior' | 'other';
+
+function inferImageKind(path: string): ApartmentImageKind {
+  const lower = path.toLowerCase();
+  if (lower.includes('living') || lower.includes('lounge')) return 'living';
+  if (lower.includes('bedroom')) return 'bedroom';
+  if (lower.includes('kitchen')) return 'kitchen';
+  if (lower.includes('bath')) return 'bathroom';
+  if (lower.includes('work') || lower.includes('desk')) return 'workspace';
+  if (lower.includes('exterior') || lower.includes('outside')) return 'exterior';
+  return 'other';
+}
+
 function toBilingualString(value: unknown): Bilingual {
   if (typeof value === 'object' && value && 'de' in (value as Record<string, unknown>) && 'en' in (value as Record<string, unknown>)) {
     return value as Bilingual;
@@ -100,6 +113,45 @@ function migrateApartments(): string[] {
 
     if (typeof data.description !== 'object' || !data.description) {
       data.description = toBilingualString(data.description);
+    }
+
+    if (Array.isArray(data.images)) {
+      data.images = data.images.map((image, index) => {
+        if (typeof image === 'string') {
+          return {
+            image,
+            kind: inferImageKind(image),
+            isPrimary: index === 0,
+          };
+        }
+
+        if (typeof image === 'object' && image) {
+          const typed = image as Record<string, unknown>;
+          return {
+            image: String(typed.image ?? ''),
+            kind: (typed.kind as string) ?? inferImageKind(String(typed.image ?? '')),
+            caption: typed.caption && typeof typed.caption === 'object' ? typed.caption : undefined,
+            isPrimary: Boolean(typed.isPrimary),
+          };
+        }
+
+        return {
+          image: '',
+          kind: 'other',
+          isPrimary: false,
+        };
+      });
+    } else {
+      data.images = [];
+    }
+
+    const primaryIndices = (data.images as Array<{ isPrimary?: boolean }>).flatMap((image, index) => (image.isPrimary ? [index] : []));
+    if (primaryIndices.length === 0 && (data.images as Array<unknown>).length > 0) {
+      (data.images as Array<{ isPrimary?: boolean }>)[0].isPrimary = true;
+    } else if (primaryIndices.length > 1) {
+      (data.images as Array<{ isPrimary?: boolean }>).forEach((image, index) => {
+        image.isPrimary = index === primaryIndices[0];
+      });
     }
 
     if (typeof data.seo !== 'object' || !data.seo) {

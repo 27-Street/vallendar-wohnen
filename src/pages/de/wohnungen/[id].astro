@@ -28,7 +28,8 @@ const seoTitle = apt.seo?.title?.[lang]?.trim()
   || `${apt.name} – ${apt.size} m², ab ${apt.pricePerMonth} €/Monat | VallendarWohnen`;
 const seoDescription = apt.seo?.description?.[lang]?.trim()
   || `${apt.name} in Vallendar: ${plainDescription} ${apt.rooms[lang]}, ${apt.size} m², ab ${apt.pricePerMonth} €/Monat.`;
-const seoImage = apt.seo?.ogImage?.trim() || `/images/apartments/${apartment.id}/og.png`;
+const primaryImage = apt.images.find((image) => image.isPrimary) ?? apt.images[0];
+const seoImage = apt.seo?.ogImage?.trim() || primaryImage?.image || `/og-default.png`;
 
 const siteUrl = Astro.site?.origin ?? 'https://lucky-cucurucho-b639b6.netlify.app';
 const apartmentJsonLd = {

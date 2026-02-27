@@ -41,9 +41,15 @@ amenities:
 available: true
 availableFrom: 2026-04-01
 images:
-  - /images/apartments/rheinblick/living.webp
-  - /images/apartments/rheinblick/bedroom.webp
-  - /images/apartments/rheinblick/kitchen.webp
+  - image: /images/apartments/rheinblick/living.webp
+    kind: living
+    isPrimary: true
+  - image: /images/apartments/rheinblick/bedroom.webp
+    kind: bedroom
+    isPrimary: false
+  - image: /images/apartments/rheinblick/kitchen.webp
+    kind: kitchen
+    isPrimary: false
 floor:
   de: 2. OG
   en: 2nd floor

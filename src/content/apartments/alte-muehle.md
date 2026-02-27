@@ -41,9 +41,15 @@ amenities:
 available: true
 availableFrom: 2026-04-01
 images:
-  - /images/apartments/alte-muehle/living.webp
-  - /images/apartments/alte-muehle/bedroom.webp
-  - /images/apartments/alte-muehle/kitchen.webp
+  - image: /images/apartments/alte-muehle/living.webp
+    kind: living
+    isPrimary: true
+  - image: /images/apartments/alte-muehle/bedroom.webp
+    kind: bedroom
+    isPrimary: false
+  - image: /images/apartments/alte-muehle/kitchen.webp
+    kind: kitchen
+    isPrimary: false
 floor:
   de: EG
   en: Ground floor
