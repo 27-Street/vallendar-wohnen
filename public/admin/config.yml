@@ -91,7 +91,7 @@ collections:
         name: images
         widget: list
         hint: "Mehrere Bilder möglich. Neue Uploads landen unter /images/uploads."
-        field: { label: Bild, widget: image, required: true }
+        field: { label: Bild, name: image, widget: image, required: true }
 
       - label: Stockwerk
         name: floor
