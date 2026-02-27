@@ -1,14 +1,17 @@
 import { z } from 'zod';
 import { readFileSync, readdirSync, existsSync } from 'node:fs';
-import { basename, join, resolve } from 'node:path';
+import { basename, join, relative, resolve, sep } from 'node:path';
 import { parse as parseYaml } from 'yaml';
 import { APARTMENT_IMAGE_KIND_OPTIONS, FEATURE_ICON_OPTIONS } from '../src/content/cms-shared';
 
 const ROOT = resolve(import.meta.dirname, '..');
+const PUBLIC_DIR = join(ROOT, 'public');
 const APARTMENTS_DIR = join(ROOT, 'src/content/apartments');
 const PAGES_DIR = join(ROOT, 'src/content/pages');
 const SETTINGS_DIR = join(ROOT, 'src/content/settings');
 const GUIDES_DIR = join(ROOT, 'src/content/guides');
+const APARTMENTS_MEDIA_DIR = join(PUBLIC_DIR, 'images/apartments');
+const HERO_MEDIA_DIR = join(PUBLIC_DIR, 'images/hero');
 const DECAP_CONFIG_PATH = join(ROOT, 'public/admin/config.yml');
 
 const nonEmptyString = z.string().refine((value) => value.trim().length > 0, 'Must not be empty');
@@ -197,7 +200,7 @@ function addZodErrors(result: ValidationResult, issues: z.ZodIssue[]): void {
 
 function resolvePublicPath(path: string): string {
   if (/^https?:\/\//.test(path)) return path;
-  if (path.startsWith('/')) return join(ROOT, 'public', path.slice(1));
+  if (path.startsWith('/')) return join(PUBLIC_DIR, path.slice(1));
   return join(ROOT, path);
 }
 
@@ -235,10 +238,46 @@ function assertSeoCompleteness(
   }
 }
 
+function normalizePublicAssetPath(path: string): string | null {
+  if (/^https?:\/\//.test(path)) return null;
+
+  const normalized = path.replace(/\\/g, '/');
+  if (normalized.startsWith('/')) return normalized;
+  if (normalized.startsWith('public/')) return `/${normalized.slice('public/'.length)}`;
+  return `/${normalized.replace(/^\.?\//, '')}`;
+}
+
+function getFilesRecursively(dir: string): string[] {
+  if (!existsSync(dir)) return [];
+
+  const files: string[] = [];
+  const entries = readdirSync(dir, { withFileTypes: true });
+  for (const entry of entries) {
+    if (entry.name.startsWith('.')) continue;
+
+    const fullPath = join(dir, entry.name);
+    if (entry.isDirectory()) {
+      files.push(...getFilesRecursively(fullPath));
+    } else if (entry.isFile()) {
+      files.push(fullPath);
+    }
+  }
+
+  return files;
+}
+
 function validateDecapConfig(): ValidationResult {
   const result = createResult(DECAP_CONFIG_PATH);
 
   const data = parseYaml(readFileSync(DECAP_CONFIG_PATH, 'utf-8')) as Record<string, unknown>;
+  const backend = typeof data.backend === 'object' && data.backend
+    ? data.backend as Record<string, unknown>
+    : null;
+
+  if (!backend || backend.name !== 'git-gateway-recursive') {
+    result.errors.push('  [backend.name] Expected "git-gateway-recursive".');
+  }
+
   const publishMode = data.publish_mode;
   if (publishMode !== 'editorial_workflow') {
     result.errors.push('  [publish_mode] Expected "editorial_workflow".');
@@ -254,11 +293,11 @@ function validateDecapConfig(): ValidationResult {
 
   const collections = Array.isArray(data.collections) ? data.collections as Array<Record<string, unknown>> : [];
   const apartmentsCollection = collections.find((collection) => collection.name === 'apartments');
-  if (apartmentsCollection?.media_folder !== 'public/images/apartments') {
-    result.errors.push('  [collections.apartments.media_folder] Expected "public/images/apartments".');
+  if (apartmentsCollection?.media_folder !== 'public/images/apartments/{{slug}}') {
+    result.errors.push('  [collections.apartments.media_folder] Expected "public/images/apartments/{{slug}}".');
   }
-  if (apartmentsCollection?.public_folder !== '/images/apartments') {
-    result.errors.push('  [collections.apartments.public_folder] Expected "/images/apartments".');
+  if (apartmentsCollection?.public_folder !== '/images/apartments/{{slug}}') {
+    result.errors.push('  [collections.apartments.public_folder] Expected "/images/apartments/{{slug}}".');
   }
   const apartmentFields = Array.isArray(apartmentsCollection?.fields)
     ? apartmentsCollection.fields as Array<Record<string, unknown>>
@@ -293,6 +332,14 @@ function validateDecapConfig(): ValidationResult {
   const pagesCollection = collections.find((collection) => collection.name === 'pages');
   const files = Array.isArray(pagesCollection?.files) ? pagesCollection?.files as Array<Record<string, unknown>> : [];
   const homeFile = files.find((entry) => entry.name === 'home');
+
+  if (homeFile?.media_folder !== 'public/images/hero') {
+    result.errors.push('  [collections.pages.files.home.media_folder] Expected "public/images/hero".');
+  }
+  if (homeFile?.public_folder !== '/images/hero') {
+    result.errors.push('  [collections.pages.files.home.public_folder] Expected "/images/hero".');
+  }
+
   const homeFields = Array.isArray(homeFile?.fields) ? homeFile?.fields as Array<Record<string, unknown>> : [];
   const heroField = homeFields.find((field) => field.name === 'hero');
   const heroFields = Array.isArray(heroField?.fields) ? heroField?.fields as Array<Record<string, unknown>> : [];
@@ -329,6 +376,7 @@ function validateDecapConfig(): ValidationResult {
 
 const results: ValidationResult[] = [];
 let hasErrors = false;
+const referencedMediaPaths = new Set<string>();
 
 function collectResult(result: ValidationResult): void {
   if (result.errors.length > 0) hasErrors = true;
@@ -343,6 +391,7 @@ for (const file of getMdFiles(APARTMENTS_DIR)) {
   const result = createResult(file);
   const data = extractFrontmatter(file);
   const parsed = apartmentSchema.safeParse(data);
+  const apartmentSlug = basename(file, '.md');
 
   if (!parsed.success) {
     addZodErrors(result, parsed.error.issues);
@@ -352,6 +401,13 @@ for (const file of getMdFiles(APARTMENTS_DIR)) {
 
   parsed.data.images.forEach((imageEntry, index) => {
     assertPathExists(result, `images[${index}].image`, imageEntry.image);
+    const expectedPrefix = `/images/apartments/${apartmentSlug}/`;
+    if (!imageEntry.image.startsWith(expectedPrefix)) {
+      result.errors.push(`  [images[${index}].image] Expected path to start with ${expectedPrefix}`);
+    }
+
+    const normalizedImagePath = normalizePublicAssetPath(imageEntry.image);
+    if (normalizedImagePath) referencedMediaPaths.add(normalizedImagePath);
 
     if (imageEntry.caption) {
       const hasCaptionDe = (imageEntry.caption.de ?? '').trim().length > 0;
@@ -373,6 +429,8 @@ for (const file of getMdFiles(APARTMENTS_DIR)) {
 
   if (parsed.data.seo?.ogImage) {
     assertPathExists(result, 'seo.ogImage', parsed.data.seo.ogImage);
+    const normalizedSeoPath = normalizePublicAssetPath(parsed.data.seo.ogImage);
+    if (normalizedSeoPath) referencedMediaPaths.add(normalizedSeoPath);
   }
 
   collectResult(result);
@@ -391,11 +449,19 @@ for (const file of getMdFiles(PAGES_DIR)) {
       assertPathExists(result, 'hero.images.desktop', parsed.data.hero.images.desktop);
       assertPathExists(result, 'hero.images.tablet', parsed.data.hero.images.tablet);
       assertPathExists(result, 'hero.images.mobile', parsed.data.hero.images.mobile);
+      const normalizedDesktop = normalizePublicAssetPath(parsed.data.hero.images.desktop);
+      const normalizedTablet = normalizePublicAssetPath(parsed.data.hero.images.tablet);
+      const normalizedMobile = normalizePublicAssetPath(parsed.data.hero.images.mobile);
+      if (normalizedDesktop) referencedMediaPaths.add(normalizedDesktop);
+      if (normalizedTablet) referencedMediaPaths.add(normalizedTablet);
+      if (normalizedMobile) referencedMediaPaths.add(normalizedMobile);
 
       assertSeoCompleteness(result, 'seo', parsed.data.seo);
 
       if (parsed.data.seo?.ogImage) {
         assertPathExists(result, 'seo.ogImage', parsed.data.seo.ogImage);
+        const normalizedSeoPath = normalizePublicAssetPath(parsed.data.seo.ogImage);
+        if (normalizedSeoPath) referencedMediaPaths.add(normalizedSeoPath);
       }
 
       parsed.data.editorialBlocks?.forEach((block, index) => {
@@ -454,9 +520,24 @@ for (const file of getMdFiles(SETTINGS_DIR)) {
   collectResult(result);
 }
 
+const orphanScanResult = createResult('public/images (orphan scan)');
+const managedMediaRoots = [APARTMENTS_MEDIA_DIR, HERO_MEDIA_DIR];
+
+for (const mediaRoot of managedMediaRoots) {
+  for (const absolutePath of getFilesRecursively(mediaRoot)) {
+    const publicPath = `/${relative(PUBLIC_DIR, absolutePath).split(sep).join('/')}`;
+    if (!referencedMediaPaths.has(publicPath)) {
+      orphanScanResult.warnings.push(`  [orphan] Unreferenced media file: ${publicPath}`);
+    }
+  }
+}
+collectResult(orphanScanResult);
+
 for (const result of results) {
   const status = result.errors.length === 0 ? '✓ PASS' : '✗ FAIL';
-  const shortPath = result.file.replace(`${ROOT}/`, '');
+  const shortPath = result.file.startsWith(`${ROOT}/`)
+    ? result.file.replace(`${ROOT}/`, '')
+    : result.file;
   console.log(`${status}  ${shortPath}`);
   for (const error of result.errors) console.log(error);
   for (const warning of result.warnings) console.log(`  ⚠ ${warning}`);

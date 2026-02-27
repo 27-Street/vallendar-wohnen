@@ -2,7 +2,7 @@
 # and invite Yannik as a user. Set registration to "Invite only" and
 # enable Git Gateway under Identity > Services.
 backend:
-  name: git-gateway
+  name: git-gateway-recursive
   branch: main
 
 publish_mode: editorial_workflow
@@ -29,8 +29,8 @@ collections:
     format: frontmatter
     summary: "{{name}}"
     preview_path: "de/wohnungen/{{slug}}"
-    media_folder: public/images/apartments
-    public_folder: /images/apartments
+    media_folder: public/images/apartments/{{slug}}
+    public_folder: /images/apartments/{{slug}}
     fields:
       - { label: Name, name: name, widget: string, hint: "Interner Wohnungsname (z. B. Rheinblick)." }
 
@@ -96,7 +96,7 @@ collections:
         widget: list
         min: 1
         summary: "{{fields.kind}} - {{fields.image}}"
-        hint: "Pro Wohnung eine eigene Bilder-Sammlung mit Bildtyp, Datei und optionaler Beschriftung."
+        hint: "Pro Wohnung eine eigene Bilder-Sammlung. Aus Liste entfernen = nur Referenz entfernen. Physisch löschen erfolgt in Medien."
         fields:
           - { label: Bilddatei, name: image, widget: image, required: true }
           -
@@ -119,7 +119,7 @@ collections:
             fields:
               - { label: Deutsch, name: de, widget: string, required: false }
               - { label: English, name: en, widget: string, required: false }
-          - { label: Primäres Bild (Karte/SEO Fallback), name: isPrimary, widget: boolean, required: false, default: false }
+          - { label: Primäres Bild (Karte/SEO Fallback), name: isPrimary, widget: boolean, required: false, default: false, hint: "Nur ein Bild sollte als primär markiert sein." }
 
       - label: Stockwerk
         name: floor
@@ -167,6 +167,8 @@ collections:
         name: home
         file: src/content/pages/home.md
         preview_path: "de/"
+        media_folder: public/images/hero
+        public_folder: /images/hero
         fields:
           - { label: Titel, name: title, widget: hidden, default: home }
 

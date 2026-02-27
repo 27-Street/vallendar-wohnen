@@ -80,17 +80,24 @@ Uploaded files go to:
 - Public URL: `/images/...`
 
 Existing media availability:
-- Existing assets under `public/images` (for example `apartments/*` and `hero/*`) are available in the CMS media picker.
+- Existing assets under `public/images` (for example `apartments/*` and `hero/*`) are available in the CMS media picker and in **Medien**.
 - You can reuse existing files or upload new ones in the same media tree.
 
 Apartment image collections:
 - Every apartment has its own `Bilder` collection.
+- Apartment uploads are written to `public/images/apartments/{{slug}}` (served as `/images/apartments/{{slug}}/...`).
 - Each image entry includes:
   - `Bilddatei`
   - `Bildtyp` (living, bedroom, kitchen, etc.)
   - optional bilingual caption
   - `Primäres Bild` flag
 - The primary image is used for card/SEO fallback. If no primary image is set, the first image is used.
+
+Reference vs physical delete:
+- Remove an item from apartment `Bilder` list: removes only the content reference.
+- Delete a file in **Medien**: physically deletes the file from the repository.
+- If you delete a still-referenced file in **Medien**, `npm run validate` fails with a missing-file error.
+- Unreferenced files are reported as warnings so they can be cleaned up manually.
 
 Recommendations:
 - Use descriptive filenames.
