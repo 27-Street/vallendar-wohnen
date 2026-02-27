@@ -23,7 +23,7 @@ rooms:
   de: 1,5 Zimmer
   en: 1.5 rooms
 maxOccupants: 1
-pricePerMonth: 550
+pricePerMonth: 580
 utilitiesPerMonth: 130
 amenities:
   - de: WLAN
@@ -53,7 +53,8 @@ seo:
     de: Alte Mühle - 38 m² Studentenwohnung in Vallendar
     en: Alte Mühle - 38 m² Student Apartment in Vallendar
   description:
-    de: Gemütliche möblierte Wohnung mit Terrasse im Erdgeschoss. Ruhige Lage in direkter WHU-Nähe.
+    de: Gemütliche möblierte Wohnung mit Terrasse im Erdgeschoss. Ruhige Lage in
+      direkter WHU-Nähe.
     en: Cozy furnished ground-floor apartment with terrace. Quiet location near WHU.
   ogImage: /images/apartments/alte-muehle/og.png
 ---
