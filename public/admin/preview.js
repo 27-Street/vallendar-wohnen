@@ -1,5 +1,5 @@
 (function () {
-  const cms = window.CMS || window.DecapCmsApp;
+  const cms = window.CMS || window.DecapCms || window.DecapCmsApp;
   if (!cms) return;
 
   const h = window.h || (window.React && window.React.createElement);
