@@ -140,6 +140,8 @@ The site includes a lightweight, cookie-free analytics solution. No cookies are 
 
 A Netlify Function at `/.netlify/functions/pageview` receives pageview beacons from the client-side script. Each pageview is logged with the page path, referrer, and language — no IP addresses, no cookies, no fingerprinting.
 
+Inquiry forms also emit a conversion event (`type: "inquiry_submit"`) including non-PII attribution fields such as landing path, traffic channel, and UTM values. This supports weekly qualified-organic inquiry reporting.
+
 **Viewing analytics data:**
 1. Go to the Netlify dashboard > **Functions** > **pageview** > **Logs**.
 2. Each log entry is a JSON object with `path`, `referrer`, `lang`, and `timestamp`.

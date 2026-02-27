@@ -22,9 +22,26 @@ const subjectDefault = apartmentName
     method="POST"
     data-netlify="true"
     netlify
+    data-form-name={formName}
+    data-form-type={apartmentName ? 'apartment-inquiry' : 'general-inquiry'}
+    data-apartment-name={apartmentName ?? ''}
     class="inquiry-form space-y-5"
   >
     <input type="hidden" name="form-name" value={formName} />
+    <input type="hidden" name="page_path" value="" />
+    <input type="hidden" name="landing_path" value="" />
+    <input type="hidden" name="first_landing_path" value="" />
+    <input type="hidden" name="referrer" value="" />
+    <input type="hidden" name="first_referrer" value="" />
+    <input type="hidden" name="utm_source" value="" />
+    <input type="hidden" name="utm_medium" value="" />
+    <input type="hidden" name="utm_campaign" value="" />
+    <input type="hidden" name="utm_term" value="" />
+    <input type="hidden" name="utm_content" value="" />
+    <input type="hidden" name="traffic_channel" value="" />
+    <input type="hidden" name="language" value={lang} />
+    <input type="hidden" name="form_type" value={apartmentName ? 'apartment-inquiry' : 'general-inquiry'} />
+    <input type="hidden" name="apartment_name" value={apartmentName ?? ''} />
 
     <!-- Name -->
     <div>
