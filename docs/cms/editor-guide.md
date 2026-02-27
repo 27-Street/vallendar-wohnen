@@ -54,6 +54,10 @@ Use these fields carefully:
 - Homepage `Abschnitt-Unterüberschrift`
 - Homepage `Redaktions-Blöcke` rich text content
 
+Homepage hero media:
+- Hero images (`desktop`, `tablet`, `mobile`) are edited in CMS media fields.
+- The live homepage and CMS preview read those image paths directly (no hardcoded hero image in page code).
+
 Security note:
 - Unsafe HTML is sanitized before rendering.
 

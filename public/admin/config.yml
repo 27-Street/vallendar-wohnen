@@ -153,6 +153,14 @@ collections:
                 fields:
                   - { label: Deutsch, name: de, widget: string }
                   - { label: English, name: en, widget: string }
+              - label: Hero-Bilder
+                name: images
+                widget: object
+                hint: "Alle Hero-Bilder kommen aus dem CMS-Media-Ordner."
+                fields:
+                  - { label: Desktop (groß), name: desktop, widget: image, required: true }
+                  - { label: Tablet, name: tablet, widget: image, required: true }
+                  - { label: Mobile, name: mobile, widget: image, required: true }
 
           - label: Abschnitt-Unterüberschrift (WYSIWYG)
             name: sectionSubheadline

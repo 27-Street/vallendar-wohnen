@@ -10,6 +10,10 @@ hero:
   cta:
     de: Wohnungen entdecken
     en: Discover Apartments
+  images:
+    desktop: /images/hero/hero-house.jpg
+    tablet: /images/hero/hero-house-tablet.jpg
+    mobile: /images/hero/hero-house-mobile.jpg
 sectionSubheadline:
   de: Drei individuell eingerichtete Wohnungen in bester Lage - direkt gegenüber der WHU.
   en: Three individually furnished apartments in a prime location - directly across from WHU.

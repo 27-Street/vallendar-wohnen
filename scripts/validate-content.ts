@@ -69,6 +69,11 @@ const homePageSchema = z.object({
     headline: bilingualString,
     subheadline: bilingualString,
     cta: bilingualString,
+    images: z.object({
+      desktop: nonEmptyString,
+      tablet: nonEmptyString,
+      mobile: nonEmptyString,
+    }).strict(),
   }).strict(),
   sectionSubheadline: bilingualString,
   features: z.array(
@@ -189,6 +194,20 @@ function validateDecapConfig(): ValidationResult {
   const files = Array.isArray(pagesCollection?.files) ? pagesCollection?.files as Array<Record<string, unknown>> : [];
   const homeFile = files.find((entry) => entry.name === 'home');
   const homeFields = Array.isArray(homeFile?.fields) ? homeFile?.fields as Array<Record<string, unknown>> : [];
+  const heroField = homeFields.find((field) => field.name === 'hero');
+  const heroFields = Array.isArray(heroField?.fields) ? heroField?.fields as Array<Record<string, unknown>> : [];
+  const heroImagesField = heroFields.find((field) => field.name === 'images');
+  const heroImageChildren = Array.isArray(heroImagesField?.fields) ? heroImagesField?.fields as Array<Record<string, unknown>> : [];
+  const heroImageNames = heroImageChildren
+    .map((field) => field.name)
+    .filter((name): name is string => typeof name === 'string');
+  const expectedHeroImageNames = ['desktop', 'tablet', 'mobile'];
+
+  const hasHeroImageFields = expectedHeroImageNames.every((expected) => heroImageNames.includes(expected));
+  if (!hasHeroImageFields) {
+    result.errors.push('  [collections.pages.home.hero.images] Expected desktop/tablet/mobile image fields.');
+  }
+
   const featuresField = homeFields.find((field) => field.name === 'features');
   const featureFields = Array.isArray(featuresField?.fields) ? featuresField?.fields as Array<Record<string, unknown>> : [];
   const iconField = featureFields.find((field) => field.name === 'icon');
@@ -250,6 +269,10 @@ for (const file of getMdFiles(PAGES_DIR)) {
     if (!parsed.success) {
       addZodErrors(result, parsed.error.issues);
     } else {
+      assertPathExists(result, 'hero.images.desktop', parsed.data.hero.images.desktop);
+      assertPathExists(result, 'hero.images.tablet', parsed.data.hero.images.tablet);
+      assertPathExists(result, 'hero.images.mobile', parsed.data.hero.images.mobile);
+
       if (parsed.data.seo?.ogImage) {
         assertPathExists(result, 'seo.ogImage', parsed.data.seo.ogImage);
       }

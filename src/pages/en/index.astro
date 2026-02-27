@@ -59,9 +59,9 @@ const localizedFaq = faqItems.map((item) => ({
     <!-- Hero background image with responsive sources -->
     <div class="absolute inset-0">
       <picture>
-        <source media="(max-width: 640px)" srcset="/images/hero/hero-house-mobile.jpg" />
-        <source media="(max-width: 1024px)" srcset="/images/hero/hero-house-tablet.jpg" />
-        <img src="/images/hero/hero-house.jpg" alt="" class="h-full w-full object-cover" aria-hidden="true" />
+        <source media="(max-width: 640px)" srcset={hero.images.mobile} />
+        <source media="(max-width: 1024px)" srcset={hero.images.tablet} />
+        <img src={hero.images.desktop} alt="" class="h-full w-full object-cover" aria-hidden="true" />
       </picture>
     </div>
     <!-- Gradient overlay for text readability -->

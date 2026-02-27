@@ -186,6 +186,23 @@ function migrateHomePage(): string[] {
     };
   }
 
+  if (
+    typeof data.hero !== 'object'
+    || !data.hero
+    || typeof (data.hero as Record<string, unknown>).images !== 'object'
+    || !(data.hero as Record<string, unknown>).images
+  ) {
+    const hero = (data.hero as Record<string, unknown> | undefined) ?? {};
+    data.hero = {
+      ...hero,
+      images: {
+        desktop: '/images/hero/hero-house.jpg',
+        tablet: '/images/hero/hero-house-tablet.jpg',
+        mobile: '/images/hero/hero-house-mobile.jpg',
+      },
+    };
+  }
+
   writeFrontmatter(HOME_FILE, data, body);
   changed.push(HOME_FILE);
   return changed;

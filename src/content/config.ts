@@ -93,6 +93,11 @@ const pages = defineCollection({
       headline: bilingualString,
       subheadline: bilingualString,
       cta: bilingualString,
+      images: z.object({
+        desktop: z.string(),
+        tablet: z.string(),
+        mobile: z.string(),
+      }),
     }).optional(),
     sectionSubheadline: bilingualString.optional(),
     features: z.array(z.object({

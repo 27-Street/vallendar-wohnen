@@ -1,0 +1,337 @@
+:root {
+  --cmsv2-accent-50: #f4f7f4;
+  --cmsv2-accent-100: #e2eae1;
+  --cmsv2-accent-200: #c5d5c3;
+  --cmsv2-accent-700: #364f33;
+  --cmsv2-accent-800: #2d402b;
+  --cmsv2-accent-900: #253525;
+  --cmsv2-neutral-50: #fafaf9;
+  --cmsv2-neutral-100: #f5f5f4;
+  --cmsv2-neutral-200: #e7e5e4;
+  --cmsv2-neutral-500: #78716c;
+  --cmsv2-neutral-700: #44403c;
+  --cmsv2-neutral-900: #1c1917;
+}
+
+.cmsv2-shell {
+  background: var(--cmsv2-neutral-50);
+  color: var(--cmsv2-neutral-900);
+  font-family: Inter, "Segoe UI", Arial, sans-serif;
+  min-height: 100vh;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.cmsv2-page {
+  background: #fff;
+  border: 1px solid var(--cmsv2-neutral-200);
+  border-radius: 16px;
+  overflow: hidden;
+  margin: 0 auto;
+  max-width: 980px;
+}
+
+.cmsv2-hero {
+  position: relative;
+  background: linear-gradient(135deg, var(--cmsv2-accent-900), var(--cmsv2-accent-700));
+  color: #fff;
+  min-height: 220px;
+}
+
+.cmsv2-home-hero {
+  min-height: 280px;
+}
+
+.cmsv2-hero-image {
+  background-size: cover;
+  background-position: center;
+}
+
+.cmsv2-hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(10, 20, 10, 0.55);
+}
+
+.cmsv2-hero-content {
+  position: relative;
+  z-index: 1;
+  padding: 28px;
+}
+
+.cmsv2-back-link {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 13px;
+}
+
+.cmsv2-hero-head {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: space-between;
+}
+
+.cmsv2-title {
+  font-size: 34px;
+  font-weight: 700;
+  line-height: 1.1;
+  margin: 12px 0 6px;
+}
+
+.cmsv2-tagline {
+  color: rgba(255, 255, 255, 0.86);
+  font-size: 16px;
+  margin: 8px 0 0;
+  max-width: 740px;
+}
+
+.cmsv2-badge {
+  border-radius: 999px;
+  display: inline-flex;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 6px 10px;
+  white-space: nowrap;
+}
+
+.cmsv2-badge-live {
+  background: rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  color: #fff;
+}
+
+.cmsv2-badge-off {
+  background: rgba(25, 25, 25, 0.5);
+  color: #f5f5f4;
+}
+
+.cmsv2-hero-cta {
+  background: #fff;
+  border-radius: 999px;
+  color: var(--cmsv2-accent-900);
+  display: inline-block;
+  font-size: 13px;
+  font-weight: 700;
+  margin-top: 18px;
+  padding: 9px 14px;
+}
+
+.cmsv2-section {
+  padding: 26px 28px;
+}
+
+.cmsv2-section + .cmsv2-section {
+  border-top: 1px solid var(--cmsv2-neutral-200);
+}
+
+.cmsv2-section-title {
+  color: var(--cmsv2-neutral-900);
+  font-size: 26px;
+  font-weight: 700;
+  margin: 0 0 12px;
+}
+
+.cmsv2-subheadline {
+  color: var(--cmsv2-neutral-500);
+  margin: 0;
+}
+
+.cmsv2-main-grid {
+  display: grid;
+  gap: 18px;
+  grid-template-columns: 2fr 1fr;
+}
+
+.cmsv2-main-left p {
+  color: var(--cmsv2-neutral-700);
+  line-height: 1.55;
+  margin: 0 0 12px;
+}
+
+.cmsv2-main-right {
+  background: var(--cmsv2-neutral-100);
+  border: 1px solid var(--cmsv2-neutral-200);
+  border-radius: 14px;
+  padding: 16px;
+}
+
+.cmsv2-card-title {
+  margin: 0 0 10px;
+}
+
+.cmsv2-price-lines p {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  margin: 0 0 8px;
+}
+
+.cmsv2-total {
+  border-top: 1px solid var(--cmsv2-neutral-200);
+  margin-top: 12px;
+  padding-top: 12px;
+}
+
+.cmsv2-stat-grid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-top: 18px;
+}
+
+.cmsv2-stat {
+  background: var(--cmsv2-neutral-100);
+  border: 1px solid var(--cmsv2-neutral-200);
+  border-radius: 12px;
+  padding: 10px;
+}
+
+.cmsv2-stat span {
+  color: var(--cmsv2-neutral-500);
+  display: block;
+  font-size: 12px;
+  margin-bottom: 4px;
+}
+
+.cmsv2-stat strong {
+  font-size: 16px;
+}
+
+.cmsv2-chip-grid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.cmsv2-chip {
+  background: var(--cmsv2-neutral-100);
+  border: 1px solid var(--cmsv2-neutral-200);
+  border-radius: 999px;
+  display: inline-flex;
+  font-size: 13px;
+  font-weight: 600;
+  justify-content: center;
+  padding: 8px 10px;
+}
+
+.cmsv2-feature-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.cmsv2-feature-card {
+  align-items: center;
+  background: var(--cmsv2-neutral-100);
+  border: 1px solid var(--cmsv2-neutral-200);
+  border-radius: 12px;
+  display: flex;
+  gap: 10px;
+  padding: 11px;
+}
+
+.cmsv2-feature-icon {
+  background: var(--cmsv2-accent-100);
+  border-radius: 8px;
+  color: var(--cmsv2-accent-800);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 5px 7px;
+}
+
+.cmsv2-feature-label {
+  color: var(--cmsv2-neutral-900);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.cmsv2-editorial {
+  background: #fff;
+}
+
+.cmsv2-editorial-stack {
+  display: grid;
+  gap: 12px;
+}
+
+.cmsv2-editorial-card {
+  background: var(--cmsv2-accent-50);
+  border: 1px solid var(--cmsv2-accent-200);
+  border-radius: 12px;
+  padding: 14px;
+}
+
+.cmsv2-editorial-card p {
+  color: var(--cmsv2-neutral-700);
+  line-height: 1.5;
+  margin: 0 0 10px;
+}
+
+.cmsv2-editorial-title {
+  margin: 0 0 10px;
+}
+
+.cmsv2-callout-info {
+  background: var(--cmsv2-accent-50);
+  border-color: var(--cmsv2-accent-200);
+}
+
+.cmsv2-callout-success {
+  background: #ecfdf5;
+  border-color: #a7f3d0;
+}
+
+.cmsv2-callout-warning {
+  background: #fffbeb;
+  border-color: #fde68a;
+}
+
+.cmsv2-cta-row {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: space-between;
+}
+
+.cmsv2-cta-text {
+  margin: 0;
+}
+
+.cmsv2-cta-button {
+  background: var(--cmsv2-accent-700);
+  border-radius: 999px;
+  color: #fff;
+  display: inline-flex;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 8px 13px;
+}
+
+.cmsv2-generic {
+  padding: 24px 28px;
+}
+
+@media (max-width: 860px) {
+  .cmsv2-title {
+    font-size: 28px;
+  }
+
+  .cmsv2-main-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .cmsv2-stat-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .cmsv2-chip-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .cmsv2-feature-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
