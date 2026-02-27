@@ -63,4 +63,11 @@ seo:
       direkter WHU-Nähe.
     en: Cozy furnished ground-floor apartment with terrace. Quiet location near WHU.
   ogImage: /images/apartments/alte-muehle/og.png
+  ogImageAlt:
+    de: Studentenwohnung Alte Mühle in Vallendar
+    en: Alte Mühle student apartment in Vallendar
+  keywords:
+    - alte mühle vallendar
+    - studentenwohnung whu
+    - furnished apartment vallendar
 ---

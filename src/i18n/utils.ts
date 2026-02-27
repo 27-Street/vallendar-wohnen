@@ -30,6 +30,7 @@ export function getRouteFromUrl(url: URL): string {
 /** Route mapping between DE and EN paths */
 const routeMap: Record<string, Record<Language, string>> = {
   apartments: { de: 'wohnungen', en: 'apartments' },
+  guides: { de: 'guides', en: 'guides' },
   contact: { de: 'kontakt', en: 'contact' },
   imprint: { de: 'impressum', en: 'imprint' },
   privacy: { de: 'datenschutz', en: 'privacy' },

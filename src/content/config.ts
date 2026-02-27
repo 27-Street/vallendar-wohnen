@@ -22,6 +22,10 @@ const seoSchema = z.object({
   title: bilingualString,
   description: bilingualString,
   ogImage: z.string().optional(),
+  ogImageAlt: bilingualString.optional(),
+  noindex: z.boolean().optional(),
+  canonicalPath: z.string().optional(),
+  keywords: z.array(z.string()).optional(),
 });
 
 const availableFromSchema = z.union([z.string(), z.date()]).transform((value) => (
@@ -189,4 +193,27 @@ const settings = defineCollection({
   }),
 });
 
-export const collections = { apartments, pages, settings };
+const guides = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/guides' }),
+  schema: z.object({
+    title: bilingualString,
+    description: bilingualString,
+    excerpt: bilingualString,
+    publishedAt: z.string(),
+    readingMinutes: z.number().int().positive(),
+    category: z.enum(['exchange', 'living', 'logistics']),
+    order: z.number().int().positive(),
+    heroImage: z.string().optional(),
+    sections: z.array(z.object({
+      heading: bilingualString,
+      body: bilingualString,
+    })).min(1),
+    faq: z.array(z.object({
+      question: bilingualString,
+      answer: bilingualString,
+    })).optional(),
+    seo: seoSchema.optional(),
+  }),
+});
+
+export const collections = { apartments, pages, settings, guides };

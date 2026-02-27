@@ -10,14 +10,34 @@ interface Props {
   title: string;
   description: string;
   lang: Language;
+  canonicalPath?: string;
   ogImage?: string;
+  ogImageAlt?: string;
   ogType?: string;
+  noindex?: boolean;
+  robots?: string;
+  keywords?: string[];
+  structuredData?: Record<string, unknown> | Array<Record<string, unknown>>;
+  alternates?: Array<{ lang: string; href: string }>;
 }
 
-const { title, description, lang, ogImage, ogType } = Astro.props;
+const {
+  title,
+  description,
+  lang,
+  canonicalPath,
+  ogImage,
+  ogImageAlt,
+  ogType,
+  noindex,
+  robots,
+  keywords,
+  structuredData,
+  alternates,
+} = Astro.props;
 const t = getTranslation(lang);
 const currentPath = Astro.url.pathname;
-const canonicalUrl = currentPath;
+const canonicalUrl = canonicalPath ?? currentPath;
 ---
 
 <!doctype html>
@@ -34,9 +54,15 @@ const canonicalUrl = currentPath;
       lang={lang}
       canonicalUrl={canonicalUrl}
       ogImage={ogImage}
+      ogImageAlt={ogImageAlt}
       type={ogType}
+      noindex={noindex}
+      robots={robots}
+      keywords={keywords}
+      structuredData={structuredData}
+      alternates={alternates}
     />
-    <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+    <slot name="head" />
   </head>
   <body class="flex min-h-screen flex-col">
     <a
@@ -57,17 +83,6 @@ const canonicalUrl = currentPath;
       <slot />
     </main>
     <Footer lang={lang} />
-    <script>
-      if (window.netlifyIdentity) {
-        window.netlifyIdentity.on('init', (user) => {
-          if (!user) {
-            window.netlifyIdentity.on('login', () => {
-              document.location.href = '/admin/';
-            });
-          }
-        });
-      }
-    </script>
     <script src="../scripts/scroll-animations.ts"></script>
     <script src="../scripts/analytics.ts"></script>
   </body>

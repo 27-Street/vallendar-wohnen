@@ -16,7 +16,7 @@ This guide explains how to edit apartments and homepage content in Decap CMS wit
 
 1. Open `/admin/` on the live site.
 2. Sign in with your invited Netlify Identity account.
-3. Work inside **Wohnungen** and **Seiten > Startseite** for this release wave.
+3. Work inside **Wohnungen**, **Seiten**, and **Guides**.
 
 ## 2. Draft and Review Workflow
 
@@ -99,10 +99,13 @@ Recommendations:
 
 ## 7. SEO Fields
 
-Apartments and homepage have optional SEO overrides:
+Apartments, homepage, and guides support SEO fields:
 - Title (DE/EN)
 - Description (DE/EN)
 - OG image
+- OG image alt text (DE/EN)
+- Keywords
+- Optional canonical path / noindex for advanced cases
 
 If SEO fields are empty, the site falls back to default generated metadata.
 

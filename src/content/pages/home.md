@@ -80,6 +80,16 @@ editorialBlocks:
     buttonHref:
       de: /de/kontakt
       en: /en/contact
+  - type: ctaRow
+    text:
+      de: Neu in Vallendar? Nutzen Sie unsere Exchange-Guides.
+      en: New to Vallendar? Use our exchange guides.
+    buttonLabel:
+      de: Zu den Guides
+      en: Explore guides
+    buttonHref:
+      de: /de/guides
+      en: /en/guides
 seo:
   title:
     de: Möblierte Studentenwohnungen in Vallendar | VallendarWohnen
@@ -88,4 +98,12 @@ seo:
     de: Möblierte Apartments für Studierende in Vallendar, direkt gegenüber der WHU. Ab 490 €/Monat, voll ausgestattet mit WLAN und Einbauküche.
     en: Furnished apartments for students in Vallendar, right across from WHU. From €490/month, fully equipped with Wi-Fi and fitted kitchen.
   ogImage: /og-default.png
+  ogImageAlt:
+    de: Möblierte Studentenwohnungen in Vallendar
+    en: Furnished student apartments in Vallendar
+  keywords:
+    - whu housing
+    - vallendar student apartment
+    - furnished apartment vallendar
+    - exchange student housing germany
 ---

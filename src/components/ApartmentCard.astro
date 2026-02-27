@@ -39,6 +39,9 @@ const priceDisplay = lang === 'de'
         src={primaryImage.image}
         alt={primaryImageAlt}
         loading="lazy"
+        decoding="async"
+        width="1600"
+        height="1200"
         class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
       />
     ) : (

@@ -1,0 +1,62 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import { getSiteOrigin } from '../../../lib/seo';
+
+const lang = 'en' as const;
+const siteOrigin = getSiteOrigin(Astro.site);
+const guides = (await getCollection('guides'))
+  .sort((a, b) => a.data.order - b.data.order);
+
+const structuredData = [{
+  '@context': 'https://schema.org',
+  '@type': 'CollectionPage',
+  name: 'Exchange Student Guides',
+  url: `${siteOrigin}/en/guides/`,
+  inLanguage: 'en-US',
+  mainEntity: {
+    '@type': 'ItemList',
+    itemListElement: guides.map((guide, index) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      url: `${siteOrigin}/en/guides/${guide.id}/`,
+      name: guide.data.title.en,
+    })),
+  },
+}];
+---
+
+<BaseLayout
+  title="Exchange Student Housing Guides | VallendarWohnen"
+  description="Practical guides for WHU exchange students: housing search, move-in preparation, local setup, and semester planning in Vallendar."
+  lang={lang}
+  structuredData={structuredData}
+>
+  <section class="bg-gradient-to-br from-accent-950 via-accent-800 to-accent-950 pb-16 pt-32">
+    <div class="mx-auto max-w-6xl px-4 sm:px-6">
+      <h1 class="font-serif text-4xl font-bold text-white sm:text-5xl">Exchange Student Guides</h1>
+      <p class="mt-4 max-w-2xl text-lg text-accent-100/85">
+        Practical playbooks for finding and securing student housing in Vallendar with less stress.
+      </p>
+    </div>
+  </section>
+
+  <section class="bg-white py-16 sm:py-20">
+    <div class="mx-auto max-w-6xl px-4 sm:px-6">
+      <div class="grid gap-6 md:grid-cols-2">
+        {guides.map((guide) => (
+          <article class="rounded-2xl border border-neutral-200 bg-neutral-50 p-6 transition-shadow hover:shadow-md">
+            <p class="text-xs font-semibold uppercase tracking-wide text-accent-700">{guide.data.publishedAt}</p>
+            <h2 class="mt-2 font-serif text-2xl font-bold text-neutral-900">
+              <a href={`/en/guides/${guide.id}/`} class="hover:text-accent-700">{guide.data.title.en}</a>
+            </h2>
+            <p class="mt-3 text-sm leading-relaxed text-neutral-600">{guide.data.excerpt.en}</p>
+            <a href={`/en/guides/${guide.id}/`} class="mt-5 inline-flex items-center text-sm font-semibold text-accent-700 hover:text-accent-900">
+              Read guide →
+            </a>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+</BaseLayout>

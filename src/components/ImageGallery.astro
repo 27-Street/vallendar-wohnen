@@ -51,6 +51,10 @@ const isPlaceholder = (src: string) => src.endsWith('.svg');
           src={entry.image}
           alt={entry.caption?.[lang] ? `${apartmentName} — ${entry.caption[lang]}` : `${apartmentName} — ${i + 1}`}
           loading={i === 0 ? 'eager' : 'lazy'}
+          decoding="async"
+          fetchpriority={i === 0 ? 'high' : 'auto'}
+          width="1600"
+          height="1200"
           class="absolute inset-0 h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
         />
       )}
@@ -136,6 +140,7 @@ const isPlaceholder = (src: string) => src.endsWith('.svg');
             <img
               src={entry.image}
               alt={entry.caption?.[lang] ? `${apartmentName} — ${entry.caption[lang]}` : `${apartmentName} — ${i + 1}`}
+              loading="lazy"
               class="max-h-[80vh] max-w-full rounded-lg object-contain"
             />
           )}
