@@ -31,3 +31,6 @@ jobs:
 
       - name: SEO audit
         run: npm run seo:audit
+
+      - name: Internal link audit
+        run: npm run links:audit
