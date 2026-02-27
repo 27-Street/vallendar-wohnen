@@ -7,7 +7,6 @@ import FAQAccordion from '../../components/FAQAccordion.astro';
 import RichText from '../../components/RichText.astro';
 import { getTranslation } from '../../i18n/translations';
 import { buildLocalBusinessSchema, buildOrganizationSchema, buildWebsiteSchema, getSiteOrigin } from '../../lib/seo';
-import { translatePath } from '../../i18n/utils';
 
 const lang = 'en' as const;
 const t = getTranslation(lang);
@@ -42,12 +41,10 @@ const minPrice = sortedApartments.length > 0
   ? Math.min(...sortedApartments.map((apt) => apt.data.pricePerMonth))
   : null;
 
-const heroStats = [
-  '2-minute walk to WHU',
-  `${sortedApartments.length} fully equipped apartments`,
-  availableApartmentCount > 0
-    ? `${availableApartmentCount} currently available`
-    : 'Currently fully booked',
+const quickFacts = [
+  { label: 'Walk to WHU', value: '2 minutes' },
+  { label: 'Available apartments', value: `${availableApartmentCount} of ${sortedApartments.length}` },
+  { label: 'Rent from', value: minPrice !== null ? `€${minPrice} / month` : 'On request' },
 ];
 
 const conceptIntro = [
@@ -89,8 +86,8 @@ const conceptCards = [
     <link rel="preload" as="image" href={hero.images.desktop} media="(min-width: 1025px)" fetchpriority="high" />
   </Fragment>
 
-  <!-- Hero Section -->
-  <section class="relative flex min-h-[82vh] items-center overflow-hidden pb-24 pt-32 sm:min-h-[88vh] sm:pb-28">
+  <!-- Hero Section /* Golden-ratio spacing rhythm: 1.3125, 2.125, 3.4375, 5.5625, 8.9375rem */ -->
+  <section class="relative flex min-h-[56svh] items-center overflow-hidden pb-[3.4375rem] pt-[5.5625rem] sm:min-h-[62vh]">
     <div class="absolute inset-0">
       <picture>
         <source media="(max-width: 640px)" srcset={hero.images.mobile} />
@@ -111,59 +108,56 @@ const conceptCards = [
     <div class="absolute inset-0 bg-gradient-to-b from-accent-950/75 via-accent-950/55 to-accent-950/75"></div>
 
     <div class="relative z-10 mx-auto max-w-5xl px-4 text-center sm:px-6">
-      <p class="text-xs font-semibold uppercase tracking-[0.2em] text-white/80">
-        Welcome to VallendarWohnen
-      </p>
-      <h1 data-animate="fade-in" class="mt-4 font-serif text-4xl font-extrabold leading-tight text-white sm:text-5xl md:text-6xl lg:text-7xl">
+      <h1 data-animate="fade-in" class="font-serif text-4xl font-extrabold leading-tight text-white sm:text-5xl md:text-6xl lg:text-7xl">
         {hero.headline[lang]}
       </h1>
-      <p data-animate="fade-up" class="mx-auto mt-6 max-w-3xl text-lg leading-relaxed text-white/90 sm:text-xl">
+      <p data-animate="fade-up" class="mx-auto mt-[2.125rem] max-w-3xl text-lg leading-relaxed text-white/90 sm:text-xl">
         {hero.subheadline[lang]}
       </p>
-      <div class="mt-10 flex flex-wrap items-center justify-center gap-3">
+      <div class="mt-[3.4375rem]">
         <a
           href={`#${apartmentsAnchorId}`}
-          class="inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-semibold text-neutral-900 transition-colors hover:bg-neutral-100"
+          class="inline-flex items-center gap-2 rounded-full bg-white px-[1.375rem] py-[0.85rem] text-sm font-semibold text-neutral-900 transition-colors hover:bg-neutral-100"
         >
           {hero.cta[lang]}
           <Icon name="lucide:arrow-down" class="h-4 w-4" />
         </a>
-        <a
-          href={translatePath('/contact', lang)}
-          class="inline-flex items-center gap-2 rounded-full border border-white/40 bg-white/10 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-white/20"
-        >
-          Contact us
-          <Icon name="lucide:arrow-right" class="h-4 w-4" />
-        </a>
       </div>
-      <ul class="mt-10 grid gap-3 sm:grid-cols-3">
-        {heroStats.map((stat) => (
-          <li class="rounded-xl border border-white/20 bg-white/10 px-4 py-3 text-center text-xs font-medium text-white/95 backdrop-blur-sm">
-            {stat}
-          </li>
-        ))}
-      </ul>
     </div>
   </section>
 
-  <section class="bg-neutral-100 pb-20 sm:pb-24">
+  <!-- Quick Facts Section -->
+  <section class="bg-neutral-100 pb-[3.4375rem] pt-[1.3125rem] sm:pb-[5.5625rem] sm:pt-[2.125rem]">
     <div class="mx-auto max-w-7xl px-4 sm:px-6">
-      <div class="-mt-10 sm:-mt-12 lg:-mt-14">
-        <RichText content={sectionSubheadline[lang]} className="mx-auto max-w-3xl rounded-2xl bg-white px-6 py-5 text-center ring-1 ring-neutral-200 shadow-md shadow-neutral-300/30" />
+      <div class="mx-auto max-w-5xl">
+        <p class="text-center text-xs font-semibold uppercase tracking-[0.16em] text-neutral-500">
+          At a glance
+        </p>
+        <div class="mt-[1.3125rem] grid gap-[1.3125rem] sm:grid-cols-3">
+          {quickFacts.map((fact) => (
+            <article class="rounded-2xl bg-white px-[1.3125rem] py-[2.125rem] text-center ring-1 ring-neutral-200">
+              <p class="text-xs uppercase tracking-[0.08em] text-neutral-500">{fact.label}</p>
+              <p class="mt-[0.8125rem] text-lg font-semibold text-neutral-900">{fact.value}</p>
+            </article>
+          ))}
+        </div>
       </div>
     </div>
   </section>
 
   <!-- Features / Highlights Section -->
-  <section class="bg-neutral-100 pb-20 sm:pb-24">
+  <section class="bg-neutral-100 pb-[5.5625rem] sm:pb-[8.9375rem]">
     <div class="mx-auto max-w-7xl px-4 sm:px-6">
-      <div data-animate-stagger class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+      <h2 data-animate="fade-in" class="text-center font-serif text-3xl font-bold text-neutral-900 sm:text-4xl">
+        {t.sections.features}
+      </h2>
+      <div data-animate-stagger class="mt-[2.125rem] grid gap-[1.3125rem] sm:mt-[3.4375rem] sm:gap-[2.125rem] sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
         {features.map((feature) => (
-          <div data-animate="fade-in" class="flex min-h-44 flex-col items-center justify-center rounded-3xl bg-white p-6 text-center ring-1 ring-neutral-200 transition-all duration-200 hover:-translate-y-1 hover:shadow-lg">
+          <div data-animate="fade-in" class="flex min-h-[12.875rem] flex-col items-center justify-center rounded-3xl bg-white p-[1.3125rem] text-center ring-1 ring-neutral-200 transition-all duration-200 hover:-translate-y-1 hover:shadow-lg sm:p-[2.125rem]">
             <span class="flex h-12 w-12 items-center justify-center rounded-full bg-neutral-100 text-neutral-900">
               <Icon name={`lucide:${feature.icon}`} class="h-5 w-5" />
             </span>
-            <span class="mt-4 text-base font-semibold text-neutral-800">{feature.label[lang]}</span>
+            <span class="mt-[1.3125rem] text-base font-semibold text-neutral-800">{feature.label[lang]}</span>
           </div>
         ))}
       </div>
@@ -171,13 +165,14 @@ const conceptCards = [
   </section>
 
   <!-- Apartment Cards Section -->
-  <section id={apartmentsAnchorId} class="bg-white py-20 sm:py-28">
+  <section id={apartmentsAnchorId} class="bg-white py-[5.5625rem] sm:py-[8.9375rem]">
     <div class="mx-auto max-w-6xl px-4 sm:px-6">
       <h2 data-animate="fade-in" class="text-center font-serif text-3xl font-bold text-neutral-900 sm:text-4xl">
         {t.sections.apartments}
       </h2>
+      <RichText content={sectionSubheadline[lang]} className="mx-auto mt-[1.3125rem] max-w-2xl text-center" />
 
-      <div data-animate-stagger class="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      <div data-animate-stagger class="mt-[3.4375rem] grid gap-[2.125rem] sm:mt-[5.5625rem] sm:grid-cols-2 lg:grid-cols-3">
         {sortedApartments.map((apt) => (
           <div data-animate="fade-up">
             <ApartmentCard apartment={apt} lang={lang} />
@@ -188,25 +183,25 @@ const conceptCards = [
   </section>
 
   <!-- Concept Section -->
-  <section class="bg-neutral-100 py-20 sm:py-28">
+  <section class="bg-neutral-100 py-[5.5625rem] sm:py-[8.9375rem]">
     <div class="mx-auto max-w-7xl px-4 sm:px-6">
       <h2 data-animate="fade-in" class="text-center font-serif text-4xl font-bold text-neutral-900 sm:text-5xl">
         Our Concept
       </h2>
 
-      <div data-animate="fade-up" class="mt-10 rounded-3xl border border-neutral-200 bg-neutral-50 p-6 sm:p-8 lg:p-10">
-        <div class="space-y-5 text-lg leading-relaxed text-neutral-600">
+      <div data-animate="fade-up" class="mt-[3.4375rem] rounded-3xl border border-neutral-200 bg-neutral-50 p-[2.125rem] sm:p-[3.4375rem] lg:p-[5.5625rem]">
+        <div class="space-y-[1.3125rem] text-lg leading-relaxed text-neutral-600">
           {conceptIntro.map((paragraph) => (
             <p>{paragraph}</p>
           ))}
         </div>
 
-        <div class="mt-10 grid gap-6 lg:grid-cols-2">
+        <div class="mt-[3.4375rem] grid gap-[2.125rem] lg:grid-cols-2">
           {conceptCards.map((card) => (
-            <article class="rounded-2xl bg-white p-6 ring-1 ring-neutral-200 shadow-sm">
+            <article class="rounded-2xl bg-white p-[2.125rem] ring-1 ring-neutral-200 shadow-sm">
               <h3 class="font-serif text-2xl font-semibold text-neutral-900">{card.title}</h3>
-              <div class="mt-4 h-px bg-neutral-200"></div>
-              <ul class="mt-6 space-y-4">
+              <div class="mt-[1.3125rem] h-px bg-neutral-200"></div>
+              <ul class="mt-[2.125rem] space-y-[1.3125rem]">
                 {card.bullets.map((bullet) => (
                   <li class="flex items-start gap-3 text-base text-neutral-700">
                     <Icon name="lucide:circle-dot" class="mt-0.5 h-4 w-4 shrink-0 text-neutral-900" />
@@ -219,7 +214,7 @@ const conceptCards = [
         </div>
 
         {editorialBlocks.length > 0 && (
-          <div class="mt-8 space-y-5 border-t border-neutral-200 pt-8">
+          <div class="mt-[3.4375rem] space-y-[1.3125rem] border-t border-neutral-200 pt-[3.4375rem]">
             {editorialBlocks.map((block) => (
               block.type === 'richText' ? (
                 <div class="editorial-block editorial-block-info">
@@ -258,12 +253,12 @@ const conceptCards = [
 
   <!-- FAQ Section -->
   {localizedFaq.length > 0 && (
-    <section id="faq" class="bg-white py-20 sm:py-28">
+    <section id="faq" class="bg-white py-[5.5625rem] sm:py-[8.9375rem]">
       <div class="mx-auto max-w-3xl px-4 sm:px-6">
         <h2 data-animate="fade-in" class="text-center font-serif text-3xl font-bold text-neutral-900 sm:text-4xl">
           {t.sections.faq}
         </h2>
-        <div data-animate="fade-up" class="mt-12">
+        <div data-animate="fade-up" class="mt-[3.4375rem]">
           <FAQAccordion items={localizedFaq} />
         </div>
       </div>
