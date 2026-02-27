@@ -6,6 +6,7 @@ import ApartmentCard from '../../components/ApartmentCard.astro';
 import FAQAccordion from '../../components/FAQAccordion.astro';
 import RichText from '../../components/RichText.astro';
 import { getTranslation } from '../../i18n/translations';
+import { translatePath } from '../../i18n/utils';
 
 const lang = 'en' as const;
 const t = getTranslation(lang);
@@ -44,6 +45,44 @@ const localizedFaq = faqItems.map((item) => ({
   question: item.question[lang],
   answer: item.answer[lang],
 }));
+
+const apartmentsAnchorId = 'apartments';
+const availableApartmentCount = sortedApartments.filter((apt) => apt.data.available).length;
+const minPrice = sortedApartments.length > 0
+  ? Math.min(...sortedApartments.map((apt) => apt.data.pricePerMonth))
+  : null;
+
+const heroStats = [
+  '2-minute walk to WHU',
+  `${sortedApartments.length} fully equipped apartments`,
+  availableApartmentCount > 0
+    ? `${availableApartmentCount} currently available`
+    : 'Currently fully booked',
+];
+
+const conceptIntro = [
+  'VallendarWohnen offers furnished student apartments for anyone looking for short routes, clear terms, and a dependable living setup during their studies.',
+  'Our concept combines fully equipped units with transparent monthly costs and a straightforward booking process that also works from abroad.',
+];
+
+const conceptCards = [
+  {
+    title: 'Ideal for Bachelor and Master students',
+    bullets: [
+      'Minimum stay: 2 semesters / 12 months',
+      'Fully furnished and equipped',
+      minPrice !== null ? `From €${minPrice} per month` : 'Transparent monthly rent terms',
+    ],
+  },
+  {
+    title: 'Ideal for exchange students',
+    bullets: [
+      'Minimum stay: 1 semester / 4 to 6 months',
+      'Remote viewings and digital contracts available',
+      'Support with registration and move-in documents',
+    ],
+  },
+];
 ---
 
 <BaseLayout
@@ -55,44 +94,82 @@ const localizedFaq = faqItems.map((item) => ({
   <script type="application/ld+json" set:html={JSON.stringify(organizationJsonLd)} />
 
   <!-- Hero Section -->
-  <section class="relative flex min-h-[85vh] items-center justify-center overflow-hidden sm:min-h-screen">
-    <!-- Hero background image with responsive sources -->
-    <div class="absolute inset-0">
-      <picture>
-        <source media="(max-width: 640px)" srcset={hero.images.mobile} />
-        <source media="(max-width: 1024px)" srcset={hero.images.tablet} />
-        <img src={hero.images.desktop} alt="" class="h-full w-full object-cover" aria-hidden="true" />
-      </picture>
-    </div>
-    <!-- Gradient overlay for text readability -->
-    <div class="absolute inset-0 bg-gradient-to-b from-accent-950/70 via-accent-950/50 to-accent-950/70"></div>
+  <section class="bg-neutral-100 pb-16 pt-28 sm:pb-20 sm:pt-32">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6">
+      <div class="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.3fr)] lg:items-center">
+        <div data-animate="slide-left">
+          <p class="text-xs font-semibold uppercase tracking-[0.18em] text-neutral-600">
+            Welcome to VallendarWohnen
+          </p>
+          <h1 class="mt-4 font-serif text-4xl font-bold leading-tight text-neutral-900 sm:text-5xl lg:text-6xl">
+            {hero.headline[lang]}
+          </h1>
+          <p class="mt-6 max-w-xl text-lg leading-relaxed text-neutral-600">
+            {hero.subheadline[lang]}
+          </p>
+          <div class="mt-8 flex flex-wrap gap-3">
+            <a
+              href={`#${apartmentsAnchorId}`}
+              class="inline-flex items-center gap-2 rounded-full bg-neutral-900 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-neutral-800"
+            >
+              {hero.cta[lang]}
+              <Icon name="lucide:arrow-down" class="h-4 w-4" />
+            </a>
+            <a
+              href={translatePath('/contact', lang)}
+              class="inline-flex items-center gap-2 rounded-full border border-neutral-300 bg-white px-6 py-3 text-sm font-semibold text-neutral-700 transition-colors hover:border-neutral-400 hover:text-neutral-900"
+            >
+              Contact us
+              <Icon name="lucide:arrow-right" class="h-4 w-4" />
+            </a>
+          </div>
+          <ul class="mt-8 grid gap-3 sm:grid-cols-3">
+            {heroStats.map((stat) => (
+              <li class="rounded-xl bg-white px-4 py-3 text-center text-xs font-medium text-neutral-700 ring-1 ring-neutral-200">
+                {stat}
+              </li>
+            ))}
+          </ul>
+        </div>
 
-    <div class="relative z-10 mx-auto max-w-4xl px-4 text-center sm:px-6">
-      <h1 class="font-serif text-4xl font-extrabold leading-tight text-white sm:text-5xl md:text-6xl lg:text-7xl">
-        {hero.headline[lang]}
-      </h1>
-      <p class="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-white/85 sm:text-xl">
-        {hero.subheadline[lang]}
-      </p>
-      <a
-        href="#apartments"
-        class="btn-glass mt-16"
-      >
-        {hero.cta[lang]}
-        <Icon name="lucide:arrow-down" class="h-4 w-4" />
-      </a>
+        <picture data-animate="slide-right" class="relative block overflow-hidden rounded-[2rem] ring-1 ring-neutral-200 shadow-2xl shadow-neutral-300/40">
+          <source media="(max-width: 640px)" srcset={hero.images.mobile} />
+          <source media="(max-width: 1024px)" srcset={hero.images.tablet} />
+          <img
+            src={hero.images.desktop}
+            alt="Interior view of a furnished student apartment in Vallendar"
+            class="h-full w-full object-cover"
+          />
+        </picture>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features / Highlights Section -->
+  <section class="bg-neutral-100 pb-20 sm:pb-24">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6">
+      <div data-animate-stagger class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+        {features.map((feature) => (
+          <div data-animate="fade-in" class="flex min-h-44 flex-col items-center justify-center rounded-3xl bg-white p-6 text-center ring-1 ring-neutral-200 transition-all duration-200 hover:-translate-y-1 hover:shadow-lg">
+            <span class="flex h-12 w-12 items-center justify-center rounded-full bg-neutral-100 text-neutral-900">
+              <Icon name={`lucide:${feature.icon}`} class="h-5 w-5" />
+            </span>
+            <span class="mt-4 text-base font-semibold text-neutral-800">{feature.label[lang]}</span>
+          </div>
+        ))}
+      </div>
     </div>
   </section>
 
   <!-- Apartment Cards Section -->
-  <section id="apartments" class="bg-neutral-50 py-20 sm:py-28">
+  <section id={apartmentsAnchorId} class="bg-white py-20 sm:py-28">
     <div class="mx-auto max-w-6xl px-4 sm:px-6">
       <h2 data-animate="fade-in" class="text-center font-serif text-3xl font-bold text-neutral-900 sm:text-4xl">
         {t.sections.apartments}
       </h2>
       <RichText content={sectionSubheadline[lang]} className="mx-auto mt-4 max-w-2xl text-center" />
 
-      <div data-animate-stagger class="mt-14 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+      <div data-animate-stagger class="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {sortedApartments.map((apt) => (
           <div data-animate="fade-up">
             <ApartmentCard apartment={apt} lang={lang} />
@@ -102,68 +179,78 @@ const localizedFaq = faqItems.map((item) => ({
     </div>
   </section>
 
-  {editorialBlocks.length > 0 && (
-    <section class="bg-white py-16 sm:py-20">
-      <div class="mx-auto max-w-4xl px-4 sm:px-6">
-        <div class="space-y-5">
-          {editorialBlocks.map((block) => (
-            block.type === 'richText' ? (
-              <div class="editorial-block editorial-block-info">
-                <RichText content={block.body[lang]} />
-              </div>
-            ) : block.type === 'callout' ? (
-              <div class:list={[
-                'editorial-block',
-                block.tone === 'success'
-                  ? 'editorial-block-success'
-                  : block.tone === 'warning'
-                    ? 'editorial-block-warning'
-                    : 'editorial-block-info',
-              ]}>
-                <h3 class="font-serif text-xl font-bold text-neutral-900">{block.title[lang]}</h3>
-                <RichText content={block.body[lang]} className="mt-3" />
-              </div>
-            ) : (
-              <div class="editorial-block editorial-block-info flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                <p class="text-sm font-medium text-neutral-800">{block.text[lang]}</p>
-                <a
-                  href={block.buttonHref[lang]}
-                  class="inline-flex items-center gap-2 rounded-full bg-accent-700 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-accent-800"
-                >
-                  {block.buttonLabel[lang]}
-                  <Icon name="lucide:arrow-right" class="h-4 w-4" />
-                </a>
-              </div>
-            )
-          ))}
-        </div>
-      </div>
-    </section>
-  )}
-
-  <!-- Features / Highlights Section -->
-  <section class="bg-white py-20 sm:py-28">
-    <div class="mx-auto max-w-6xl px-4 sm:px-6">
-      <h2 data-animate="fade-in" class="text-center font-serif text-3xl font-bold text-neutral-900 sm:text-4xl">
-        {t.sections.features}
+  <!-- Concept Section -->
+  <section class="bg-neutral-100 py-20 sm:py-28">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6">
+      <h2 data-animate="fade-in" class="text-center font-serif text-4xl font-bold text-neutral-900 sm:text-5xl">
+        Our Concept
       </h2>
 
-      <div data-animate-stagger class="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {features.map((feature) => (
-          <div data-animate="fade-in" class="flex items-center gap-4 rounded-xl bg-neutral-50 p-5 ring-1 ring-neutral-100 transition-all duration-200 hover:shadow-md hover:ring-accent-200">
-            <span class="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-accent-100 text-accent-700">
-              <Icon name={`lucide:${feature.icon}`} class="h-5 w-5" />
-            </span>
-            <span class="text-sm font-semibold text-neutral-800">{feature.label[lang]}</span>
+      <div data-animate="fade-up" class="mt-10 rounded-3xl border border-neutral-200 bg-neutral-50 p-6 sm:p-8 lg:p-10">
+        <div class="space-y-5 text-lg leading-relaxed text-neutral-600">
+          {conceptIntro.map((paragraph) => (
+            <p>{paragraph}</p>
+          ))}
+        </div>
+
+        <div class="mt-10 grid gap-6 lg:grid-cols-2">
+          {conceptCards.map((card) => (
+            <article class="rounded-2xl bg-white p-6 ring-1 ring-neutral-200 shadow-sm">
+              <h3 class="font-serif text-2xl font-semibold text-neutral-900">{card.title}</h3>
+              <div class="mt-4 h-px bg-neutral-200"></div>
+              <ul class="mt-6 space-y-4">
+                {card.bullets.map((bullet) => (
+                  <li class="flex items-start gap-3 text-base text-neutral-700">
+                    <Icon name="lucide:circle-dot" class="mt-0.5 h-4 w-4 shrink-0 text-neutral-900" />
+                    <span>{bullet}</span>
+                  </li>
+                ))}
+              </ul>
+            </article>
+          ))}
+        </div>
+
+        {editorialBlocks.length > 0 && (
+          <div class="mt-8 space-y-5 border-t border-neutral-200 pt-8">
+            {editorialBlocks.map((block) => (
+              block.type === 'richText' ? (
+                <div class="editorial-block editorial-block-info">
+                  <RichText content={block.body[lang]} />
+                </div>
+              ) : block.type === 'callout' ? (
+                <div class:list={[
+                  'editorial-block',
+                  block.tone === 'success'
+                    ? 'editorial-block-success'
+                    : block.tone === 'warning'
+                      ? 'editorial-block-warning'
+                      : 'editorial-block-info',
+                ]}>
+                  <h3 class="font-serif text-xl font-bold text-neutral-900">{block.title[lang]}</h3>
+                  <RichText content={block.body[lang]} className="mt-3" />
+                </div>
+              ) : (
+                <div class="editorial-block editorial-block-info flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                  <p class="text-sm font-medium text-neutral-800">{block.text[lang]}</p>
+                  <a
+                    href={block.buttonHref[lang]}
+                    class="inline-flex items-center gap-2 rounded-full bg-accent-700 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-accent-800"
+                  >
+                    {block.buttonLabel[lang]}
+                    <Icon name="lucide:arrow-right" class="h-4 w-4" />
+                  </a>
+                </div>
+              )
+            ))}
           </div>
-        ))}
+        )}
       </div>
     </div>
   </section>
 
   <!-- FAQ Section -->
   {localizedFaq.length > 0 && (
-    <section id="faq" class="bg-neutral-50 py-20 sm:py-28">
+    <section id="faq" class="bg-white py-20 sm:py-28">
       <div class="mx-auto max-w-3xl px-4 sm:px-6">
         <h2 data-animate="fade-in" class="text-center font-serif text-3xl font-bold text-neutral-900 sm:text-4xl">
           {t.sections.faq}
