@@ -24,7 +24,7 @@ rooms:
   en: 1.5 rooms
 maxOccupants: 1
 pricePerMonth: 580
-utilitiesPerMonth: 130
+utilitiesPerMonth: 200
 amenities:
   - de: WLAN
     en: Wi-Fi
