@@ -274,8 +274,8 @@ function validateDecapConfig(): ValidationResult {
     ? data.backend as Record<string, unknown>
     : null;
 
-  if (!backend || backend.name !== 'git-gateway-recursive') {
-    result.errors.push('  [backend.name] Expected "git-gateway-recursive".');
+  if (!backend || backend.name !== 'git-gateway') {
+    result.errors.push('  [backend.name] Expected "git-gateway".');
   }
 
   const publishMode = data.publish_mode;

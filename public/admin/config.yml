@@ -2,7 +2,7 @@
 # and invite Yannik as a user. Set registration to "Invite only" and
 # enable Git Gateway under Identity > Services.
 backend:
-  name: git-gateway-recursive
+  name: git-gateway
   branch: main
 
 publish_mode: editorial_workflow
