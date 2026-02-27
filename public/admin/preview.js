@@ -258,7 +258,11 @@
             .map((entry) => toApartmentCardData(entry, lang))
             .filter(Boolean)
             .sort((a, b) => a.order - b.order);
-          setApartments(normalized);
+          setApartments((previous) => {
+            const before = JSON.stringify(previous);
+            const after = JSON.stringify(normalized);
+            return before === after ? previous : normalized;
+          });
         })
         .catch(() => {
           if (!cancelled) setApartments([]);
@@ -267,7 +271,7 @@
       return () => {
         cancelled = true;
       };
-    }, [getCollection, lang]);
+    }, [lang]);
 
     return apartments;
   };
