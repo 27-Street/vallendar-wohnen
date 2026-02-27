@@ -90,58 +90,66 @@ const conceptCards = [
   </Fragment>
 
   <!-- Hero Section -->
-  <section class="bg-neutral-100 pb-16 pt-28 sm:pb-20 sm:pt-32">
-    <div class="mx-auto max-w-7xl px-4 sm:px-6">
-      <div class="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.3fr)] lg:items-center">
-        <div data-animate="slide-left">
-          <p class="text-xs font-semibold uppercase tracking-[0.18em] text-neutral-600">
-            Welcome to VallendarWohnen
-          </p>
-          <h1 class="mt-4 font-serif text-4xl font-bold leading-tight text-neutral-900 sm:text-5xl lg:text-6xl">
-            {hero.headline[lang]}
-          </h1>
-          <p class="mt-6 max-w-xl text-lg leading-relaxed text-neutral-600">
-            {hero.subheadline[lang]}
-          </p>
-          <div class="mt-8 flex flex-wrap gap-3">
-            <a
-              href={`#${apartmentsAnchorId}`}
-              class="inline-flex items-center gap-2 rounded-full bg-neutral-900 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-neutral-800"
-            >
-              {hero.cta[lang]}
-              <Icon name="lucide:arrow-down" class="h-4 w-4" />
-            </a>
-            <a
-              href={translatePath('/contact', lang)}
-              class="inline-flex items-center gap-2 rounded-full border border-neutral-300 bg-white px-6 py-3 text-sm font-semibold text-neutral-700 transition-colors hover:border-neutral-400 hover:text-neutral-900"
-            >
-              Contact us
-              <Icon name="lucide:arrow-right" class="h-4 w-4" />
-            </a>
-          </div>
-          <ul class="mt-8 grid gap-3 sm:grid-cols-3">
-            {heroStats.map((stat) => (
-              <li class="rounded-xl bg-white px-4 py-3 text-center text-xs font-medium text-neutral-700 ring-1 ring-neutral-200">
-                {stat}
-              </li>
-            ))}
-          </ul>
-        </div>
+  <section class="relative flex min-h-[82vh] items-center overflow-hidden pb-24 pt-32 sm:min-h-[88vh] sm:pb-28">
+    <div class="absolute inset-0">
+      <picture>
+        <source media="(max-width: 640px)" srcset={hero.images.mobile} />
+        <source media="(max-width: 1024px)" srcset={hero.images.tablet} />
+        <img
+          src={hero.images.desktop}
+          alt=""
+          width="2400"
+          height="1350"
+          loading="eager"
+          decoding="async"
+          fetchpriority="high"
+          class="h-full w-full object-cover"
+          aria-hidden="true"
+        />
+      </picture>
+    </div>
+    <div class="absolute inset-0 bg-gradient-to-b from-accent-950/75 via-accent-950/55 to-accent-950/75"></div>
 
-        <picture data-animate="slide-right" class="relative block overflow-hidden rounded-[2rem] ring-1 ring-neutral-200 shadow-2xl shadow-neutral-300/40">
-          <source media="(max-width: 640px)" srcset={hero.images.mobile} />
-          <source media="(max-width: 1024px)" srcset={hero.images.tablet} />
-          <img
-            src={hero.images.desktop}
-            alt="Interior view of a furnished student apartment in Vallendar"
-            width="2400"
-            height="1350"
-            loading="eager"
-            decoding="async"
-            fetchpriority="high"
-            class="h-full w-full object-cover"
-          />
-        </picture>
+    <div class="relative z-10 mx-auto max-w-5xl px-4 text-center sm:px-6">
+      <p class="text-xs font-semibold uppercase tracking-[0.2em] text-white/80">
+        Welcome to VallendarWohnen
+      </p>
+      <h1 data-animate="fade-in" class="mt-4 font-serif text-4xl font-extrabold leading-tight text-white sm:text-5xl md:text-6xl lg:text-7xl">
+        {hero.headline[lang]}
+      </h1>
+      <p data-animate="fade-up" class="mx-auto mt-6 max-w-3xl text-lg leading-relaxed text-white/90 sm:text-xl">
+        {hero.subheadline[lang]}
+      </p>
+      <div class="mt-10 flex flex-wrap items-center justify-center gap-3">
+        <a
+          href={`#${apartmentsAnchorId}`}
+          class="inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-semibold text-neutral-900 transition-colors hover:bg-neutral-100"
+        >
+          {hero.cta[lang]}
+          <Icon name="lucide:arrow-down" class="h-4 w-4" />
+        </a>
+        <a
+          href={translatePath('/contact', lang)}
+          class="inline-flex items-center gap-2 rounded-full border border-white/40 bg-white/10 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-white/20"
+        >
+          Contact us
+          <Icon name="lucide:arrow-right" class="h-4 w-4" />
+        </a>
+      </div>
+      <ul class="mt-10 grid gap-3 sm:grid-cols-3">
+        {heroStats.map((stat) => (
+          <li class="rounded-xl border border-white/20 bg-white/10 px-4 py-3 text-center text-xs font-medium text-white/95 backdrop-blur-sm">
+            {stat}
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <section class="bg-neutral-100 pb-20 sm:pb-24">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6">
+      <div class="-mt-10 sm:-mt-12 lg:-mt-14">
+        <RichText content={sectionSubheadline[lang]} className="mx-auto max-w-3xl rounded-2xl bg-white px-6 py-5 text-center ring-1 ring-neutral-200 shadow-md shadow-neutral-300/30" />
       </div>
     </div>
   </section>
@@ -168,7 +176,6 @@ const conceptCards = [
       <h2 data-animate="fade-in" class="text-center font-serif text-3xl font-bold text-neutral-900 sm:text-4xl">
         {t.sections.apartments}
       </h2>
-      <RichText content={sectionSubheadline[lang]} className="mx-auto mt-4 max-w-2xl text-center" />
 
       <div data-animate-stagger class="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {sortedApartments.map((apt) => (
