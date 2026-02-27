@@ -17,6 +17,8 @@ media_folder: public/images
 public_folder: /images
 
 locale: de
+editor:
+  preview: false
 
 collections:
   - name: apartments
