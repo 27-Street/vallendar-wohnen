@@ -2,12 +2,11 @@
 # and invite Yannik as a user. Set registration to "Invite only" and
 # enable Git Gateway under Identity > Services.
 backend:
-  name: git-gateway
+  name: proxy
+  proxy_url: http://localhost:8082/api/v1
   branch: main
-local_backend:
-  url: http://localhost:8082/api/v1
 
-publish_mode: editorial_workflow
+publish_mode: simple
 
 # Update these URLs after connecting a custom domain
 site_url: https://lucky-cucurucho-b639b6.netlify.app

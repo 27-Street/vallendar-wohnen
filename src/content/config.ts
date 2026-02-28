@@ -132,6 +132,15 @@ const pages = defineCollection({
         mobile: z.string(),
       }),
     }).optional(),
+    welcomeSpotlight: z.object({
+      eyebrow: bilingualString,
+      headline: bilingualString,
+      body: bilingualString,
+      ctaLabel: bilingualString,
+      ctaHref: bilingualString,
+      image: z.string().optional(),
+      imageAlt: bilingualString.optional(),
+    }).optional(),
     sectionSubheadline: bilingualString.optional(),
     features: z.array(z.object({
       icon: z.enum(FEATURE_ICON_OPTIONS),

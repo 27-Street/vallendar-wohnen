@@ -14,6 +14,26 @@ hero:
     desktop: /images/hero/hero-house.jpg
     tablet: /images/hero/hero-house-tablet.jpg
     mobile: /images/hero/hero-house-mobile.jpg
+welcomeSpotlight:
+  eyebrow:
+    de: Willkommen bei VallendarWohnen
+    en: Welcome to VallendarWohnen
+  headline:
+    de: Hochwertiges studentisches Wohnen in Vallendar
+    en: High-quality student living in Vallendar
+  body:
+    de: VallendarWohnen bietet einen neuen Standard für studentisches Wohnen, konzipiert für WHU-Studierende, die Komfort und Stil in Kombination mit idealen Studienbedingungen suchen.
+    en: VallendarWohnen sets a new standard for student living, designed for WHU students looking for comfort and style combined with ideal study conditions.
+  ctaLabel:
+    de: Mehr entdecken
+    en: Explore more
+  ctaHref:
+    de: /de/#wohnungen
+    en: /en/#apartments
+  image: /images/apartments/alte-muehle/kitchen.webp
+  imageAlt:
+    de: Moderne Küchenzeile in einem Studentenapartment in Vallendar
+    en: Modern kitchenette inside a student apartment in Vallendar
 sectionSubheadline:
   de: Drei individuell eingerichtete Wohnungen in bester Lage - direkt gegenüber der WHU.
   en: Three individually furnished apartments in a prime location - directly across from WHU.

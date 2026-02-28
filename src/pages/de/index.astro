@@ -18,6 +18,7 @@ const sortedApartments = allApartments.sort((a, b) => a.data.order - b.data.orde
 
 const homePage = await getEntry('pages', 'home');
 const hero = homePage.data.hero!;
+const cmsWelcomeSpotlight = homePage.data.welcomeSpotlight;
 const sectionSubheadline = homePage.data.sectionSubheadline!;
 const features = homePage.data.features!;
 const editorialBlocks = homePage.data.editorialBlocks ?? [];
@@ -39,11 +40,6 @@ const apartmentsAnchorId = 'wohnungen';
 const minPrice = sortedApartments.length > 0
   ? Math.min(...sortedApartments.map((apt) => apt.data.pricePerMonth))
   : null;
-
-const introImage = sortedApartments
-  .flatMap((apt) => apt.data.images)
-  .find((image) => image.kind === 'kitchen')
-  ?.image ?? hero.images.desktop;
 
 const withFormat = (src: string, format: 'avif' | 'webp') => src.replace(/\.(jpe?g|png)$/i, `.${format}`);
 const heroImageMobileAvif = withFormat(hero.images.mobile, 'avif');
@@ -76,6 +72,25 @@ const conceptCards = [
     ],
   },
 ];
+
+const apartmentImagePool = sortedApartments.flatMap((apartment) => apartment.data.images.map((image) => ({
+  image,
+})));
+const spotlightImageRecord = apartmentImagePool.find(({ image }) => image.kind === 'kitchen')
+  ?? apartmentImagePool.find(({ image }) => image.isPrimary)
+  ?? apartmentImagePool[0];
+const fallbackSpotlightImageSrc = spotlightImageRecord?.image.image ?? hero.images.desktop;
+const spotlightImageSrc = cmsWelcomeSpotlight?.image?.trim() || fallbackSpotlightImageSrc;
+const spotlightImageAlt = cmsWelcomeSpotlight?.imageAlt?.[lang]?.trim()
+  || spotlightImageRecord?.image.caption?.[lang]
+  || 'Einblick in ein Studentenapartment in Vallendar';
+const welcomeSpotlight = {
+  eyebrow: cmsWelcomeSpotlight?.eyebrow?.[lang]?.trim() || 'Willkommen bei VallendarWohnen',
+  headline: cmsWelcomeSpotlight?.headline?.[lang]?.trim() || 'Hochwertiges studentisches Wohnen in Vallendar',
+  body: cmsWelcomeSpotlight?.body?.[lang]?.trim() || 'VallendarWohnen bietet einen neuen Standard für studentisches Wohnen, konzipiert für WHU-Studierende, die Komfort und Stil in Kombination mit idealen Studienbedingungen suchen.',
+  ctaLabel: cmsWelcomeSpotlight?.ctaLabel?.[lang]?.trim() || 'Mehr entdecken',
+  ctaHref: cmsWelcomeSpotlight?.ctaHref?.[lang]?.trim() || `#${apartmentsAnchorId}`,
+};
 ---
 
 <BaseLayout
@@ -146,27 +161,26 @@ const conceptCards = [
         <div class="grid items-center gap-[3.4375rem] lg:grid-cols-[minmax(0,0.618fr)_minmax(0,1fr)] lg:gap-[5.5625rem]">
           <div data-animate="slide-left" class="lg:pr-[1.3125rem]">
             <p class="text-xs font-semibold uppercase tracking-[0.16em] text-neutral-600">
-              Willkommen bei VallendarWohnen
+              {welcomeSpotlight.eyebrow}
             </p>
             <h2 class="mt-[1.3125rem] max-w-[10.5ch] font-serif text-4xl font-bold leading-tight text-neutral-900 sm:text-5xl">
-              Hochwertiges studentisches Wohnen in Vallendar
+              {welcomeSpotlight.headline}
             </h2>
             <p class="mt-[2.125rem] max-w-[30ch] text-lg leading-relaxed text-neutral-600">
-              VallendarWohnen bietet möblierte Wohnungen für WHU-Studierende, die
-              Komfort, Stil und klare Mietkonditionen in direkter Campusnähe suchen.
+              {welcomeSpotlight.body}
             </p>
             <a
-              href={`#${apartmentsAnchorId}`}
+              href={welcomeSpotlight.ctaHref}
               class="btn btn-contrast mt-[3.4375rem]"
             >
-              Mehr entdecken
+              {welcomeSpotlight.ctaLabel}
               <Icon name="lucide:arrow-right" class="h-4 w-4" />
             </a>
           </div>
           <figure data-animate="slide-right" class="overflow-hidden rounded-[2.125rem] bg-white ring-1 ring-neutral-200 shadow-xl shadow-neutral-300/35">
             <img
-              src={introImage}
-              alt="Küchenbereich einer möblierten Studentenwohnung in Vallendar"
+              src={spotlightImageSrc}
+              alt={spotlightImageAlt}
               loading="lazy"
               class="aspect-[1.618/1] w-full object-cover lg:h-full"
             />

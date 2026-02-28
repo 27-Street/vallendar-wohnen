@@ -4,6 +4,8 @@
   "version": "0.0.1",
   "scripts": {
     "dev": "astro dev",
+    "dev:cms": "bash scripts/run-dev-cms.sh",
+    "cms:proxy": "PORT=8082 npx decap-server",
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",

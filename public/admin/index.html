@@ -4,8 +4,26 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="robots" content="noindex" />
+  <base href="/admin/" />
   <title>Content Manager</title>
-  <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+  <script>
+    (function () {
+      const hostname = window.location.hostname;
+      const isLocal = hostname === 'localhost' || hostname === '127.0.0.1';
+
+      const configLink = document.createElement('link');
+      configLink.rel = 'cms-config-url';
+      configLink.type = 'text/yaml';
+      configLink.href = isLocal ? '/admin/config-local.yml' : '/admin/config.yml';
+      document.head.appendChild(configLink);
+
+      if (!isLocal) {
+        const identityScript = document.createElement('script');
+        identityScript.src = 'https://identity.netlify.com/v1/netlify-identity-widget.js';
+        document.head.appendChild(identityScript);
+      }
+    })();
+  </script>
 </head>
 <body>
   <script src="https://unpkg.com/decap-cms@3.10.1/dist/decap-cms.js"></script>

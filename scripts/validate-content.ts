@@ -83,6 +83,16 @@ const editorialBlockSchema = z.discriminatedUnion('type', [
   }).strict(),
 ]);
 
+const welcomeSpotlightSchema = z.object({
+  eyebrow: bilingualString,
+  headline: bilingualString,
+  body: bilingualString,
+  ctaLabel: bilingualString,
+  ctaHref: bilingualString,
+  image: nonEmptyString.optional(),
+  imageAlt: bilingualString.optional(),
+}).strict();
+
 const homePageSchema = z.object({
   title: z.literal('home'),
   hero: z.object({
@@ -95,6 +105,7 @@ const homePageSchema = z.object({
       mobile: nonEmptyString,
     }).strict(),
   }).strict(),
+  welcomeSpotlight: welcomeSpotlightSchema.optional(),
   sectionSubheadline: bilingualString,
   features: z.array(
     z.object({
@@ -355,6 +366,19 @@ function validateDecapConfig(): ValidationResult {
     result.errors.push('  [collections.pages.home.hero.images] Expected desktop/tablet/mobile image fields.');
   }
 
+  const welcomeSpotlightField = homeFields.find((field) => field.name === 'welcomeSpotlight');
+  const welcomeSpotlightChildren = Array.isArray(welcomeSpotlightField?.fields)
+    ? welcomeSpotlightField.fields as Array<Record<string, unknown>>
+    : [];
+  const welcomeSpotlightNames = welcomeSpotlightChildren
+    .map((field) => field.name)
+    .filter((name): name is string => typeof name === 'string');
+  const expectedWelcomeSpotlightNames = ['eyebrow', 'headline', 'body', 'ctaLabel', 'ctaHref', 'image', 'imageAlt'];
+  const hasWelcomeSpotlightFields = expectedWelcomeSpotlightNames.every((expected) => welcomeSpotlightNames.includes(expected));
+  if (!hasWelcomeSpotlightFields) {
+    result.errors.push('  [collections.pages.home.welcomeSpotlight] Expected fields: eyebrow, headline, body, ctaLabel, ctaHref, image, imageAlt.');
+  }
+
   const featuresField = homeFields.find((field) => field.name === 'features');
   const featureFields = Array.isArray(featuresField?.fields) ? featuresField?.fields as Array<Record<string, unknown>> : [];
   const iconField = featureFields.find((field) => field.name === 'icon');
@@ -455,6 +479,12 @@ for (const file of getMdFiles(PAGES_DIR)) {
       if (normalizedDesktop) referencedMediaPaths.add(normalizedDesktop);
       if (normalizedTablet) referencedMediaPaths.add(normalizedTablet);
       if (normalizedMobile) referencedMediaPaths.add(normalizedMobile);
+
+      if (parsed.data.welcomeSpotlight?.image) {
+        assertPathExists(result, 'welcomeSpotlight.image', parsed.data.welcomeSpotlight.image);
+        const normalizedWelcomeImage = normalizePublicAssetPath(parsed.data.welcomeSpotlight.image);
+        if (normalizedWelcomeImage) referencedMediaPaths.add(normalizedWelcomeImage);
+      }
 
       assertSeoCompleteness(result, 'seo', parsed.data.seo);
 
