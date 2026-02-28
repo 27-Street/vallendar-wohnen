@@ -34,10 +34,14 @@
   --font-serif: "Plus Jakarta Sans Variable", "Plus Jakarta Sans", system-ui, sans-serif;
 }
 
+:root {
+  --site-header-height: 4.875rem;
+}
+
 html {
   scroll-behavior: smooth;
-  /* Offset anchor targets so they clear the sticky header (~56px + breathing room) */
-  scroll-padding-top: 5rem;
+  /* Keep in-page anchor targets below the sticky header */
+  scroll-padding-top: calc(var(--site-header-height) + 1rem);
 }
 
 body {
@@ -269,6 +273,18 @@ textarea:focus-visible {
 .btn-glass:focus-visible {
   outline: 2px solid rgba(255, 255, 255, 0.5);
   outline-offset: 3px;
+}
+
+/* Hero should fill viewport minus sticky header (mobile + desktop) */
+.hero-fullscreen {
+  min-height: calc(100svh - var(--site-header-height));
+  height: calc(100dvh - var(--site-header-height));
+}
+
+@supports not (height: 100dvh) {
+  .hero-fullscreen {
+    height: calc(100vh - var(--site-header-height));
+  }
 }
 
 /* ── Scroll-triggered animations ── */

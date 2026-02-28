@@ -36,7 +36,7 @@ function isCurrentPage(href: string): boolean {
 }
 ---
 
-<header class="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-neutral-200">
+<header data-site-header class="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-neutral-200">
   <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:px-6">
     <!-- Logo / Property Name -->
     <a href={translatePath('/', lang)} class="text-lg font-bold tracking-tight text-neutral-900 hover:text-accent-700 transition-colors">
@@ -114,6 +114,23 @@ function isCurrentPage(href: string): boolean {
 </header>
 
 <script>
+  const siteHeader = document.querySelector('[data-site-header]');
+
+  const syncHeaderHeight = () => {
+    if (!siteHeader) return;
+    const height = Math.ceil(siteHeader.getBoundingClientRect().height);
+    document.documentElement.style.setProperty('--site-header-height', `${height}px`);
+  };
+
+  syncHeaderHeight();
+
+  if (siteHeader && 'ResizeObserver' in window) {
+    const headerObserver = new ResizeObserver(syncHeaderHeight);
+    headerObserver.observe(siteHeader);
+  }
+
+  window.addEventListener('orientationchange', syncHeaderHeight);
+
   const btn = document.getElementById('mobile-menu-btn');
   const menu = document.getElementById('mobile-menu');
   const iconOpen = document.getElementById('menu-icon-open');
