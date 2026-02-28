@@ -10,13 +10,13 @@ tags:
 
 # CMS Editor Guide
 
-This guide explains how to edit apartments and homepage content in Decap CMS with the CMS V2 workflow.
+This guide explains how to edit apartments, pages, and guides in Decap CMS with the CMS V2 workflow.
 
 ## 1. Login
 
 1. Open `/admin/` on the live site.
 2. Sign in with your invited Netlify Identity account.
-3. Work inside **Wohnungen**, **Seiten**, and **Guides**.
+3. Work inside **Wohnungen**, **Seiten** (Startseite), **Inhaltsseiten**, and **Guides**.
 
 ## 2. Draft and Review Workflow
 
@@ -63,7 +63,7 @@ Security note:
 
 ## 4.1 Visual Preview (WordPress/Shopify-like)
 
-For **Startseite** and **Wohnungen**, the preview pane now uses a live-layout iframe route (`/cms-preview/*`) with the same site CSS and component structure.
+For **Startseite**, **Wohnungen**, **Inhaltsseiten** (inkl. FAQ/Austauschstudierende), and **Guides**, the preview pane uses live-layout iframe routes (`/cms-preview/*`) with the same site CSS and component structure.
 
 Available controls in preview:
 - `DE` / `EN` locale switch
@@ -138,6 +138,12 @@ Apartments, homepage, and guides support SEO fields:
 
 If SEO fields are empty, the site falls back to default generated metadata.
 
+## 8.1 Single Source Rules
+
+- Homepage FAQ teaser and `/de/faq` + `/en/faq` are sourced from the same canonical content page entry (`routeSlug.de=en=faq`).
+- Apartment cards on homepage and apartment detail pages read from the same apartment entry files in `src/content/apartments/*`.
+- Avoid duplicating apartment or FAQ text in homepage custom fields to prevent drift.
+
 ## 8. Publish Checklist
 
 Before publishing:
@@ -151,4 +157,4 @@ Before publishing:
 After publishing:
 
 1. Wait for Netlify deploy to finish.
-2. Spot-check homepage and apartment detail pages in both languages.
+2. Spot-check edited pages in both languages where available.

@@ -1,4 +1,9 @@
 ---
+kind: content
+pageType: faq
+routeSlug:
+  de: faq
+  en: faq
 title: faq
 faq:
   - question:

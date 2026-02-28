@@ -16,8 +16,8 @@ export interface CmsPreviewBaseMessage {
 }
 
 export interface CmsPreviewUpdatePayload {
-  page: 'home' | 'apartments';
-  collection: 'pages' | 'apartments';
+  page: 'home' | 'apartments' | 'faq' | 'exchange-students' | 'guide' | 'content-page';
+  collection: 'pages' | 'apartments' | 'guides' | 'content_pages';
   slug: string;
   locale: 'de' | 'en';
   highlight: boolean;

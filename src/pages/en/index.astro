@@ -6,6 +6,7 @@ import ApartmentCard from '../../components/ApartmentCard.astro';
 import FAQAccordion from '../../components/FAQAccordion.astro';
 import RichText from '../../components/RichText.astro';
 import { getTranslation } from '../../i18n/translations';
+import { getCanonicalFaqPage } from '../../lib/content-pages';
 import { buildLocalBusinessSchema, buildOrganizationSchema, buildWebsiteSchema, getSiteOrigin } from '../../lib/seo';
 
 const lang = 'en' as const;
@@ -24,8 +25,8 @@ const features = homePage.data.features!;
 const editorialBlocks = homePage.data.editorialBlocks ?? [];
 const seo = homePage.data.seo;
 
-const faqPage = await getEntry('pages', 'faq');
-const faqItems = faqPage.data.faq ?? [];
+const faqPage = await getCanonicalFaqPage();
+const faqItems = faqPage?.data.faq ?? [];
 const localizedFaq = faqItems.map((item) => ({
   question: item.question[lang],
   answer: item.answer[lang],

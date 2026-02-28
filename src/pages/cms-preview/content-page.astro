@@ -1,0 +1,196 @@
+---
+import { Icon } from 'astro-icon/components';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import FAQAccordion from '../../components/FAQAccordion.astro';
+import RichText from '../../components/RichText.astro';
+import { getContentPages } from '../../lib/content-pages';
+import { CONTENT_PAGE_PREVIEW_FIELD_MAP } from '../../lib/cms-preview/field-map';
+import {
+  RICH_TEXT_ALLOWED_ATTRIBUTES,
+  RICH_TEXT_ALLOWED_TAGS,
+  RICH_TEXT_CONFIG_SIGNATURE,
+} from '../../lib/rich-text-config';
+
+const lang = 'de' as const;
+const pages = await getContentPages();
+const fallbackPage = {
+  id: 'content-page-draft',
+  data: {
+    kind: 'content' as const,
+    pageType: 'standard' as const,
+    title: 'Neue Seite',
+    routeSlug: { de: 'neue-seite', en: 'new-page' },
+    heading: { de: 'Neue Seite', en: 'New page' },
+    subheading: { de: 'Untertitel', en: 'Subtitle' },
+    intro: { de: 'Einleitung', en: 'Intro' },
+    sections: [],
+    faq: [],
+    seo: {
+      title: { de: '', en: '' },
+      description: { de: '', en: '' },
+    },
+  },
+};
+const page = pages[0] ?? fallbackPage;
+const d = page.data;
+
+const localizedFaq = (d.faq ?? []).map((item) => ({
+  question: item.question[lang],
+  answer: item.answer[lang],
+}));
+
+const bootstrapPayload = {
+  page: 'content-page',
+  collection: 'content_pages',
+  slug: page.id,
+  locale: 'de',
+  highlight: false,
+  activePath: null,
+  data: d,
+  resolvedAssets: {},
+  sentAt: Date.now(),
+};
+
+const richTextConfig = {
+  allowedTags: [...RICH_TEXT_ALLOWED_TAGS],
+  allowedAttributes: Array.from(new Set(Object.values(RICH_TEXT_ALLOWED_ATTRIBUTES).flat())),
+  signature: RICH_TEXT_CONFIG_SIGNATURE,
+};
+---
+
+<BaseLayout
+  title="CMS Preview — Content Page"
+  description="Visual preview route for Decap CMS dynamic page editing"
+  lang={lang}
+  noindex={true}
+>
+  <Fragment slot="head">
+    <meta name="robots" content="noindex, nofollow" />
+    <script
+      is:inline
+      define:vars={{
+        bootstrapPayload,
+        contentPageFieldMap: CONTENT_PAGE_PREVIEW_FIELD_MAP,
+        richTextConfig,
+      }}
+    >
+      window.__CMS_PREVIEW_BOOTSTRAP__ = {
+        page: 'content-page',
+        locale: bootstrapPayload.locale,
+        fieldMap: contentPageFieldMap,
+        richTextConfig,
+        initialPayload: bootstrapPayload,
+      };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dompurify@3.2.5/dist/purify.min.js"></script>
+    <script is:inline src="/admin/preview-frame.js"></script>
+    <style>
+      [data-cms-path] {
+        scroll-margin-top: 96px;
+      }
+
+      .cms-preview-highlightable {
+        outline: 1px dashed rgba(54, 79, 51, 0.4);
+        outline-offset: 4px;
+      }
+
+      .cms-preview-highlight-active {
+        outline: 2px solid rgba(54, 79, 51, 0.8);
+        outline-offset: 4px;
+      }
+    </style>
+  </Fragment>
+
+  <section class="bg-gradient-to-br from-accent-950 via-accent-800 to-accent-950 pb-16 pt-32">
+    <div class="mx-auto max-w-6xl px-4 sm:px-6">
+      <span data-cms-path="pageType" class="inline-flex rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[0.6875rem] font-semibold uppercase tracking-[0.12em] text-white/90">
+        {d.pageType || 'standard'}
+      </span>
+      <h1 data-cms-path="heading" class="mt-4 font-serif text-4xl font-bold text-white sm:text-5xl">
+        {d.heading?.[lang] || d.title}
+      </h1>
+      <p data-cms-path="subheading" class="mt-4 text-lg text-accent-100/80">
+        {d.subheading?.[lang]}
+      </p>
+    </div>
+  </section>
+
+  <section class="bg-white py-16 sm:py-20">
+    <div class="mx-auto max-w-4xl px-4 sm:px-6">
+      <p data-cms-path="intro" class="text-lg leading-relaxed text-neutral-700">
+        {d.intro?.[lang]}
+      </p>
+
+      <div data-cms-path="highlights" class="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+        {(d.highlights ?? []).map((item) => (
+          <div class="rounded-xl bg-white p-6 ring-1 ring-neutral-200 transition-all duration-200 hover:shadow-md hover:ring-accent-200">
+            <span class="flex h-12 w-12 items-center justify-center rounded-lg bg-accent-100 text-accent-700">
+              <Icon name={`lucide:${item.icon}`} class="h-5 w-5" />
+            </span>
+            <h3 class="mt-4 text-base font-semibold text-neutral-900">{item.title[lang]}</h3>
+            <p class="mt-2 text-sm leading-relaxed text-neutral-600">{item.description[lang]}</p>
+          </div>
+        ))}
+      </div>
+
+      <div data-cms-path="sections" class="mt-12 space-y-10">
+        {(d.sections ?? []).map((section) => (
+          <article>
+            <h2 class="font-serif text-2xl font-bold text-neutral-900">{section.heading[lang]}</h2>
+            <RichText content={section.body[lang]} className="mt-4" />
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="bg-neutral-50 py-16 sm:py-20">
+    <div class="mx-auto max-w-4xl px-4 sm:px-6">
+      <h2 class="font-serif text-2xl font-bold text-neutral-900">Zusatzinhalte</h2>
+      <div class="mt-6 grid gap-6 sm:grid-cols-2">
+        <article class="rounded-xl bg-white p-6 ring-1 ring-neutral-200">
+          <h3 class="text-sm font-semibold uppercase tracking-[0.12em] text-neutral-500">Was ist enthalten?</h3>
+          <p data-cms-path="whatsIncluded" class="mt-3 text-sm leading-relaxed text-neutral-700">{d.whatsIncluded?.[lang]}</p>
+        </article>
+        <article class="rounded-xl bg-white p-6 ring-1 ring-neutral-200">
+          <h3 class="text-sm font-semibold uppercase tracking-[0.12em] text-neutral-500">Über Vallendar</h3>
+          <p data-cms-path="aboutVallendar" class="mt-3 text-sm leading-relaxed text-neutral-700">{d.aboutVallendar?.[lang]}</p>
+        </article>
+        <article class="rounded-xl bg-white p-6 ring-1 ring-neutral-200 sm:col-span-2">
+          <h3 class="text-sm font-semibold uppercase tracking-[0.12em] text-neutral-500">Buchung aus dem Ausland</h3>
+          <p data-cms-path="remoteBooking" class="mt-3 text-sm leading-relaxed text-neutral-700">{d.remoteBooking?.[lang]}</p>
+        </article>
+      </div>
+      <a href="/de/kontakt/" class="btn btn-primary mt-8">
+        <span data-cms-path="ctaText">{d.ctaText?.[lang]}</span>
+        <Icon name="lucide:arrow-right" class="h-4 w-4" />
+      </a>
+    </div>
+  </section>
+
+  <section class="bg-white py-16 sm:py-20">
+    <div class="mx-auto max-w-4xl px-4 sm:px-6">
+      <h2 class="font-serif text-3xl font-bold text-neutral-900">Häufige Fragen</h2>
+      <div data-cms-path="faq" class="mt-8">
+        <FAQAccordion items={localizedFaq} />
+      </div>
+    </div>
+  </section>
+
+  <section class="bg-white py-16">
+    <div class="mx-auto max-w-4xl px-4 sm:px-6">
+      <div class="rounded-3xl border border-neutral-200 bg-neutral-50 p-6 sm:p-8">
+        <h2 class="font-serif text-2xl font-bold text-neutral-900">SEO Vorschau</h2>
+        <p class="mt-5 text-xs font-semibold uppercase tracking-[0.12em] text-neutral-500">SEO Title</p>
+        <p data-cms-path="seo.title" class="mt-2 text-lg font-semibold text-neutral-900">{d.seo?.title?.[lang]}</p>
+
+        <p class="mt-6 text-xs font-semibold uppercase tracking-[0.12em] text-neutral-500">SEO Description</p>
+        <p data-cms-path="seo.description" class="mt-2 text-sm leading-relaxed text-neutral-600">{d.seo?.description?.[lang]}</p>
+
+        <p class="mt-6 text-xs font-semibold uppercase tracking-[0.12em] text-neutral-500">OpenGraph Image</p>
+        <img data-cms-path="seo.ogImage" src={d.seo?.ogImage} alt="" class="mt-2 max-h-52 w-full rounded-2xl object-cover ring-1 ring-neutral-200" />
+      </div>
+    </div>
+  </section>
+</BaseLayout>

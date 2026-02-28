@@ -39,5 +39,52 @@ export const APARTMENT_PREVIEW_FIELD_MAP = {
   'seo.ogImage': '[data-cms-path="seo.ogImage"]',
 } as const;
 
+export const FAQ_PREVIEW_FIELD_MAP = {
+  faq: '[data-cms-path="faq"]',
+} as const;
+
+export const EXCHANGE_STUDENTS_PREVIEW_FIELD_MAP = {
+  heading: '[data-cms-path="heading"]',
+  subheading: '[data-cms-path="subheading"]',
+  intro: '[data-cms-path="intro"]',
+  highlights: '[data-cms-path="highlights"]',
+  whatsIncluded: '[data-cms-path="whatsIncluded"]',
+  aboutVallendar: '[data-cms-path="aboutVallendar"]',
+  remoteBooking: '[data-cms-path="remoteBooking"]',
+  ctaText: '[data-cms-path="ctaText"]',
+} as const;
+
+export const CONTENT_PAGE_PREVIEW_FIELD_MAP = {
+  pageType: '[data-cms-path="pageType"]',
+  heading: '[data-cms-path="heading"]',
+  subheading: '[data-cms-path="subheading"]',
+  intro: '[data-cms-path="intro"]',
+  highlights: '[data-cms-path="highlights"]',
+  whatsIncluded: '[data-cms-path="whatsIncluded"]',
+  aboutVallendar: '[data-cms-path="aboutVallendar"]',
+  remoteBooking: '[data-cms-path="remoteBooking"]',
+  ctaText: '[data-cms-path="ctaText"]',
+  sections: '[data-cms-path="sections"]',
+  faq: '[data-cms-path="faq"]',
+  'seo.title': '[data-cms-path="seo.title"]',
+  'seo.description': '[data-cms-path="seo.description"]',
+  'seo.ogImage': '[data-cms-path="seo.ogImage"]',
+} as const;
+
+export const GUIDE_PREVIEW_FIELD_MAP = {
+  title: '[data-cms-path="title"]',
+  description: '[data-cms-path="description"]',
+  publishedAt: '[data-cms-path="publishedAt"]',
+  sections: '[data-cms-path="sections"]',
+  faq: '[data-cms-path="faq"]',
+  'seo.title': '[data-cms-path="seo.title"]',
+  'seo.description': '[data-cms-path="seo.description"]',
+  'seo.ogImage': '[data-cms-path="seo.ogImage"]',
+} as const;
+
 export const HOME_REQUIRED_PREVIEW_PATHS = Object.keys(HOME_PREVIEW_FIELD_MAP);
 export const APARTMENT_REQUIRED_PREVIEW_PATHS = Object.keys(APARTMENT_PREVIEW_FIELD_MAP);
+export const FAQ_REQUIRED_PREVIEW_PATHS = Object.keys(FAQ_PREVIEW_FIELD_MAP);
+export const EXCHANGE_STUDENTS_REQUIRED_PREVIEW_PATHS = Object.keys(EXCHANGE_STUDENTS_PREVIEW_FIELD_MAP);
+export const GUIDE_REQUIRED_PREVIEW_PATHS = Object.keys(GUIDE_PREVIEW_FIELD_MAP);
+export const CONTENT_PAGE_REQUIRED_PREVIEW_PATHS = Object.keys(CONTENT_PAGE_PREVIEW_FIELD_MAP);

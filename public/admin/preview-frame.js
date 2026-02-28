@@ -11,7 +11,8 @@
   const RICH_TEXT_CONFIG_SIGNATURE = 'cms-richtext-v1-2026-02-28';
 
   const bootstrap = window.__CMS_PREVIEW_BOOTSTRAP__ || {};
-  const page = bootstrap.page === 'apartments' ? 'apartments' : 'home';
+  const VALID_PAGES = new Set(['apartments', 'home', 'faq', 'exchange-students', 'guide', 'content-page']);
+  const page = VALID_PAGES.has(bootstrap.page) ? bootstrap.page : 'home';
   const fieldMap = bootstrap.fieldMap || {};
   const richTextConfig = bootstrap.richTextConfig || {};
 
@@ -258,6 +259,62 @@
     }).join('');
   };
 
+  const renderFaqAccordion = (faqItems, locale) => {
+    const items = toArray(faqItems);
+    if (items.length === 0) {
+      return '<div class="rounded-xl border border-dashed border-neutral-300 bg-neutral-50 p-6 text-sm text-neutral-500">No FAQ entries configured.</div>';
+    }
+
+    return `
+      <div class="divide-y divide-neutral-200 rounded-xl border border-neutral-200 bg-white">
+        ${items.map((item) => `
+          <details class="group">
+            <summary class="flex cursor-pointer items-center justify-between gap-4 px-6 py-5 text-left text-base font-semibold text-neutral-900 transition-colors hover:text-accent-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-600 focus-visible:ring-inset">
+              <span>${escapeHtml(getLocalized(item.question, locale))}</span>
+              <svg class="h-5 w-5 shrink-0 text-neutral-400 transition-transform duration-300 group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"></path>
+              </svg>
+            </summary>
+            <div class="px-6 pb-5 text-sm leading-relaxed text-neutral-600">
+              ${escapeHtml(getLocalized(item.answer, locale))}
+            </div>
+          </details>
+        `).join('')}
+      </div>
+    `;
+  };
+
+  const renderExchangeHighlights = (highlights, locale) => {
+    const items = toArray(highlights);
+    if (items.length === 0) {
+      return '<div class="rounded-xl border border-dashed border-neutral-300 bg-neutral-50 p-6 text-sm text-neutral-500">No highlights configured.</div>';
+    }
+
+    return items.map((item) => `
+      <div class="rounded-xl bg-white p-6 ring-1 ring-neutral-200 transition-all duration-200 hover:shadow-md hover:ring-accent-200">
+        <span class="flex h-12 w-12 items-center justify-center rounded-lg bg-accent-100 text-accent-700">
+          <span class="text-[0.625rem] font-semibold uppercase tracking-[0.12em]">${escapeHtml(String(item.icon || 'ic').slice(0, 2).toUpperCase())}</span>
+        </span>
+        <h3 class="mt-4 text-base font-semibold text-neutral-900">${escapeHtml(getLocalized(item.title, locale))}</h3>
+        <p class="mt-2 text-sm leading-relaxed text-neutral-600">${escapeHtml(getLocalized(item.description, locale))}</p>
+      </div>
+    `).join('');
+  };
+
+  const renderGuideSections = (sections, locale) => {
+    const items = toArray(sections);
+    if (items.length === 0) {
+      return '<div class="rounded-xl border border-dashed border-neutral-300 bg-neutral-50 p-6 text-sm text-neutral-500">No guide sections configured.</div>';
+    }
+
+    return items.map((section) => `
+      <article>
+        <h2 class="font-serif text-2xl font-bold text-neutral-900">${escapeHtml(getLocalized(section.heading, locale))}</h2>
+        <div class="richtext mt-4">${renderMarkdown(getLocalized(section.body, locale))}</div>
+      </article>
+    `).join('');
+  };
+
   const applyHighlights = () => {
     document.querySelectorAll('[data-cms-path]').forEach((node) => {
       node.classList.toggle('cms-preview-highlightable', state.highlight);
@@ -365,12 +422,108 @@
     applyHighlights();
   };
 
+  const renderFaq = () => {
+    const payload = state.payload || {};
+    const data = payload.data || {};
+    const locale = state.locale;
+
+    setHTML('faq', renderFaqAccordion(data.faq, locale));
+    applyHighlights();
+  };
+
+  const renderExchangeStudents = () => {
+    const payload = state.payload || {};
+    const data = payload.data || {};
+    const locale = state.locale;
+
+    setText('heading', getLocalized(data.heading, locale));
+    setText('subheading', getLocalized(data.subheading, locale));
+    setText('intro', getLocalized(data.intro, locale));
+    setHTML('highlights', renderExchangeHighlights(data.highlights, locale));
+    setText('whatsIncluded', getLocalized(data.whatsIncluded, locale));
+    setText('aboutVallendar', getLocalized(data.aboutVallendar, locale));
+    setText('remoteBooking', getLocalized(data.remoteBooking, locale));
+    setText('ctaText', getLocalized(data.ctaText, locale));
+
+    applyHighlights();
+  };
+
+  const renderGuide = () => {
+    const payload = state.payload || {};
+    const data = payload.data || {};
+    const locale = state.locale;
+
+    setText('title', getLocalized(data.title, locale));
+    setText('description', getLocalized(data.description, locale));
+
+    const readingMinutes = Number(data.readingMinutes || 0);
+    const readLabel = locale === 'de' ? 'Min. Lesezeit' : 'min read';
+    setText('publishedAt', `${data.publishedAt || ''}${readingMinutes > 0 ? ` · ${readingMinutes} ${readLabel}` : ''}`);
+
+    setHTML('sections', renderGuideSections(data.sections, locale));
+    setHTML('faq', renderFaqAccordion(data.faq, locale));
+
+    setText('seo.title', getLocalized(data.seo && data.seo.title, locale));
+    setText('seo.description', getLocalized(data.seo && data.seo.description, locale));
+    setAttr('seo.ogImage', 'src', resolveAsset((data.seo && data.seo.ogImage) || data.heroImage || ''));
+
+    applyHighlights();
+  };
+
+  const renderContentPage = () => {
+    const payload = state.payload || {};
+    const data = payload.data || {};
+    const locale = state.locale;
+    const pageType = typeof data.pageType === 'string' ? data.pageType : 'standard';
+
+    setText('pageType', pageType);
+    setText('heading', getLocalized(data.heading, locale));
+    setText('subheading', getLocalized(data.subheading, locale));
+    setText('intro', getLocalized(data.intro, locale));
+    setText('whatsIncluded', getLocalized(data.whatsIncluded, locale));
+    setText('aboutVallendar', getLocalized(data.aboutVallendar, locale));
+    setText('remoteBooking', getLocalized(data.remoteBooking, locale));
+    setText('ctaText', getLocalized(data.ctaText, locale));
+    setText('seo.title', getLocalized(data.seo && data.seo.title, locale));
+    setText('seo.description', getLocalized(data.seo && data.seo.description, locale));
+    setAttr('seo.ogImage', 'src', resolveAsset((data.seo && data.seo.ogImage) || ''));
+
+    if (pageType === 'faq') {
+      setHTML('faq', renderFaqAccordion(data.faq, locale));
+      setHTML('highlights', '');
+      setHTML('sections', '');
+      applyHighlights();
+      return;
+    }
+
+    if (pageType === 'exchange') {
+      setHTML('highlights', renderExchangeHighlights(data.highlights, locale));
+      setHTML('faq', renderFaqAccordion(data.faq, locale));
+      setHTML('sections', '');
+      applyHighlights();
+      return;
+    }
+
+    setHTML('highlights', renderExchangeHighlights(data.highlights, locale));
+    setHTML('sections', renderGuideSections(data.sections, locale));
+    setHTML('faq', renderFaqAccordion(data.faq, locale));
+    applyHighlights();
+  };
+
   const renderPreview = () => {
     if (!state.payload) return;
     if (page === 'apartments') {
       renderApartment();
-    } else {
+    } else if (page === 'home') {
       renderHome();
+    } else if (page === 'faq') {
+      renderFaq();
+    } else if (page === 'exchange-students') {
+      renderExchangeStudents();
+    } else if (page === 'guide') {
+      renderGuide();
+    } else if (page === 'content-page') {
+      renderContentPage();
     }
 
     (window.top || window.parent).postMessage({

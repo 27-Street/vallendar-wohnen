@@ -181,7 +181,7 @@ The CMS is configured with `publish_mode: editorial_workflow`, which means conte
 
 - Draft content is visible in the CMS editorial interface.
 - Live site pages only change after publish + successful Netlify deploy.
-- Home and apartment visual previews are rendered via `/cms-preview/home` and `/cms-preview/apartment` in an iframe.
+- Visual previews are rendered via `/cms-preview/home`, `/cms-preview/apartment`, `/cms-preview/content-page`, and `/cms-preview/guide` in an iframe.
 - Frame policy must allow same-origin embedding (`X-Frame-Options: SAMEORIGIN`) or the visual preview will not render.
 - If an image path or bilingual field is invalid, local/CI validation should fail before production deployment.
 - The CMS **Medien** tab lists media recursively from `public/images/**`, including apartment, hero, guides, and other page folders.

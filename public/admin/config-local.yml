@@ -391,96 +391,169 @@ collections:
               - { label: Noindex (optional), name: noindex, widget: boolean, required: false, default: false }
               - { label: Keywords (optional), name: keywords, widget: list, required: false, hint: "Ziel-Keywords für SEO-Planung." }
 
-      - label: Austauschstudierende
-        name: exchange-students
-        file: src/content/pages/exchange-students.md
-        media_folder: public/images/pages/exchange-students
-        public_folder: /images/pages/exchange-students
+  - name: content_pages
+    label: Inhaltsseiten
+    label_singular: Inhaltsseite
+    folder: src/content/pages
+    create: true
+    slug: "{{slug}}"
+    extension: md
+    format: frontmatter
+    filter:
+      field: kind
+      value: content
+    summary: "{{fields.routeSlug.de}} ({{fields.pageType}})"
+    preview_path: "de/{{fields.routeSlug.de}}/"
+    media_folder: public/images/pages/{{slug}}
+    public_folder: /images/pages/{{slug}}
+    fields:
+      - { label: Typkennzeichen, name: kind, widget: hidden, default: content }
+      - { label: Interner Titel, name: title, widget: string, hint: "Nur für die CMS-Übersicht; nicht zwingend die sichtbare Überschrift." }
+      - label: Seitentyp
+        name: pageType
+        widget: select
+        default: standard
+        options:
+          - { label: Standardseite, value: standard }
+          - { label: FAQ-Seite, value: faq }
+          - { label: Austauschstudierende, value: exchange }
+      - label: Slug (Pfadsegment)
+        name: routeSlug
+        widget: object
+        hint: "Nur Segment ohne führenden Slash, z. B. faq oder austauschstudierende."
         fields:
-          - { label: Titel, name: title, widget: hidden, default: exchange-students }
+          - { label: Deutsch, name: de, widget: string, required: true }
+          - { label: English, name: en, widget: string, required: true }
+      - label: Überschrift
+        name: heading
+        widget: object
+        required: false
+        fields:
+          - { label: Deutsch, name: de, widget: string, required: false }
+          - { label: English, name: en, widget: string, required: false }
+      - label: Unterüberschrift
+        name: subheading
+        widget: object
+        required: false
+        fields:
+          - { label: Deutsch, name: de, widget: string, required: false }
+          - { label: English, name: en, widget: string, required: false }
+      - label: Einleitung
+        name: intro
+        widget: object
+        required: false
+        fields:
+          - { label: Deutsch, name: de, widget: text, required: false }
+          - { label: English, name: en, widget: text, required: false }
+      - label: Highlights (für Austauschstudierende)
+        name: highlights
+        widget: list
+        required: false
+        fields:
+          - { label: Icon, name: icon, widget: string, required: true }
+          - label: Titel
+            name: title
+            widget: object
+            fields:
+              - { label: Deutsch, name: de, widget: string, required: true }
+              - { label: English, name: en, widget: string, required: true }
+          - label: Beschreibung
+            name: description
+            widget: object
+            fields:
+              - { label: Deutsch, name: de, widget: text, required: true }
+              - { label: English, name: en, widget: text, required: true }
+      - label: Was ist enthalten
+        name: whatsIncluded
+        widget: object
+        required: false
+        fields:
+          - { label: Deutsch, name: de, widget: text, required: false }
+          - { label: English, name: en, widget: text, required: false }
+      - label: Über Vallendar
+        name: aboutVallendar
+        widget: object
+        required: false
+        fields:
+          - { label: Deutsch, name: de, widget: text, required: false }
+          - { label: English, name: en, widget: text, required: false }
+      - label: Buchung aus dem Ausland
+        name: remoteBooking
+        widget: object
+        required: false
+        fields:
+          - { label: Deutsch, name: de, widget: text, required: false }
+          - { label: English, name: en, widget: text, required: false }
+      - label: CTA-Text
+        name: ctaText
+        widget: object
+        required: false
+        fields:
+          - { label: Deutsch, name: de, widget: string, required: false }
+          - { label: English, name: en, widget: string, required: false }
+      - label: Inhaltsabschnitte (für Standardseiten)
+        name: sections
+        widget: list
+        required: false
+        fields:
           - label: Überschrift
             name: heading
             widget: object
             fields:
-              - { label: Deutsch, name: de, widget: string }
-              - { label: English, name: en, widget: string }
-          - label: Unterüberschrift
-            name: subheading
+              - { label: Deutsch, name: de, widget: string, required: true }
+              - { label: English, name: en, widget: string, required: true }
+          - label: Inhalt
+            name: body
             widget: object
             fields:
-              - { label: Deutsch, name: de, widget: string }
-              - { label: English, name: en, widget: string }
-          - label: Einleitung
-            name: intro
-            widget: object
-            fields:
-              - { label: Deutsch, name: de, widget: text }
-              - { label: English, name: en, widget: text }
-          - label: Highlights
-            name: highlights
-            widget: list
-            fields:
-              - { label: Icon, name: icon, widget: string }
-              - label: Titel
-                name: title
-                widget: object
-                fields:
-                  - { label: Deutsch, name: de, widget: string }
-                  - { label: English, name: en, widget: string }
-              - label: Beschreibung
-                name: description
-                widget: object
-                fields:
-                  - { label: Deutsch, name: de, widget: text }
-                  - { label: English, name: en, widget: text }
-          - label: Was ist enthalten
-            name: whatsIncluded
-            widget: object
-            fields:
-              - { label: Deutsch, name: de, widget: text }
-              - { label: English, name: en, widget: text }
-          - label: Über Vallendar
-            name: aboutVallendar
-            widget: object
-            fields:
-              - { label: Deutsch, name: de, widget: text }
-              - { label: English, name: en, widget: text }
-          - label: Buchung aus dem Ausland
-            name: remoteBooking
-            widget: object
-            fields:
-              - { label: Deutsch, name: de, widget: text }
-              - { label: English, name: en, widget: text }
-          - label: CTA-Text
-            name: ctaText
-            widget: object
-            fields:
-              - { label: Deutsch, name: de, widget: string }
-              - { label: English, name: en, widget: string }
-
-      - label: FAQ
+              - { label: Deutsch, name: de, widget: markdown, modes: [rich_text, raw], required: true }
+              - { label: English, name: en, widget: markdown, modes: [rich_text, raw], required: true }
+      - label: FAQ-Einträge (für FAQ- und Standardseiten)
         name: faq
-        file: src/content/pages/faq.md
-        media_folder: public/images/pages/faq
-        public_folder: /images/pages/faq
+        widget: list
+        required: false
         fields:
-          - { label: Titel, name: title, widget: hidden, default: faq }
-          - label: FAQ-Einträge
-            name: faq
-            widget: list
+          - label: Frage
+            name: question
+            widget: object
             fields:
-              - label: Frage
-                name: question
-                widget: object
-                fields:
-                  - { label: Deutsch, name: de, widget: string }
-                  - { label: English, name: en, widget: string }
-              - label: Antwort
-                name: answer
-                widget: object
-                fields:
-                  - { label: Deutsch, name: de, widget: text }
-                  - { label: English, name: en, widget: text }
+              - { label: Deutsch, name: de, widget: string, required: true }
+              - { label: English, name: en, widget: string, required: true }
+          - label: Antwort
+            name: answer
+            widget: object
+            fields:
+              - { label: Deutsch, name: de, widget: text, required: true }
+              - { label: English, name: en, widget: text, required: true }
+      - label: SEO (optional)
+        name: seo
+        widget: object
+        required: false
+        collapsed: true
+        fields:
+          - label: SEO-Titel
+            name: title
+            widget: object
+            fields:
+              - { label: Deutsch, name: de, widget: string, required: false }
+              - { label: English, name: en, widget: string, required: false }
+          - label: SEO-Beschreibung
+            name: description
+            widget: object
+            fields:
+              - { label: Deutsch, name: de, widget: text, required: false }
+              - { label: English, name: en, widget: text, required: false }
+          - { label: OpenGraph Bild (optional), name: ogImage, widget: image, required: false }
+          - label: OpenGraph Alt-Text (optional)
+            name: ogImageAlt
+            widget: object
+            required: false
+            fields:
+              - { label: Deutsch, name: de, widget: string, required: false }
+              - { label: English, name: en, widget: string, required: false }
+          - { label: Canonical Pfad (optional), name: canonicalPath, widget: string, required: false }
+          - { label: Noindex (optional), name: noindex, widget: boolean, required: false, default: false }
+          - { label: Keywords (optional), name: keywords, widget: list, required: false }
 
   - name: settings
     label: Einstellungen
@@ -512,6 +585,7 @@ collections:
     extension: md
     format: frontmatter
     summary: "{{fields.title.de}}"
+    preview_path: "de/guides/{{slug}}/"
     fields:
       - label: Titel
         name: title

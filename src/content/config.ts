@@ -121,6 +121,9 @@ const apartments = defineCollection({
 const pages = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/pages' }),
   schema: z.object({
+    kind: z.enum(['content']).optional(),
+    pageType: z.enum(['faq', 'exchange', 'standard']).optional(),
+    routeSlug: bilingualString.optional(),
     title: z.string(),
     hero: z.object({
       headline: bilingualString,
@@ -170,6 +173,10 @@ const pages = defineCollection({
     faq: z.array(z.object({
       question: bilingualString,
       answer: bilingualString,
+    })).optional(),
+    sections: z.array(z.object({
+      heading: bilingualString,
+      body: bilingualString,
     })).optional(),
     // Exchange students page fields
     heading: bilingualString.optional(),

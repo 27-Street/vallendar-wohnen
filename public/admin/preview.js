@@ -15,6 +15,25 @@
     ACK: 'CMS_PREVIEW_ACK',
   };
 
+  const PREVIEW_MODES = {
+    apartments: {
+      collection: 'apartments',
+      source: (slug) => `/cms-preview/apartment?cmsPreview=1${slug ? `&slug=${encodeURIComponent(slug)}` : ''}`,
+    },
+    home: {
+      collection: 'pages',
+      source: () => '/cms-preview/home?cmsPreview=1',
+    },
+    'content-page': {
+      collection: 'content_pages',
+      source: () => '/cms-preview/content-page?cmsPreview=1',
+    },
+    guide: {
+      collection: 'guides',
+      source: (slug) => `/cms-preview/guide?cmsPreview=1${slug ? `&slug=${encodeURIComponent(slug)}` : ''}`,
+    },
+  };
+
   const stores = new Map();
   let activeStoreKey = null;
   let listenersBound = false;
@@ -132,10 +151,52 @@
     return bestScore > 0 ? best : null;
   };
 
-  const isHomeEntry = (entryData, slug) => {
-    if (slug === 'home') return true;
-    const title = typeof entryData?.title === 'string' ? entryData.title.trim().toLowerCase() : '';
-    return title === 'home';
+  const getCollectionName = (props) => {
+    const fromCollection = props.collection && typeof props.collection.get === 'function'
+      ? props.collection.get('name')
+      : null;
+    if (typeof fromCollection === 'string' && fromCollection.trim()) {
+      return fromCollection.trim();
+    }
+
+    const fromEntry = props.entry && typeof props.entry.get === 'function'
+      ? props.entry.get('collection')
+      : null;
+    if (typeof fromEntry === 'string' && fromEntry.trim()) {
+      return fromEntry.trim();
+    }
+
+    return '';
+  };
+
+  const getEntrySlug = (props, entryData) => {
+    const slug = props.entry && typeof props.entry.get === 'function'
+      ? props.entry.get('slug')
+      : null;
+    if (typeof slug === 'string' && slug.trim()) {
+      return slug.trim().toLowerCase();
+    }
+
+    if (typeof entryData?.title === 'string' && entryData.title.trim()) {
+      return entryData.title.trim().toLowerCase();
+    }
+
+    return '';
+  };
+
+  const resolveMode = (collectionName, slug, entryData) => {
+    if (collectionName === 'apartments') return 'apartments';
+    if (collectionName === 'guides') return 'guide';
+    if (collectionName === 'content_pages') return 'content-page';
+
+    if (collectionName === 'pages') {
+      const title = typeof entryData?.title === 'string' ? entryData.title.trim().toLowerCase() : '';
+      const pageId = slug || title;
+
+      if (pageId === 'home') return 'home';
+    }
+
+    return null;
   };
 
   const createStore = (key, mode) => ({
@@ -160,7 +221,7 @@
     viewportGroupId: `cms-preview-viewport-${key}`,
     highlightButtonId: `cms-preview-highlight-${key}`,
     latestPayload: null,
-    source: mode === 'apartments' ? '/cms-preview/apartment?cmsPreview=1' : '/cms-preview/home?cmsPreview=1',
+    source: '/cms-preview/home?cmsPreview=1',
     updateTimer: null,
     handshakeTimer: null,
   });
@@ -351,7 +412,8 @@
 
   const buildPayload = (props, store) => {
     const entryData = toJS(props.entry && props.entry.get && props.entry.get('data'), {});
-    const slug = String(props.entry && props.entry.get ? props.entry.get('slug') || '' : '').trim();
+    const slug = getEntrySlug(props, entryData);
+    const modeConfig = PREVIEW_MODES[store.mode] || PREVIEW_MODES.home;
     const resolvedAssets = buildResolvedAssets(entryData, props.getAsset);
 
     if (hasBlobAsset(resolvedAssets)) {
@@ -363,7 +425,7 @@
       type: MESSAGE_TYPES.UPDATE,
       payload: {
         page: store.mode,
-        collection: store.mode === 'home' ? 'pages' : 'apartments',
+        collection: modeConfig.collection,
         slug,
         locale: store.locale,
         highlight: store.highlight,
@@ -491,16 +553,15 @@
 
   const renderFrame = (props, mode) => {
     const entryData = toJS(props.entry && props.entry.get && props.entry.get('data'), {});
-    const slug = String(props.entry && props.entry.get ? props.entry.get('slug') || '' : '').trim().toLowerCase();
+    const slug = getEntrySlug(props, entryData);
     const keyBase = `${mode}-${slug || 'draft'}`.replace(/[^a-z0-9_-]+/gi, '-');
     const key = keyBase || `${mode}-preview`;
 
     const store = ensureStore(key, mode);
     activeStoreKey = key;
 
-    const source = mode === 'apartments'
-      ? `/cms-preview/apartment?cmsPreview=1${slug ? `&slug=${encodeURIComponent(slug)}` : ''}`
-      : '/cms-preview/home?cmsPreview=1';
+    const modeConfig = PREVIEW_MODES[mode] || PREVIEW_MODES.home;
+    const source = modeConfig.source(slug);
 
     store.source = source;
     store.latestPayload = buildPayload(props, store);
@@ -568,24 +629,28 @@
     return h(
       'div',
       { className: 'cms-preview-fallback', style: { display: 'block' } },
-      h('p', { className: 'cms-preview-fallback-title' }, 'High-fidelity visual preview is enabled for homepage and apartments in this wave.'),
+      h('p', { className: 'cms-preview-fallback-title' }, 'Visual preview is not mapped for this collection entry yet.'),
       h('pre', { className: 'cms-preview-fallback-json' }, JSON.stringify(data, null, 2)),
     );
   };
 
-  const ApartmentsTemplate = (props) => renderFrame(props, 'apartments');
-
-  const PagesTemplate = (props) => {
+  const resolveTemplateMode = (props) => {
     const entryData = toJS(props.entry && props.entry.get && props.entry.get('data'), {});
-    const slug = String(props.entry && props.entry.get ? props.entry.get('slug') || '' : '').trim().toLowerCase();
-    if (!isHomeEntry(entryData, slug)) {
-      return h(UnsupportedPreview, props);
-    }
-
-    return renderFrame(props, 'home');
+    const slug = getEntrySlug(props, entryData);
+    const collectionName = getCollectionName(props);
+    return resolveMode(collectionName, slug, entryData);
   };
 
-  cms.registerPreviewTemplate('apartments', ApartmentsTemplate);
-  cms.registerPreviewTemplate('pages', PagesTemplate);
+  const CollectionTemplate = (props) => {
+    const mode = resolveTemplateMode(props);
+    if (!mode) return h(UnsupportedPreview, props);
+
+    return renderFrame(props, mode);
+  };
+
+  cms.registerPreviewTemplate('apartments', CollectionTemplate);
+  cms.registerPreviewTemplate('pages', CollectionTemplate);
+  cms.registerPreviewTemplate('content_pages', CollectionTemplate);
+  cms.registerPreviewTemplate('guides', CollectionTemplate);
   cms.registerPreviewTemplate('home', (props) => renderFrame(props, 'home'));
 })();

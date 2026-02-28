@@ -5,6 +5,8 @@ import { parse as parseYaml } from 'yaml';
 import { APARTMENT_IMAGE_KIND_OPTIONS, FEATURE_ICON_OPTIONS } from '../src/content/cms-shared';
 import {
   APARTMENT_REQUIRED_PREVIEW_PATHS,
+  CONTENT_PAGE_REQUIRED_PREVIEW_PATHS,
+  GUIDE_REQUIRED_PREVIEW_PATHS,
   HOME_REQUIRED_PREVIEW_PATHS,
 } from '../src/lib/cms-preview/field-map';
 import { RICH_TEXT_CONFIG_SIGNATURE } from '../src/lib/rich-text-config';
@@ -23,6 +25,8 @@ const DECAP_CONFIG_PATH = join(ROOT, 'public/admin/config.yml');
 const DECAP_ADMIN_INDEX_PATH = join(ROOT, 'public/admin/index.html');
 const CMS_PREVIEW_HOME_ROUTE = join(ROOT, 'src/pages/cms-preview/home.astro');
 const CMS_PREVIEW_APARTMENT_ROUTE = join(ROOT, 'src/pages/cms-preview/apartment.astro');
+const CMS_PREVIEW_CONTENT_PAGE_ROUTE = join(ROOT, 'src/pages/cms-preview/content-page.astro');
+const CMS_PREVIEW_GUIDE_ROUTE = join(ROOT, 'src/pages/cms-preview/guide.astro');
 const CMS_PREVIEW_FRAME_PATH = join(ROOT, 'public/admin/preview-frame.js');
 
 const nonEmptyString = z.string().refine((value) => value.trim().length > 0, 'Must not be empty');
@@ -128,33 +132,67 @@ const homePageSchema = z.object({
   seo: seoSchema.optional(),
 }).strict();
 
-const faqPageSchema = z.object({
-  title: z.literal('faq'),
-  faq: z.array(
-    z.object({
-      question: bilingualString,
-      answer: bilingualString,
-    }).strict(),
-  ).min(1),
+const localizedSlugSchema = z.object({
+  de: nonEmptyString,
+  en: nonEmptyString,
 }).strict();
 
-const exchangeStudentsPageSchema = z.object({
-  title: z.literal('exchange-students'),
+const pageHighlightSchema = z.object({
+  icon: nonEmptyString,
+  title: bilingualString,
+  description: bilingualString,
+}).strict();
+
+const pageSectionSchema = z.object({
+  heading: bilingualString,
+  body: bilingualString,
+}).strict();
+
+const faqItemSchema = z.object({
+  question: bilingualString,
+  answer: bilingualString,
+}).strict();
+
+const contentPageBaseSchema = z.object({
+  kind: z.literal('content'),
+  pageType: z.enum(['faq', 'exchange', 'standard']),
+  title: nonEmptyString,
+  routeSlug: localizedSlugSchema,
+  heading: bilingualString.optional(),
+  subheading: bilingualString.optional(),
+  intro: bilingualString.optional(),
+  highlights: z.array(pageHighlightSchema).optional(),
+  whatsIncluded: bilingualString.optional(),
+  aboutVallendar: bilingualString.optional(),
+  remoteBooking: bilingualString.optional(),
+  ctaText: bilingualString.optional(),
+  sections: z.array(pageSectionSchema).optional(),
+  faq: z.array(faqItemSchema).optional(),
+  seo: seoSchema.optional(),
+}).strict();
+
+const faqContentPageSchema = contentPageBaseSchema.extend({
+  pageType: z.literal('faq'),
+  faq: z.array(faqItemSchema).min(1),
+});
+
+const exchangeContentPageSchema = contentPageBaseSchema.extend({
+  pageType: z.literal('exchange'),
   heading: bilingualString,
   subheading: bilingualString,
   intro: bilingualString,
-  highlights: z.array(
-    z.object({
-      icon: nonEmptyString,
-      title: bilingualString,
-      description: bilingualString,
-    }).strict(),
-  ).min(1),
+  highlights: z.array(pageHighlightSchema).min(1),
   whatsIncluded: bilingualString,
   aboutVallendar: bilingualString,
   remoteBooking: bilingualString,
   ctaText: bilingualString,
-}).strict();
+});
+
+const standardContentPageSchema = contentPageBaseSchema.extend({
+  pageType: z.literal('standard'),
+  heading: bilingualString,
+  sections: z.array(pageSectionSchema).min(1),
+});
 
 const guideSchema = z.object({
   title: bilingualString,
@@ -304,6 +342,12 @@ function validatePreviewContracts(): ValidationResult {
   if (!existsSync(CMS_PREVIEW_APARTMENT_ROUTE)) {
     result.errors.push(`  [preview.routes] Missing ${relative(ROOT, CMS_PREVIEW_APARTMENT_ROUTE)}`);
   }
+  if (!existsSync(CMS_PREVIEW_CONTENT_PAGE_ROUTE)) {
+    result.errors.push(`  [preview.routes] Missing ${relative(ROOT, CMS_PREVIEW_CONTENT_PAGE_ROUTE)}`);
+  }
+  if (!existsSync(CMS_PREVIEW_GUIDE_ROUTE)) {
+    result.errors.push(`  [preview.routes] Missing ${relative(ROOT, CMS_PREVIEW_GUIDE_ROUTE)}`);
+  }
   if (!existsSync(CMS_PREVIEW_FRAME_PATH)) {
     result.errors.push(`  [preview.frame] Missing ${relative(ROOT, CMS_PREVIEW_FRAME_PATH)}`);
     return result;
@@ -311,9 +355,13 @@ function validatePreviewContracts(): ValidationResult {
 
   const homePaths = extractDataCmsPaths(CMS_PREVIEW_HOME_ROUTE);
   const apartmentPaths = extractDataCmsPaths(CMS_PREVIEW_APARTMENT_ROUTE);
+  const contentPagePaths = extractDataCmsPaths(CMS_PREVIEW_CONTENT_PAGE_ROUTE);
+  const guidePaths = extractDataCmsPaths(CMS_PREVIEW_GUIDE_ROUTE);
 
   const homePathSet = new Set(homePaths);
   const apartmentPathSet = new Set(apartmentPaths);
+  const contentPagePathSet = new Set(contentPagePaths);
+  const guidePathSet = new Set(guidePaths);
 
   HOME_REQUIRED_PREVIEW_PATHS.forEach((path) => {
     if (!homePathSet.has(path)) {
@@ -327,6 +375,18 @@ function validatePreviewContracts(): ValidationResult {
     }
   });
 
+  CONTENT_PAGE_REQUIRED_PREVIEW_PATHS.forEach((path) => {
+    if (!contentPagePathSet.has(path)) {
+      result.errors.push(`  [preview.content-page] Missing data-cms-path="${path}"`);
+    }
+  });
+
+  GUIDE_REQUIRED_PREVIEW_PATHS.forEach((path) => {
+    if (!guidePathSet.has(path)) {
+      result.errors.push(`  [preview.guide] Missing data-cms-path="${path}"`);
+    }
+  });
+
   const duplicateHomePaths = homePaths.filter((path, index) => homePaths.indexOf(path) !== index);
   duplicateHomePaths.forEach((path) => {
     result.errors.push(`  [preview.home] Duplicate data-cms-path="${path}"`);
@@ -335,6 +395,16 @@ function validatePreviewContracts(): ValidationResult {
   const duplicateApartmentPaths = apartmentPaths.filter((path, index) => apartmentPaths.indexOf(path) !== index);
   duplicateApartmentPaths.forEach((path) => {
     result.errors.push(`  [preview.apartment] Duplicate data-cms-path="${path}"`);
+  });
+
+  const duplicateContentPagePaths = contentPagePaths.filter((path, index) => contentPagePaths.indexOf(path) !== index);
+  duplicateContentPagePaths.forEach((path) => {
+    result.errors.push(`  [preview.content-page] Duplicate data-cms-path="${path}"`);
+  });
+
+  const duplicateGuidePaths = guidePaths.filter((path, index) => guidePaths.indexOf(path) !== index);
+  duplicateGuidePaths.forEach((path) => {
+    result.errors.push(`  [preview.guide] Duplicate data-cms-path="${path}"`);
   });
 
   const frameSource = readFileSync(CMS_PREVIEW_FRAME_PATH, 'utf-8');
@@ -446,8 +516,6 @@ function validateDecapConfig(): ValidationResult {
 
   const files = Array.isArray(pagesCollection?.files) ? pagesCollection?.files as Array<Record<string, unknown>> : [];
   const homeFile = files.find((entry) => entry.name === 'home');
-  const exchangeStudentsFile = files.find((entry) => entry.name === 'exchange-students');
-  const faqFile = files.find((entry) => entry.name === 'faq');
 
   if (homeFile?.media_folder !== 'public/images/hero') {
     result.errors.push('  [collections.pages.files.home.media_folder] Expected "public/images/hero".');
@@ -455,17 +523,8 @@ function validateDecapConfig(): ValidationResult {
   if (homeFile?.public_folder !== '/images/hero') {
     result.errors.push('  [collections.pages.files.home.public_folder] Expected "/images/hero".');
   }
-  if (exchangeStudentsFile?.media_folder !== 'public/images/pages/exchange-students') {
-    result.errors.push('  [collections.pages.files.exchange-students.media_folder] Expected "public/images/pages/exchange-students".');
-  }
-  if (exchangeStudentsFile?.public_folder !== '/images/pages/exchange-students') {
-    result.errors.push('  [collections.pages.files.exchange-students.public_folder] Expected "/images/pages/exchange-students".');
-  }
-  if (faqFile?.media_folder !== 'public/images/pages/faq') {
-    result.errors.push('  [collections.pages.files.faq.media_folder] Expected "public/images/pages/faq".');
-  }
-  if (faqFile?.public_folder !== '/images/pages/faq') {
-    result.errors.push('  [collections.pages.files.faq.public_folder] Expected "/images/pages/faq".');
+  if (homeFile?.preview_path !== 'de/') {
+    result.errors.push('  [collections.pages.files.home.preview_path] Expected "de/".');
   }
 
   const homeFields = Array.isArray(homeFile?.fields) ? homeFile?.fields as Array<Record<string, unknown>> : [];
@@ -512,12 +571,38 @@ function validateDecapConfig(): ValidationResult {
     result.errors.push(`  [collections.pages.home.features.icon.options] Expected icon options: ${expected.join(', ')}`);
   }
 
+  const contentPagesCollection = collections.find((collection) => collection.name === 'content_pages');
+  if (contentPagesCollection?.folder !== 'src/content/pages') {
+    result.errors.push('  [collections.content_pages.folder] Expected "src/content/pages".');
+  }
+  if (contentPagesCollection?.create !== true) {
+    result.errors.push('  [collections.content_pages.create] Expected true.');
+  }
+  if (contentPagesCollection?.media_folder !== 'public/images/pages/{{slug}}') {
+    result.errors.push('  [collections.content_pages.media_folder] Expected "public/images/pages/{{slug}}".');
+  }
+  if (contentPagesCollection?.public_folder !== '/images/pages/{{slug}}') {
+    result.errors.push('  [collections.content_pages.public_folder] Expected "/images/pages/{{slug}}".');
+  }
+  if (contentPagesCollection?.preview_path !== 'de/{{fields.routeSlug.de}}/') {
+    result.errors.push('  [collections.content_pages.preview_path] Expected "de/{{fields.routeSlug.de}}/".');
+  }
+  const contentPagesFilter = typeof contentPagesCollection?.filter === 'object' && contentPagesCollection.filter
+    ? contentPagesCollection.filter as Record<string, unknown>
+    : null;
+  if (!contentPagesFilter || contentPagesFilter.field !== 'kind' || contentPagesFilter.value !== 'content') {
+    result.errors.push('  [collections.content_pages.filter] Expected filter field "kind" with value "content".');
+  }
+
   const guidesCollection = collections.find((collection) => collection.name === 'guides');
   if (guidesCollection?.media_folder !== 'public/images/guides/{{slug}}') {
     result.errors.push('  [collections.guides.media_folder] Expected "public/images/guides/{{slug}}".');
   }
   if (guidesCollection?.public_folder !== '/images/guides/{{slug}}') {
     result.errors.push('  [collections.guides.public_folder] Expected "/images/guides/{{slug}}".');
+  }
+  if (guidesCollection?.preview_path !== 'de/guides/{{slug}}/') {
+    result.errors.push('  [collections.guides.preview_path] Expected "de/guides/{{slug}}/".');
   }
 
   return result;
@@ -586,6 +671,12 @@ for (const file of getMdFiles(APARTMENTS_DIR)) {
   collectResult(result);
 }
 
+const contentPageSlugsByLocale: Record<'de' | 'en', Map<string, string>> = {
+  de: new Map(),
+  en: new Map(),
+};
+let hasCanonicalFaqSlug = false;
+
 for (const file of getMdFiles(PAGES_DIR)) {
   const result = createResult(file);
   const data = extractFrontmatter(file);
@@ -631,18 +722,61 @@ for (const file of getMdFiles(PAGES_DIR)) {
         }
       });
     }
-  } else if (name === 'faq.md') {
-    const parsed = faqPageSchema.safeParse(data);
-    if (!parsed.success) addZodErrors(result, parsed.error.issues);
-  } else if (name === 'exchange-students.md') {
-    const parsed = exchangeStudentsPageSchema.safeParse(data);
-    if (!parsed.success) addZodErrors(result, parsed.error.issues);
   } else {
-    result.errors.push('  [file] Unsupported page file for strict validation.');
+    const baseParsed = contentPageBaseSchema.safeParse(data);
+    if (!baseParsed.success) {
+      addZodErrors(result, baseParsed.error.issues);
+      collectResult(result);
+      continue;
+    }
+
+    const pageData = baseParsed.data;
+    (['de', 'en'] as const).forEach((locale) => {
+      const slug = pageData.routeSlug[locale].trim().toLowerCase();
+      if (slug.includes('/')) {
+        result.errors.push(`  [routeSlug.${locale}] Slug must be a single segment without "/".`);
+      }
+
+      const existing = contentPageSlugsByLocale[locale].get(slug);
+      if (existing && existing !== name) {
+        result.errors.push(`  [routeSlug.${locale}] Duplicate slug "${slug}" also used in ${existing}.`);
+      } else {
+        contentPageSlugsByLocale[locale].set(slug, name);
+      }
+    });
+
+    if (pageData.pageType === 'faq') {
+      const parsed = faqContentPageSchema.safeParse(pageData);
+      if (!parsed.success) {
+        addZodErrors(result, parsed.error.issues);
+      } else {
+        const isCanonicalFaq = parsed.data.routeSlug.de.trim().toLowerCase() === 'faq'
+          && parsed.data.routeSlug.en.trim().toLowerCase() === 'faq';
+        if (isCanonicalFaq) hasCanonicalFaqSlug = true;
+      }
+    } else if (pageData.pageType === 'exchange') {
+      const parsed = exchangeContentPageSchema.safeParse(pageData);
+      if (!parsed.success) addZodErrors(result, parsed.error.issues);
+    } else if (pageData.pageType === 'standard') {
+      const parsed = standardContentPageSchema.safeParse(pageData);
+      if (!parsed.success) addZodErrors(result, parsed.error.issues);
+    }
+
+    if (pageData.seo?.ogImage) {
+      assertPathExists(result, 'seo.ogImage', pageData.seo.ogImage);
+      const normalizedSeoPath = normalizePublicAssetPath(pageData.seo.ogImage);
+      if (normalizedSeoPath) referencedMediaPaths.add(normalizedSeoPath);
+    }
   }
 
   collectResult(result);
 }
+
+const contentPagesConsistencyResult = createResult('content-pages-consistency');
+if (!hasCanonicalFaqSlug) {
+  contentPagesConsistencyResult.errors.push('  [faq] Missing canonical FAQ page with routeSlug.de=faq and routeSlug.en=faq. Homepage FAQ section relies on this single data source.');
+}
+collectResult(contentPagesConsistencyResult);
 
 for (const file of getMdFiles(GUIDES_DIR)) {
   const result = createResult(file);

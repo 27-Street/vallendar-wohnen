@@ -1,4 +1,9 @@
 ---
+kind: content
+pageType: exchange
+routeSlug:
+  de: austauschstudierende
+  en: exchange-students
 title: exchange-students
 heading:
   de: Für Austauschstudierende
