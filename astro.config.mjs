@@ -3,6 +3,27 @@ import { defineConfig } from 'astro/config';
 import tailwindcss from '@tailwindcss/vite';
 import icon from 'astro-icon';
 
+function adminCmsDevRewritePlugin() {
+  return {
+    name: 'admin-cms-dev-rewrite',
+    configureServer(server) {
+      server.middlewares.use((req, _res, next) => {
+        if (!req.url) {
+          next();
+          return;
+        }
+
+        const [pathname, query = ''] = req.url.split('?');
+        if (pathname === '/admin' || pathname === '/admin/') {
+          req.url = `/admin/index.html${query ? `?${query}` : ''}`;
+        }
+
+        next();
+      });
+    },
+  };
+}
+
 // https://astro.build/config
 // Update 'site' to the production domain once available
 export default defineConfig({
@@ -11,6 +32,6 @@ export default defineConfig({
   compressHTML: true,
   integrations: [icon()],
   vite: {
-    plugins: [tailwindcss()]
+    plugins: [tailwindcss(), adminCmsDevRewritePlugin()],
   }
 });
