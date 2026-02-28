@@ -1,7 +1,7 @@
 (function () {
-  if (!window.CMS) return;
+  const cms = window.CMS || window.DecapCms || window.DecapCmsApp;
+  if (!cms) return;
 
-  const cms = window.CMS;
   const baseBackend = cms.getBackend('git-gateway');
   if (!baseBackend || typeof baseBackend.init !== 'function') {
     console.error('[cms-media] Missing base git-gateway backend.');
