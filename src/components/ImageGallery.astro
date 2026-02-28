@@ -82,7 +82,7 @@ const isPlaceholder = (src: string) => src.endsWith('.svg');
     <!-- Close button -->
     <button
       type="button"
-      class="lightbox-close absolute top-4 right-4 z-10 rounded-full bg-white/10 p-2.5 text-white/80 transition-colors hover:bg-white/20 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
+      class="lightbox-close btn-icon-overlay absolute top-4 right-4 z-10"
       aria-label={t.gallery.close}
     >
       <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
@@ -100,7 +100,7 @@ const isPlaceholder = (src: string) => src.endsWith('.svg');
       <>
         <button
           type="button"
-          class="lightbox-prev absolute left-4 top-1/2 z-10 -translate-y-1/2 rounded-full bg-white/10 p-3 text-white/80 transition-colors hover:bg-white/20 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
+          class="lightbox-prev btn-icon-overlay absolute left-4 top-1/2 z-10 -translate-y-1/2"
           aria-label={t.gallery.previous}
         >
           <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
@@ -109,7 +109,7 @@ const isPlaceholder = (src: string) => src.endsWith('.svg');
         </button>
         <button
           type="button"
-          class="lightbox-next absolute right-4 top-1/2 z-10 -translate-y-1/2 rounded-full bg-white/10 p-3 text-white/80 transition-colors hover:bg-white/20 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
+          class="lightbox-next btn-icon-overlay absolute right-4 top-1/2 z-10 -translate-y-1/2"
           aria-label={t.gallery.next}
         >
           <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
