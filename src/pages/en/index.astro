@@ -45,6 +45,14 @@ const introImage = sortedApartments
   .find((image) => image.kind === 'kitchen')
   ?.image ?? hero.images.desktop;
 
+const withFormat = (src: string, format: 'avif' | 'webp') => src.replace(/\.(jpe?g|png)$/i, `.${format}`);
+const heroImageMobileAvif = withFormat(hero.images.mobile, 'avif');
+const heroImageTabletAvif = withFormat(hero.images.tablet, 'avif');
+const heroImageDesktopAvif = withFormat(hero.images.desktop, 'avif');
+const heroImageMobileWebp = withFormat(hero.images.mobile, 'webp');
+const heroImageTabletWebp = withFormat(hero.images.tablet, 'webp');
+const heroImageDesktopWebp = withFormat(hero.images.desktop, 'webp');
+
 const conceptIntro = [
   'VallendarWohnen offers furnished student apartments for anyone looking for short routes, clear terms, and a dependable living setup during their studies.',
   'Our concept combines fully equipped units with transparent monthly costs and a straightforward booking process that also works from abroad.',
@@ -79,15 +87,21 @@ const conceptCards = [
   lang={lang}
 >
   <Fragment slot="head">
-    <link rel="preload" as="image" href={hero.images.mobile} media="(max-width: 640px)" />
-    <link rel="preload" as="image" href={hero.images.tablet} media="(max-width: 1024px)" />
-    <link rel="preload" as="image" href={hero.images.desktop} media="(min-width: 1025px)" fetchpriority="high" />
+    <link rel="preload" as="image" href={heroImageMobileAvif} type="image/avif" media="(max-width: 640px)" fetchpriority="high" />
+    <link rel="preload" as="image" href={heroImageTabletAvif} type="image/avif" media="(max-width: 1024px)" />
+    <link rel="preload" as="image" href={heroImageDesktopAvif} type="image/avif" media="(min-width: 1025px)" />
   </Fragment>
 
   <!-- Hero Section /* Golden-ratio spacing rhythm: 1.3125, 2.125, 3.4375, 5.5625, 8.9375rem */ -->
-  <section class="relative flex min-h-[56svh] items-center overflow-hidden pb-[3.4375rem] pt-[5.5625rem] sm:min-h-[62vh]">
+  <section class="relative flex min-h-[calc(100svh-4.875rem)] items-end overflow-hidden pb-[2.125rem] pt-[3.4375rem] sm:min-h-[62vh] sm:items-center sm:pb-[3.4375rem] sm:pt-[5.5625rem]">
     <div class="absolute inset-0">
       <picture>
+        <source type="image/avif" media="(max-width: 640px)" srcset={heroImageMobileAvif} />
+        <source type="image/avif" media="(max-width: 1024px)" srcset={heroImageTabletAvif} />
+        <source type="image/avif" media="(min-width: 1025px)" srcset={heroImageDesktopAvif} />
+        <source type="image/webp" media="(max-width: 640px)" srcset={heroImageMobileWebp} />
+        <source type="image/webp" media="(max-width: 1024px)" srcset={heroImageTabletWebp} />
+        <source type="image/webp" media="(min-width: 1025px)" srcset={heroImageDesktopWebp} />
         <source media="(max-width: 640px)" srcset={hero.images.mobile} />
         <source media="(max-width: 1024px)" srcset={hero.images.tablet} />
         <img
@@ -95,27 +109,28 @@ const conceptCards = [
           alt=""
           width="2400"
           height="1350"
+          sizes="100vw"
           loading="eager"
           decoding="async"
           fetchpriority="high"
-          class="h-full w-full object-cover"
+          class="h-full w-full object-cover object-[52%_40%] sm:object-center"
           aria-hidden="true"
         />
       </picture>
     </div>
-    <div class="absolute inset-0 bg-gradient-to-b from-accent-950/75 via-accent-950/55 to-accent-950/75"></div>
+    <div class="absolute inset-0 bg-gradient-to-b from-accent-950/68 via-accent-950/48 to-accent-950/84 sm:from-accent-950/75 sm:via-accent-950/55 sm:to-accent-950/75"></div>
 
-    <div class="relative z-10 mx-auto max-w-5xl px-4 text-center sm:px-6">
-      <h1 data-animate="fade-in" class="font-serif text-4xl font-extrabold leading-tight text-white sm:text-5xl md:text-6xl lg:text-7xl">
+    <div class="relative z-10 mx-auto w-full max-w-5xl px-[1.3125rem] text-center sm:px-6">
+      <h1 data-animate="fade-in" class="mx-auto max-w-[12ch] text-balance font-serif text-[clamp(2.25rem,10.5vw,3.65rem)] font-extrabold leading-[1.06] text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.35)] sm:max-w-none sm:text-5xl md:text-6xl lg:text-7xl">
         {hero.headline[lang]}
       </h1>
-      <p data-animate="fade-up" class="mx-auto mt-[2.125rem] max-w-3xl text-lg leading-relaxed text-white/90 sm:text-xl">
+      <p data-animate="fade-up" class="mx-auto mt-[1.3125rem] max-w-[30ch] text-[1.0625rem] leading-relaxed text-white/92 drop-shadow-[0_1px_6px_rgba(0,0,0,0.28)] sm:mt-[2.125rem] sm:max-w-3xl sm:text-xl">
         {hero.subheadline[lang]}
       </p>
-      <div class="mt-[3.4375rem]">
+      <div class="mt-[2.125rem] sm:mt-[3.4375rem]">
         <a
           href={`#${apartmentsAnchorId}`}
-          class="btn btn-secondary"
+          class="btn btn-secondary w-full max-w-[22rem] justify-center sm:w-auto"
         >
           {hero.cta[lang]}
           <Icon name="lucide:arrow-down" class="h-4 w-4" />
@@ -125,7 +140,7 @@ const conceptCards = [
   </section>
 
   <!-- Editorial Intro Section -->
-  <section class="bg-neutral-100 py-[5.5625rem] sm:py-[8.9375rem]">
+  <section class="bg-neutral-100 py-[3.4375rem] sm:py-[5.5625rem] lg:py-[8.9375rem]">
     <div class="mx-auto max-w-7xl px-4 sm:px-6">
       <div class="rounded-[2.125rem] bg-neutral-50/90 p-[2.125rem] ring-1 ring-neutral-200 sm:p-[3.4375rem] lg:p-[5.5625rem]">
         <div class="grid items-center gap-[3.4375rem] lg:grid-cols-[minmax(0,0.618fr)_minmax(0,1fr)] lg:gap-[5.5625rem]">
