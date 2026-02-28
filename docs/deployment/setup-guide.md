@@ -182,9 +182,11 @@ The CMS is configured with `publish_mode: editorial_workflow`, which means conte
 - Draft content is visible in the CMS editorial interface.
 - Live site pages only change after publish + successful Netlify deploy.
 - If an image path or bilingual field is invalid, local/CI validation should fail before production deployment.
-- The CMS **Medien** tab lists apartment and hero media recursively from `public/images/**`.
+- The CMS **Medien** tab lists media recursively from `public/images/**`, including apartment, hero, guides, and other page folders.
 - Apartment image uploads are stored under `public/images/apartments/<apartment-slug>/`.
 - Homepage hero uploads are stored under `public/images/hero/`.
+- Other page uploads are stored under `public/images/pages/<page-name>/`.
+- Guide uploads are stored under `public/images/guides/<guide-slug>/`.
 - Deleting media in **Medien** removes the file from Git; referenced file deletion is caught by `npm run validate`.
 
 ## 9. Ongoing Maintenance

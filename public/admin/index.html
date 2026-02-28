@@ -7,6 +7,9 @@
   <base href="/admin/" />
   <title>Content Manager</title>
   <script>
+    window.CMS_MANUAL_INIT = true;
+  </script>
+  <script>
     (function () {
       const hostname = window.location.hostname;
       const isLocal = hostname === 'localhost' || hostname === '127.0.0.1';
@@ -27,5 +30,13 @@
 </head>
 <body>
   <script src="https://unpkg.com/decap-cms@3.10.1/dist/decap-cms.js"></script>
+  <script src="/admin/media-backend.js"></script>
+  <script>
+    if (window.CMS && typeof window.CMS.init === 'function') {
+      window.CMS.init();
+    } else {
+      console.error('[cms-admin] CMS failed to load.');
+    }
+  </script>
 </body>
 </html>

@@ -12,6 +12,8 @@ const SETTINGS_DIR = join(ROOT, 'src/content/settings');
 const GUIDES_DIR = join(ROOT, 'src/content/guides');
 const APARTMENTS_MEDIA_DIR = join(PUBLIC_DIR, 'images/apartments');
 const HERO_MEDIA_DIR = join(PUBLIC_DIR, 'images/hero');
+const PAGES_MEDIA_DIR = join(PUBLIC_DIR, 'images/pages');
+const GUIDES_MEDIA_DIR = join(PUBLIC_DIR, 'images/guides');
 const DECAP_CONFIG_PATH = join(ROOT, 'public/admin/config.yml');
 
 const nonEmptyString = z.string().refine((value) => value.trim().length > 0, 'Must not be empty');
@@ -285,8 +287,8 @@ function validateDecapConfig(): ValidationResult {
     ? data.backend as Record<string, unknown>
     : null;
 
-  if (!backend || backend.name !== 'git-gateway') {
-    result.errors.push('  [backend.name] Expected "git-gateway".');
+  if (!backend || backend.name !== 'git-gateway-recursive') {
+    result.errors.push('  [backend.name] Expected "git-gateway-recursive".');
   }
 
   const publishMode = data.publish_mode;
@@ -341,14 +343,35 @@ function validateDecapConfig(): ValidationResult {
   }
 
   const pagesCollection = collections.find((collection) => collection.name === 'pages');
+  if (pagesCollection?.media_folder !== 'public/images/pages') {
+    result.errors.push('  [collections.pages.media_folder] Expected "public/images/pages".');
+  }
+  if (pagesCollection?.public_folder !== '/images/pages') {
+    result.errors.push('  [collections.pages.public_folder] Expected "/images/pages".');
+  }
+
   const files = Array.isArray(pagesCollection?.files) ? pagesCollection?.files as Array<Record<string, unknown>> : [];
   const homeFile = files.find((entry) => entry.name === 'home');
+  const exchangeStudentsFile = files.find((entry) => entry.name === 'exchange-students');
+  const faqFile = files.find((entry) => entry.name === 'faq');
 
   if (homeFile?.media_folder !== 'public/images/hero') {
     result.errors.push('  [collections.pages.files.home.media_folder] Expected "public/images/hero".');
   }
   if (homeFile?.public_folder !== '/images/hero') {
     result.errors.push('  [collections.pages.files.home.public_folder] Expected "/images/hero".');
+  }
+  if (exchangeStudentsFile?.media_folder !== 'public/images/pages/exchange-students') {
+    result.errors.push('  [collections.pages.files.exchange-students.media_folder] Expected "public/images/pages/exchange-students".');
+  }
+  if (exchangeStudentsFile?.public_folder !== '/images/pages/exchange-students') {
+    result.errors.push('  [collections.pages.files.exchange-students.public_folder] Expected "/images/pages/exchange-students".');
+  }
+  if (faqFile?.media_folder !== 'public/images/pages/faq') {
+    result.errors.push('  [collections.pages.files.faq.media_folder] Expected "public/images/pages/faq".');
+  }
+  if (faqFile?.public_folder !== '/images/pages/faq') {
+    result.errors.push('  [collections.pages.files.faq.public_folder] Expected "/images/pages/faq".');
   }
 
   const homeFields = Array.isArray(homeFile?.fields) ? homeFile?.fields as Array<Record<string, unknown>> : [];
@@ -393,6 +416,14 @@ function validateDecapConfig(): ValidationResult {
 
   if (!sameValues) {
     result.errors.push(`  [collections.pages.home.features.icon.options] Expected icon options: ${expected.join(', ')}`);
+  }
+
+  const guidesCollection = collections.find((collection) => collection.name === 'guides');
+  if (guidesCollection?.media_folder !== 'public/images/guides/{{slug}}') {
+    result.errors.push('  [collections.guides.media_folder] Expected "public/images/guides/{{slug}}".');
+  }
+  if (guidesCollection?.public_folder !== '/images/guides/{{slug}}') {
+    result.errors.push('  [collections.guides.public_folder] Expected "/images/guides/{{slug}}".');
   }
 
   return result;
@@ -522,6 +553,7 @@ for (const file of getMdFiles(GUIDES_DIR)) {
   const result = createResult(file);
   const data = extractFrontmatter(file);
   const parsed = guideSchema.safeParse(data);
+  const guideSlug = basename(file, '.md');
 
   if (!parsed.success) {
     addZodErrors(result, parsed.error.issues);
@@ -531,12 +563,26 @@ for (const file of getMdFiles(GUIDES_DIR)) {
 
   if (parsed.data.heroImage) {
     assertPathExists(result, 'heroImage', parsed.data.heroImage);
+    const normalizedHeroImage = normalizePublicAssetPath(parsed.data.heroImage);
+    if (normalizedHeroImage) referencedMediaPaths.add(normalizedHeroImage);
+
+    const expectedPrefix = `/images/guides/${guideSlug}/`;
+    if (!parsed.data.heroImage.startsWith(expectedPrefix)) {
+      result.warnings.push(`  [heroImage] Recommended path prefix is ${expectedPrefix}`);
+    }
   }
 
   assertSeoCompleteness(result, 'seo', parsed.data.seo);
 
   if (parsed.data.seo?.ogImage) {
     assertPathExists(result, 'seo.ogImage', parsed.data.seo.ogImage);
+    const normalizedSeoImage = normalizePublicAssetPath(parsed.data.seo.ogImage);
+    if (normalizedSeoImage) referencedMediaPaths.add(normalizedSeoImage);
+
+    const expectedPrefix = `/images/guides/${guideSlug}/`;
+    if (!parsed.data.seo.ogImage.startsWith(expectedPrefix)) {
+      result.warnings.push(`  [seo.ogImage] Recommended path prefix is ${expectedPrefix}`);
+    }
   }
 
   collectResult(result);
@@ -551,7 +597,7 @@ for (const file of getMdFiles(SETTINGS_DIR)) {
 }
 
 const orphanScanResult = createResult('public/images (orphan scan)');
-const managedMediaRoots = [APARTMENTS_MEDIA_DIR, HERO_MEDIA_DIR];
+const managedMediaRoots = [APARTMENTS_MEDIA_DIR, HERO_MEDIA_DIR, PAGES_MEDIA_DIR, GUIDES_MEDIA_DIR];
 
 for (const mediaRoot of managedMediaRoots) {
   for (const absolutePath of getFilesRecursively(mediaRoot)) {

@@ -80,7 +80,7 @@ Uploaded files go to:
 - Public URL: `/images/...`
 
 Existing media availability:
-- Existing assets under `public/images` (for example `apartments/*` and `hero/*`) are available in the CMS media picker and in **Medien**.
+- Existing assets under `public/images/**` are available in the CMS media picker and in **Medien** (recursive listing, including nested folders).
 - You can reuse existing files or upload new ones in the same media tree.
 
 Apartment image collections:
@@ -92,6 +92,12 @@ Apartment image collections:
   - optional bilingual caption
   - `Primäres Bild` flag
 - The primary image is used for card/SEO fallback. If no primary image is set, the first image is used.
+
+Page and guide media folders:
+- Homepage hero uploads: `public/images/hero` (`/images/hero/...`).
+- Other page uploads: `public/images/pages/<page-name>` (`/images/pages/<page-name>/...`).
+- Guide uploads: `public/images/guides/{{slug}}` (`/images/guides/{{slug}}/...`).
+- Existing files can be selected from **Medien** even if they were uploaded before this workflow.
 
 Reference vs physical delete:
 - Remove an item from apartment `Bilder` list: removes only the content reference.
