@@ -1,0 +1,219 @@
+---
+import { getCollection } from 'astro:content';
+import { Icon } from 'astro-icon/components';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import RichText from '../../components/RichText.astro';
+import { getTranslation } from '../../i18n/translations';
+import { APARTMENT_PREVIEW_FIELD_MAP } from '../../lib/cms-preview/field-map';
+import {
+  RICH_TEXT_ALLOWED_ATTRIBUTES,
+  RICH_TEXT_ALLOWED_TAGS,
+  RICH_TEXT_CONFIG_SIGNATURE,
+} from '../../lib/rich-text-config';
+
+const lang = 'de' as const;
+const t = getTranslation(lang);
+
+const allApartments = await getCollection('apartments');
+const sortedApartments = allApartments.sort((a, b) => a.data.order - b.data.order);
+const apartment = sortedApartments[0];
+const apt = apartment.data;
+const total = apt.pricePerMonth + apt.utilitiesPerMonth;
+
+const orderedImages = [...apt.images].sort((a, b) => Number(Boolean(b.isPrimary)) - Number(Boolean(a.isPrimary)));
+
+const bootstrapPayload = {
+  page: 'apartments',
+  collection: 'apartments',
+  slug: apartment.id,
+  locale: 'de',
+  highlight: false,
+  activePath: null,
+  data: apt,
+  resolvedAssets: {},
+  sentAt: Date.now(),
+};
+
+const richTextConfig = {
+  allowedTags: [...RICH_TEXT_ALLOWED_TAGS],
+  allowedAttributes: Array.from(new Set(Object.values(RICH_TEXT_ALLOWED_ATTRIBUTES).flat())),
+  signature: RICH_TEXT_CONFIG_SIGNATURE,
+};
+---
+
+<BaseLayout
+  title="CMS Preview — Apartment"
+  description="Visual preview route for Decap CMS apartment editing"
+  lang={lang}
+  noindex={true}
+>
+  <Fragment slot="head">
+    <meta name="robots" content="noindex, nofollow" />
+    <script
+      is:inline
+      define:vars={{
+        bootstrapPayload,
+        apartmentFieldMap: APARTMENT_PREVIEW_FIELD_MAP,
+        richTextConfig,
+      }}
+    >
+      window.__CMS_PREVIEW_BOOTSTRAP__ = {
+        page: 'apartments',
+        locale: bootstrapPayload.locale,
+        fieldMap: apartmentFieldMap,
+        richTextConfig,
+        initialPayload: bootstrapPayload,
+      };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dompurify@3.2.5/dist/purify.min.js"></script>
+    <script is:inline src="/admin/preview-frame.js"></script>
+    <style>
+      [data-cms-path] {
+        scroll-margin-top: 96px;
+      }
+
+      .cms-preview-highlightable {
+        outline: 1px dashed rgba(54, 79, 51, 0.4);
+        outline-offset: 4px;
+      }
+
+      .cms-preview-highlight-active {
+        outline: 2px solid rgba(54, 79, 51, 0.8);
+        outline-offset: 4px;
+      }
+    </style>
+  </Fragment>
+
+  <section class="bg-gradient-to-br from-accent-950 via-accent-800 to-accent-950 pb-16 pt-32">
+    <div class="mx-auto max-w-6xl px-4 sm:px-6">
+      <a href="/de/#wohnungen" class="inline-flex items-center gap-1 text-sm font-medium text-accent-200 transition-colors hover:text-white">
+        <Icon name="lucide:arrow-left" class="h-4 w-4" />
+        {t.apartment.backToAll}
+      </a>
+
+      <div class="mt-6 flex flex-wrap items-start gap-4">
+        <h1 data-cms-path="name" class="font-serif text-4xl font-bold text-white sm:text-5xl">{apt.name}</h1>
+        <div class="mt-1 sm:mt-2">
+          <span data-cms-path="available" class="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-4 py-1.5 text-xs font-medium tracking-wide text-white/90 ring-1 ring-white/20 backdrop-blur-sm">
+            {apt.available ? t.availability.available : t.availability.occupied}
+          </span>
+          <p data-cms-path="availableFrom" class="mt-2 text-xs text-white/70">
+            {apt.availableFrom ? new Intl.DateTimeFormat('de-DE', { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(apt.availableFrom)) : ''}
+          </p>
+        </div>
+      </div>
+      <p data-cms-path="tagline" class="mt-3 text-lg text-accent-100/80">{apt.tagline[lang]}</p>
+    </div>
+  </section>
+
+  <section class="bg-neutral-50 py-12">
+    <div class="mx-auto max-w-6xl px-4 sm:px-6">
+      <div data-cms-path="images" class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 lg:grid-rows-2">
+        {orderedImages.slice(0, 5).map((entry, index) => (
+          <div
+            class:list={[
+              'group relative overflow-hidden rounded-xl',
+              index === 0
+                ? 'sm:col-span-2 lg:row-span-2 aspect-[16/10] sm:aspect-[16/10] lg:aspect-auto lg:h-full'
+                : 'aspect-[4/3]',
+            ]}
+          >
+            <img
+              src={entry.image}
+              alt={entry.caption?.[lang] ? `${apt.name} — ${entry.caption[lang]}` : `${apt.name} — ${index + 1}`}
+              loading={index === 0 ? 'eager' : 'lazy'}
+              class="absolute inset-0 h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+            />
+            <div class="absolute inset-0 bg-accent-950/0 transition-colors duration-200 group-hover:bg-accent-950/10"></div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="bg-white py-16 sm:py-20">
+    <div class="mx-auto max-w-6xl px-4 sm:px-6">
+      <div class="grid gap-10 lg:grid-cols-3">
+        <div class="lg:col-span-2">
+          <h2 data-cms-path="nameSecondary" class="font-serif text-2xl font-bold text-neutral-900">{apt.name}</h2>
+          <div data-cms-path="description" class="richtext mt-4">
+            <RichText content={apt.description[lang]} className="mt-4" />
+          </div>
+
+          <div class="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-4">
+            <div class="rounded-xl bg-neutral-50 p-4 ring-1 ring-neutral-100 transition-shadow duration-200 hover:shadow-sm">
+              <p class="text-xs font-medium text-neutral-500 uppercase tracking-wider">{t.apartment.size}</p>
+              <p data-cms-path="size" class="mt-1 text-lg font-bold text-neutral-900">{apt.size} m²</p>
+            </div>
+            <div class="rounded-xl bg-neutral-50 p-4 ring-1 ring-neutral-100 transition-shadow duration-200 hover:shadow-sm">
+              <p class="text-xs font-medium text-neutral-500 uppercase tracking-wider">{t.apartment.rooms}</p>
+              <p data-cms-path="rooms" class="mt-1 text-lg font-bold text-neutral-900">{apt.rooms[lang]}</p>
+            </div>
+            <div class="rounded-xl bg-neutral-50 p-4 ring-1 ring-neutral-100 transition-shadow duration-200 hover:shadow-sm">
+              <p class="text-xs font-medium text-neutral-500 uppercase tracking-wider">{t.apartment.floor}</p>
+              <p data-cms-path="floor" class="mt-1 text-lg font-bold text-neutral-900">{apt.floor[lang]}</p>
+            </div>
+            <div class="rounded-xl bg-neutral-50 p-4 ring-1 ring-neutral-100 transition-shadow duration-200 hover:shadow-sm">
+              <p class="text-xs font-medium text-neutral-500 uppercase tracking-wider">{t.apartment.maxOccupants}</p>
+              <p data-cms-path="maxOccupants" class="mt-1 text-lg font-bold text-neutral-900">{apt.maxOccupants}</p>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="rounded-2xl bg-neutral-50 p-6 ring-1 ring-neutral-200">
+            <h3 class="text-lg font-bold text-neutral-900">{t.apartment.rentalCosts}</h3>
+
+            <div class="mt-5 space-y-3">
+              <div class="flex items-center justify-between text-sm">
+                <span class="text-neutral-600">{t.apartment.rent}</span>
+                <span data-cms-path="pricePerMonth" class="font-semibold text-neutral-900">{apt.pricePerMonth} €</span>
+              </div>
+              <div class="flex items-center justify-between text-sm">
+                <span class="text-neutral-600">{t.apartment.utilities}</span>
+                <span data-cms-path="utilitiesPerMonth" class="font-semibold text-neutral-900">{apt.utilitiesPerMonth} €</span>
+              </div>
+              <div class="border-t border-neutral-200 pt-3">
+                <div class="flex items-center justify-between">
+                  <span class="font-semibold text-neutral-900">{t.apartment.total}</span>
+                  <span data-cms-path="totalRent" class="text-xl font-bold text-accent-700">{total} € / Monat</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="bg-neutral-50 py-16 sm:py-20">
+    <div class="mx-auto max-w-6xl px-4 sm:px-6">
+      <h2 class="font-serif text-2xl font-bold text-neutral-900">{t.apartment.amenities}</h2>
+      <div data-cms-path="amenities" class="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+        {apt.amenities.map((amenity) => (
+          <div class="flex items-center gap-3 rounded-xl bg-white p-4 ring-1 ring-neutral-200 transition-all duration-200 hover:shadow-sm hover:ring-accent-200">
+            <Icon name="lucide:check" class="h-5 w-5 shrink-0 text-accent-600" />
+            <span class="min-w-0 break-words text-sm font-medium text-neutral-800">{amenity[lang]}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="bg-white py-16">
+    <div class="mx-auto max-w-4xl px-4 sm:px-6">
+      <div class="rounded-3xl border border-neutral-200 bg-neutral-50 p-6 sm:p-8">
+        <h2 class="font-serif text-2xl font-bold text-neutral-900">SEO Vorschau</h2>
+        <p class="mt-5 text-xs font-semibold uppercase tracking-[0.12em] text-neutral-500">SEO Title</p>
+        <p data-cms-path="seo.title" class="mt-2 text-lg font-semibold text-neutral-900">{apt.seo?.title?.[lang]}</p>
+
+        <p class="mt-6 text-xs font-semibold uppercase tracking-[0.12em] text-neutral-500">SEO Description</p>
+        <p data-cms-path="seo.description" class="mt-2 text-sm leading-relaxed text-neutral-600">{apt.seo?.description?.[lang]}</p>
+
+        <p class="mt-6 text-xs font-semibold uppercase tracking-[0.12em] text-neutral-500">OpenGraph Image</p>
+        <img data-cms-path="seo.ogImage" src={apt.seo?.ogImage} alt="" class="mt-2 max-h-52 w-full rounded-2xl object-cover ring-1 ring-neutral-200" />
+      </div>
+    </div>
+  </section>
+</BaseLayout>

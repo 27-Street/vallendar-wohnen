@@ -1,57 +1,25 @@
 (function () {
   const cms = window.CMS || window.DecapCms || window.DecapCmsApp;
-  if (!cms) return;
+  const h = window.h;
 
-  const h = window.h || (window.React && window.React.createElement);
-  if (!h) {
-    console.error('[cms-preview] Missing element factory (window.h).');
+  if (!cms || typeof h !== 'function') {
     return;
   }
 
-  const styleRegistry = new Set();
-  const registerStyleOnce = (href) => {
-    if (!href || styleRegistry.has(href)) return;
-    styleRegistry.add(href);
-    cms.registerPreviewStyle(href);
+  const PROTOCOL_VERSION = 1;
+  const MESSAGE_TYPES = {
+    READY: 'CMS_PREVIEW_READY',
+    UPDATE: 'CMS_PREVIEW_UPDATE',
+    SET_LOCALE: 'CMS_PREVIEW_SET_LOCALE',
+    REQUEST_FOCUS: 'CMS_PREVIEW_REQUEST_FOCUS',
+    ACK: 'CMS_PREVIEW_ACK',
   };
 
-  registerStyleOnce('/admin/preview.css');
+  const stores = new Map();
+  let activeStoreKey = null;
+  let listenersBound = false;
 
-  const resolveHref = (href, basePath) => {
-    try {
-      return new URL(href, `${window.location.origin}${basePath}`).toString();
-    } catch {
-      return href;
-    }
-  };
-
-  const loadLiveStyles = async () => {
-    const paths = ['/de/', '/en/', '/'];
-    for (const path of paths) {
-      try {
-        const response = await fetch(path, { credentials: 'same-origin' });
-        if (!response.ok) continue;
-
-        const html = await response.text();
-        const doc = new DOMParser().parseFromString(html, 'text/html');
-        const stylesheetLinks = Array.from(doc.querySelectorAll('link[rel="stylesheet"][href]'));
-        if (stylesheetLinks.length === 0) continue;
-
-        stylesheetLinks.forEach((linkEl) => {
-          const href = linkEl.getAttribute('href');
-          if (!href) return;
-          const resolved = resolveHref(href, path);
-          registerStyleOnce(resolved);
-        });
-
-        return;
-      } catch {
-        // Try next path.
-      }
-    }
-  };
-
-  loadLiveStyles();
+  cms.registerPreviewStyle('/admin/preview.css');
 
   const toJS = (value, fallback) => {
     if (value == null) return fallback;
@@ -59,727 +27,565 @@
     return value;
   };
 
-  const localized = (value, lang) => {
-    if (!value) return '';
-    if (typeof value === 'string') return value;
-    return value[lang] || value.de || value.en || '';
+  const isObject = (value) => value && typeof value === 'object' && !Array.isArray(value);
+
+  const looksLikeMediaPath = (value, keyTrail) => {
+    if (typeof value !== 'string') return false;
+
+    const normalizedValue = value.trim();
+    if (!normalizedValue) return false;
+    if (/^https?:\/\//i.test(normalizedValue)) return false;
+
+    const lowerValue = normalizedValue.toLowerCase();
+    if (lowerValue.startsWith('/images/')) return true;
+
+    const lowerTrail = keyTrail.join('.').toLowerCase();
+    const containsImageKey = /(^|\.)(image|images|ogimage|heroimage)(\.|$)/i.test(lowerTrail);
+    const hasImageExtension = /\.(png|jpe?g|webp|avif|gif|svg)$/i.test(lowerValue);
+    return containsImageKey && hasImageExtension;
   };
 
-  const asNumber = (value) => {
-    const parsed = Number(value);
-    return Number.isFinite(parsed) ? parsed : 0;
-  };
-
-  const escapeHtml = (value) => String(value)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
-
-  const sanitizeHref = (href) => {
-    const raw = String(href || '').trim();
-    if (!raw) return '#';
-    if (/^(https?:\/\/|\/|#|mailto:|tel:)/i.test(raw)) return raw;
-    return '#';
-  };
-
-  const renderInlineMarkdown = (line) => {
-    let output = escapeHtml(line);
-    output = output.replace(/`([^`]+)`/g, '<code>$1</code>');
-    output = output.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_match, label, href) => {
-      const safeHref = sanitizeHref(href);
-      const rel = /^https?:\/\//i.test(safeHref) ? ' rel="noopener noreferrer"' : '';
-      const target = /^https?:\/\//i.test(safeHref) ? ' target="_blank"' : '';
-      return `<a href="${escapeHtml(safeHref)}"${rel}${target}>${label}</a>`;
-    });
-    output = output.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
-    output = output.replace(/(^|[^*])\*([^*]+)\*/g, '$1<em>$2</em>');
-    output = output.replace(/~~([^~]+)~~/g, '<del>$1</del>');
-    return output;
-  };
-
-  const markdownToHtml = (markdown) => {
-    if (!markdown) return '';
-
-    const lines = String(markdown).replace(/\r\n/g, '\n').split('\n');
-    const html = [];
-    let i = 0;
-
-    const isBoundary = (line) => (
-      /^#{1,6}\s+/.test(line)
-      || /^\s*[-*+]\s+/.test(line)
-      || /^\s*\d+\.\s+/.test(line)
-      || /^\s*>\s?/.test(line)
-    );
-
-    while (i < lines.length) {
-      const line = lines[i];
-      if (!line.trim()) {
-        i += 1;
-        continue;
+  const collectMediaPaths = (node, keyTrail, output) => {
+    if (typeof node === 'string') {
+      if (looksLikeMediaPath(node, keyTrail)) {
+        output.add(node);
       }
-
-      const heading = line.match(/^(#{1,6})\s+(.*)$/);
-      if (heading) {
-        const level = heading[1].length;
-        html.push(`<h${level}>${renderInlineMarkdown(heading[2].trim())}</h${level}>`);
-        i += 1;
-        continue;
-      }
-
-      if (/^\s*>\s?/.test(line)) {
-        const quote = [];
-        while (i < lines.length && /^\s*>\s?/.test(lines[i])) {
-          quote.push(lines[i].replace(/^\s*>\s?/, '').trim());
-          i += 1;
-        }
-        html.push(`<blockquote>${renderInlineMarkdown(quote.join(' '))}</blockquote>`);
-        continue;
-      }
-
-      if (/^\s*[-*+]\s+/.test(line)) {
-        const items = [];
-        while (i < lines.length && /^\s*[-*+]\s+/.test(lines[i])) {
-          items.push(lines[i].replace(/^\s*[-*+]\s+/, '').trim());
-          i += 1;
-        }
-        html.push(`<ul>${items.map((item) => `<li>${renderInlineMarkdown(item)}</li>`).join('')}</ul>`);
-        continue;
-      }
-
-      if (/^\s*\d+\.\s+/.test(line)) {
-        const items = [];
-        while (i < lines.length && /^\s*\d+\.\s+/.test(lines[i])) {
-          items.push(lines[i].replace(/^\s*\d+\.\s+/, '').trim());
-          i += 1;
-        }
-        html.push(`<ol>${items.map((item) => `<li>${renderInlineMarkdown(item)}</li>`).join('')}</ol>`);
-        continue;
-      }
-
-      const paragraph = [];
-      while (i < lines.length && lines[i].trim() && !isBoundary(lines[i])) {
-        paragraph.push(lines[i].trim());
-        i += 1;
-      }
-      html.push(`<p>${paragraph.map(renderInlineMarkdown).join('<br />')}</p>`);
+      return;
     }
 
-    return html.join('');
-  };
+    if (Array.isArray(node)) {
+      node.forEach((item, index) => collectMediaPaths(item, [...keyTrail, String(index)], output));
+      return;
+    }
 
-  const richTextNode = (markdown, className) => h('div', {
-    className: ['richtext', className || ''].filter(Boolean).join(' '),
-    dangerouslySetInnerHTML: {
-      __html: markdownToHtml(markdown),
-    },
-  });
+    if (!isObject(node)) return;
+
+    Object.entries(node).forEach(([key, value]) => {
+      collectMediaPaths(value, [...keyTrail, key], output);
+    });
+  };
 
   const resolveAssetUrl = (value, getAsset) => {
-    if (!value) return '';
-    if (typeof getAsset !== 'function') return String(value);
+    if (typeof getAsset !== 'function') return value;
 
-    const asset = getAsset(value);
-    if (!asset) return String(value);
-    if (typeof asset === 'string') return asset;
-    if (typeof asset.toString === 'function') return asset.toString();
-    return String(value);
+    try {
+      const asset = getAsset(value);
+      if (!asset) return value;
+      if (typeof asset === 'string') return asset;
+      if (typeof asset.toString === 'function') {
+        const asString = asset.toString();
+        if (asString && asString !== '[object Object]') return asString;
+      }
+      if (typeof asset.url === 'string') return asset.url;
+      return value;
+    } catch {
+      return value;
+    }
   };
 
-  const normalizeImages = (images) => {
-    if (!Array.isArray(images)) return [];
-    return images
-      .map((entry) => {
-        if (!entry) return null;
-        if (typeof entry === 'string') {
-          return { image: entry, kind: 'other', isPrimary: false };
+  const buildResolvedAssets = (entryData, getAsset) => {
+    const paths = new Set();
+    collectMediaPaths(entryData, [], paths);
+
+    const resolved = {};
+    paths.forEach((path) => {
+      resolved[path] = resolveAssetUrl(path, getAsset);
+    });
+
+    return resolved;
+  };
+
+  const hasBlobAsset = (resolvedAssets) => Object.values(resolvedAssets).some((value) => (
+    typeof value === 'string' && value.startsWith('blob:')
+  ));
+
+  const normalizePathToken = (value) => String(value || '').toLowerCase().replace(/[^a-z0-9]+/g, '');
+
+  const findBestInputMatch = (path) => {
+    const inputs = Array.from(document.querySelectorAll('input, textarea, select, [contenteditable="true"]'));
+    if (inputs.length === 0) return null;
+
+    const normalizedPath = normalizePathToken(path);
+    const pathTail = normalizePathToken(String(path).split('.').slice(-1)[0]);
+
+    let best = null;
+    let bestScore = 0;
+
+    inputs.forEach((input) => {
+      const name = normalizePathToken(input.getAttribute('name') || '');
+      const id = normalizePathToken(input.getAttribute('id') || '');
+      const label = normalizePathToken(input.getAttribute('aria-label') || '');
+      const haystack = `${name} ${id} ${label}`.trim();
+      if (!haystack) return;
+
+      let score = 0;
+      if (normalizedPath && haystack.includes(normalizedPath)) score += 4;
+      if (pathTail && haystack.includes(pathTail)) score += 2;
+      if (pathTail && (name.endsWith(pathTail) || id.endsWith(pathTail))) score += 3;
+
+      if (score > bestScore) {
+        best = input;
+        bestScore = score;
+      }
+    });
+
+    return bestScore > 0 ? best : null;
+  };
+
+  const isHomeEntry = (entryData, slug) => {
+    if (slug === 'home') return true;
+    const title = typeof entryData?.title === 'string' ? entryData.title.trim().toLowerCase() : '';
+    return title === 'home';
+  };
+
+  const createStore = (key, mode) => ({
+    key,
+    mode,
+    locale: 'de',
+    viewport: 'desktop',
+    highlight: false,
+    activePath: '',
+    ready: false,
+    handshakeTimeout: false,
+    status: 'loading',
+    statusNote: '',
+    rootId: `cms-preview-root-${key}`,
+    iframeId: `cms-preview-iframe-${key}`,
+    frameShellId: `cms-preview-shell-${key}`,
+    statusId: `cms-preview-status-${key}`,
+    noteId: `cms-preview-note-${key}`,
+    fallbackId: `cms-preview-fallback-${key}`,
+    fallbackJsonId: `cms-preview-fallback-json-${key}`,
+    localeGroupId: `cms-preview-locale-${key}`,
+    viewportGroupId: `cms-preview-viewport-${key}`,
+    highlightButtonId: `cms-preview-highlight-${key}`,
+    latestPayload: null,
+    source: mode === 'apartments' ? '/cms-preview/apartment?cmsPreview=1' : '/cms-preview/home?cmsPreview=1',
+    updateTimer: null,
+    handshakeTimer: null,
+  });
+
+  const getPreviewPaneDocument = () => {
+    const previewPane = document.getElementById('preview-pane');
+    if (previewPane && previewPane.tagName === 'IFRAME' && previewPane.contentDocument) {
+      return previewPane.contentDocument;
+    }
+    return document;
+  };
+
+  const ensureStore = (key, mode) => {
+    if (!stores.has(key)) {
+      stores.set(key, createStore(key, mode));
+    }
+    return stores.get(key);
+  };
+
+  const setStatus = (store, status, note) => {
+    store.status = status;
+    store.statusNote = note || '';
+
+    const statusEl = getPreviewPaneDocument().getElementById(store.statusId);
+    if (statusEl) {
+      statusEl.className = ['cms-preview-status', `status-${status.replace(/\s+/g, '-')}`].join(' ');
+      statusEl.textContent = status;
+    }
+
+    const noteEl = getPreviewPaneDocument().getElementById(store.noteId);
+    if (noteEl) {
+      noteEl.textContent = store.statusNote;
+      noteEl.style.display = store.statusNote ? 'block' : 'none';
+    }
+  };
+
+  const setFallbackVisible = (store, visible) => {
+    const fallbackEl = getPreviewPaneDocument().getElementById(store.fallbackId);
+    if (!fallbackEl) return;
+    fallbackEl.style.display = visible ? 'block' : 'none';
+  };
+
+  const updateFallbackJson = (store) => {
+    const jsonEl = getPreviewPaneDocument().getElementById(store.fallbackJsonId);
+    if (!jsonEl) return;
+    const data = store.latestPayload ? store.latestPayload.payload.data : {};
+    jsonEl.textContent = JSON.stringify(data, null, 2);
+  };
+
+  const applyViewport = (store) => {
+    const shell = getPreviewPaneDocument().getElementById(store.frameShellId);
+    if (!shell) return;
+
+    const widths = {
+      desktop: '100%',
+      tablet: '860px',
+      mobile: '430px',
+    };
+
+    shell.style.width = widths[store.viewport] || widths.desktop;
+
+    const group = getPreviewPaneDocument().getElementById(store.viewportGroupId);
+    if (!group) return;
+    group.querySelectorAll('.cms-preview-toolbar-button[data-cms-value]').forEach((button) => {
+      const isActive = button.getAttribute('data-cms-value') === store.viewport;
+      button.classList.toggle('is-active', isActive);
+    });
+  };
+
+  const applyLocaleButtons = (store) => {
+    const group = getPreviewPaneDocument().getElementById(store.localeGroupId);
+    if (!group) return;
+
+    group.querySelectorAll('.cms-preview-toolbar-button[data-cms-value]').forEach((button) => {
+      const isActive = button.getAttribute('data-cms-value') === store.locale;
+      button.classList.toggle('is-active', isActive);
+    });
+  };
+
+  const applyHighlightButton = (store) => {
+    const button = getPreviewPaneDocument().getElementById(store.highlightButtonId);
+    if (!button) return;
+    button.classList.toggle('is-active', store.highlight);
+    button.textContent = store.highlight ? 'Highlight: On' : 'Highlight: Off';
+  };
+
+  const postToIframe = (store, message) => {
+    const iframe = getPreviewPaneDocument().getElementById(store.iframeId);
+    if (!iframe || !iframe.contentWindow) return false;
+
+    iframe.contentWindow.postMessage(message, window.location.origin);
+    return true;
+  };
+
+  const flushUpdate = (store) => {
+    if (!store.ready || !store.latestPayload) return;
+
+    const sent = postToIframe(store, store.latestPayload);
+    if (sent) {
+      if (store.status !== 'asset pending') {
+        setStatus(store, 'updating', store.statusNote);
+      }
+    }
+  };
+
+  const queueUpdate = (store, immediate) => {
+    if (!store.latestPayload) return;
+
+    if (!store.ready) {
+      setStatus(store, 'loading', store.statusNote);
+      return;
+    }
+
+    if (store.updateTimer) {
+      window.clearTimeout(store.updateTimer);
+      store.updateTimer = null;
+    }
+
+    if (immediate) {
+      flushUpdate(store);
+      return;
+    }
+
+    store.updateTimer = window.setTimeout(() => {
+      flushUpdate(store);
+    }, 120);
+  };
+
+  const setLocale = (store, locale) => {
+    if (store.locale === locale) return;
+    store.locale = locale;
+    applyLocaleButtons(store);
+
+    postToIframe(store, {
+      version: PROTOCOL_VERSION,
+      type: MESSAGE_TYPES.SET_LOCALE,
+      locale,
+    });
+
+    if (store.latestPayload) {
+      store.latestPayload.payload.locale = locale;
+    }
+
+    setStatus(store, 'updating', `Locale switched to ${locale.toUpperCase()}.`);
+    queueUpdate(store, true);
+  };
+
+  const setViewport = (store, viewport) => {
+    if (store.viewport === viewport) return;
+    store.viewport = viewport;
+    applyViewport(store);
+  };
+
+  const toggleHighlight = (store) => {
+    store.highlight = !store.highlight;
+    applyHighlightButton(store);
+
+    if (store.latestPayload) {
+      store.latestPayload.payload.highlight = store.highlight;
+      store.latestPayload.payload.activePath = store.activePath || null;
+    }
+
+    queueUpdate(store, false);
+  };
+
+  const bindStoreDom = (store) => {
+    applyLocaleButtons(store);
+    applyViewport(store);
+    applyHighlightButton(store);
+    updateFallbackJson(store);
+
+    const iframe = getPreviewPaneDocument().getElementById(store.iframeId);
+    if (iframe && iframe.getAttribute('src') !== store.source) {
+      store.ready = false;
+      iframe.setAttribute('src', store.source);
+    }
+
+    if (!store.ready && !store.handshakeTimer) {
+      store.handshakeTimer = window.setTimeout(() => {
+        if (!store.ready) {
+          store.handshakeTimeout = true;
+          setFallbackVisible(store, true);
+          setStatus(store, 'render warning', 'Preview bridge timeout. Showing structured fallback.');
         }
-        return {
-          image: entry.image,
-          kind: entry.kind || 'other',
-          caption: entry.caption,
-          isPrimary: !!entry.isPrimary,
-        };
-      })
-      .filter(Boolean)
-      .filter((entry) => entry.image);
+      }, 2000);
+    }
   };
 
-  const HOME_PREVIEW_FALLBACK_APARTMENTS = [
-    {
-      name: 'Rheinblick',
-      tagline: 'Wohnen mit Weitblick',
-      size: 42,
-      rooms: '2 Zimmer',
-      pricePerMonth: 620,
-      image: '/images/apartments/rheinblick/living.webp',
-      available: true,
-      availableFrom: '2026-04-01',
-    },
-    {
-      name: 'Alte Muehle',
-      tagline: 'Gemuetlichkeit trifft Stil',
-      size: 38,
-      rooms: '1.5 Zimmer',
-      pricePerMonth: 580,
-      image: '/images/apartments/alte-muehle/living.webp',
-      available: true,
-      availableFrom: '2026-04-01',
-    },
-    {
-      name: 'Zur Linde',
-      tagline: 'Kompakt und mittendrin',
-      size: 35,
-      rooms: '1 Zimmer',
-      pricePerMonth: 490,
-      image: '/images/apartments/zur-linde/living.webp',
-      available: false,
-      availableFrom: '',
-    },
-  ];
+  const buildPayload = (props, store) => {
+    const entryData = toJS(props.entry && props.entry.get && props.entry.get('data'), {});
+    const slug = String(props.entry && props.entry.get ? props.entry.get('slug') || '' : '').trim();
+    const resolvedAssets = buildResolvedAssets(entryData, props.getAsset);
 
-  const formatDate = (value) => {
-    if (!value) return '';
-    const parsed = new Date(value);
-    if (Number.isNaN(parsed.getTime())) return value;
-    return new Intl.DateTimeFormat('de-DE', {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric',
-    }).format(parsed);
-  };
+    if (hasBlobAsset(resolvedAssets)) {
+      setStatus(store, 'asset pending', 'Using local blob URLs for unpublished uploads.');
+    }
 
-  const availabilityBadge = ({ available, availableFrom, variant }) => {
-    const hasDate = Boolean(available && availableFrom);
-    const label = !available
-      ? 'Vermietet'
-      : hasDate
-        ? `Verfuegbar ab ${formatDate(availableFrom)}`
-        : 'Verfuegbar';
-
-    const colorClass = variant === 'hero'
-      ? (!available
-        ? 'bg-neutral-900/60 text-neutral-200 backdrop-blur-sm'
-        : 'bg-white/15 text-white/90 backdrop-blur-sm ring-1 ring-white/20')
-      : (!available
-        ? 'bg-neutral-800/80 text-neutral-100 backdrop-blur-sm'
-        : 'bg-white/90 text-neutral-700 backdrop-blur-sm ring-1 ring-neutral-200');
-
-    const dotClass = !available
-      ? 'bg-neutral-400'
-      : hasDate
-        ? 'bg-amber-500'
-        : 'bg-emerald-500';
-
-    return h(
-      'span',
-      {
-        className: [
-          'inline-flex items-center gap-1.5 rounded-full font-medium tracking-wide',
-          variant === 'hero' ? 'px-4 py-1.5 text-xs' : 'px-2.5 py-1 text-[11px] uppercase',
-          colorClass,
-        ].join(' '),
+    return {
+      version: PROTOCOL_VERSION,
+      type: MESSAGE_TYPES.UPDATE,
+      payload: {
+        page: store.mode,
+        collection: store.mode === 'home' ? 'pages' : 'apartments',
+        slug,
+        locale: store.locale,
+        highlight: store.highlight,
+        activePath: store.activePath || null,
+        data: entryData,
+        resolvedAssets,
+        sentAt: Date.now(),
       },
-      h('span', { className: `h-1.5 w-1.5 shrink-0 rounded-full ${dotClass}` }),
-      label,
-    );
+    };
   };
 
-  const iconArrow = (direction, className) => {
-    if (direction === 'left') {
-      return h(
-        'svg',
-        { viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: '2', className: className || 'h-4 w-4' },
-        h('path', { d: 'M15.75 19.5 8.25 12l7.5-7.5', strokeLinecap: 'round', strokeLinejoin: 'round' }),
-      );
-    }
+  const bindGlobalListeners = () => {
+    if (listenersBound) return;
+    listenersBound = true;
 
-    if (direction === 'down') {
-      return h(
-        'svg',
-        { viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: '2', className: className || 'h-4 w-4' },
-        h('path', { d: 'M12 5v14m7-7-7 7-7-7', strokeLinecap: 'round', strokeLinejoin: 'round' }),
-      );
-    }
+    window.addEventListener('message', (event) => {
+      if (event.origin !== window.location.origin) return;
 
-    return h(
-      'svg',
-      { viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: '2', className: className || 'h-4 w-4' },
-      h('path', { d: 'M5 12h14m-7-7 7 7-7 7', strokeLinecap: 'round', strokeLinejoin: 'round' }),
-    );
-  };
+      const matchingStore = Array.from(stores.values()).find((store) => {
+        const iframe = getPreviewPaneDocument().getElementById(store.iframeId);
+        return iframe && iframe.contentWindow === event.source;
+      });
 
-  const iconCheck = () => h(
-    'svg',
-    { viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: '2', className: 'h-5 w-5 shrink-0 text-accent-600' },
-    h('path', { d: 'm4.5 12.75 6 6 9-13.5', strokeLinecap: 'round', strokeLinejoin: 'round' }),
-  );
+      if (!matchingStore) return;
 
-  const previewHeader = () => h(
-    'header',
-    { className: 'sticky top-0 z-50 border-b border-neutral-200 bg-white/90 backdrop-blur-md' },
-    h(
-      'div',
-      { className: 'mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:px-6' },
-      h(
-        'a',
-        { href: '#', className: 'text-lg font-bold tracking-tight text-neutral-900' },
-        'Vallendar',
-        h('span', { className: 'text-accent-600' }, 'Wohnen'),
-      ),
-      h(
-        'nav',
-        { className: 'hidden items-center gap-6 md:flex', 'aria-label': 'Main navigation preview' },
-        h('a', { href: '#', className: 'relative text-sm font-medium text-accent-700' }, 'Home'),
-        h('a', { href: '#', className: 'relative text-sm font-medium text-neutral-600' }, 'Wohnungen'),
-        h('a', { href: '#', className: 'relative text-sm font-medium text-neutral-600' }, 'FAQ'),
-        h(
-          'span',
-          { className: 'ml-2 rounded-md border border-neutral-300 px-2.5 py-1 text-xs font-semibold uppercase tracking-wider text-neutral-600' },
-          'EN',
-        ),
-      ),
-    ),
-  );
+      const data = event.data;
+      if (!data || typeof data !== 'object' || data.version !== PROTOCOL_VERSION) return;
 
-  const previewFooter = () => h(
-    'footer',
-    { className: 'border-t border-neutral-200 bg-neutral-900 text-neutral-300' },
-    h(
-      'div',
-      { className: 'mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:py-12' },
-      h(
-        'div',
-        { className: 'grid gap-8 sm:grid-cols-2 lg:grid-cols-3' },
-        h(
-          'div',
-          null,
-          h(
-            'a',
-            { href: '#', className: 'text-lg font-bold tracking-tight text-white' },
-            'Vallendar',
-            h('span', { className: 'text-accent-400' }, 'Wohnen'),
-          ),
-          h('address', { className: 'mt-3 not-italic text-sm leading-relaxed text-neutral-400' }, 'Musterstrasse 1', h('br'), '56179 Vallendar'),
-        ),
-        h(
-          'div',
-          null,
-          h('h3', { className: 'text-sm font-semibold uppercase tracking-wider text-neutral-200' }, 'Kontakt'),
-          h(
-            'ul',
-            { className: 'mt-3 space-y-2 text-sm text-neutral-400' },
-            h('li', null, h('span', { className: 'text-neutral-500' }, 'E-Mail: '), 'info@vallendar-wohnen.de'),
-            h('li', null, h('span', { className: 'text-neutral-500' }, 'Telefon: '), '+49 261 94 000 000'),
-          ),
-        ),
-        h(
-          'div',
-          null,
-          h('h3', { className: 'text-sm font-semibold uppercase tracking-wider text-neutral-200' }, 'Legal'),
-          h(
-            'ul',
-            { className: 'mt-3 space-y-2 text-sm text-neutral-400' },
-            h('li', null, h('a', { href: '#', className: 'transition-colors hover:text-accent-400' }, 'Impressum')),
-            h('li', null, h('a', { href: '#', className: 'transition-colors hover:text-accent-400' }, 'Datenschutz')),
-          ),
-        ),
-      ),
-      h('div', { className: 'mt-8 border-t border-neutral-800 pt-6 text-center text-xs text-neutral-500' }, `© ${new Date().getFullYear()} VallendarWohnen. Alle Rechte vorbehalten.`),
-    ),
-  );
+      if (data.type === MESSAGE_TYPES.READY) {
+        matchingStore.ready = true;
+        matchingStore.handshakeTimeout = false;
+        setFallbackVisible(matchingStore, false);
 
-  const apartmentCard = (apartment, getAsset, index) => {
-    const imageUrl = resolveAssetUrl(apartment.image, getAsset);
-    const price = `${asNumber(apartment.pricePerMonth)} EUR / Monat`;
+        if (matchingStore.handshakeTimer) {
+          window.clearTimeout(matchingStore.handshakeTimer);
+          matchingStore.handshakeTimer = null;
+        }
 
-    return h(
-      'a',
-      {
-        href: '#',
-        key: `preview-apartment-${index}`,
-        className: 'group flex flex-col overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-neutral-200 transition-all hover:shadow-lg hover:ring-accent-300 focus:outline-none focus:ring-2 focus:ring-accent-500 focus:ring-offset-2',
-      },
-      h(
-        'div',
-        { className: 'relative aspect-[4/3] overflow-hidden bg-neutral-100' },
-        imageUrl
-          ? h('img', { src: imageUrl, alt: apartment.name, loading: 'lazy', className: 'h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]' })
-          : h('div', { className: 'absolute inset-0 flex items-center justify-center bg-gradient-to-br from-neutral-100 to-neutral-200 text-sm font-medium text-neutral-400' }, 'Foto folgt'),
-        h('div', { className: 'absolute bottom-3 left-3' }, availabilityBadge({ available: apartment.available, availableFrom: apartment.availableFrom, variant: 'default' })),
-      ),
-      h(
-        'div',
-        { className: 'flex flex-1 flex-col p-5' },
-        h('h3', { className: 'font-serif text-lg font-semibold text-neutral-900 transition-colors group-hover:text-accent-700' }, apartment.name),
-        h('p', { className: 'mt-1 text-sm text-neutral-500' }, apartment.tagline),
-        h(
-          'div',
-          { className: 'mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-neutral-500' },
-          h('span', null, `${apartment.size} m2`),
-          h('span', { className: 'text-neutral-300' }, '·'),
-          h('span', null, apartment.rooms),
-          h('span', { className: 'text-neutral-300' }, '·'),
-          h('span', { className: 'font-semibold text-neutral-900' }, price),
-        ),
-        h(
-          'div',
-          { className: 'mt-auto border-t border-neutral-100 pt-4' },
-          h(
-            'span',
-            { className: 'inline-flex items-center gap-1.5 text-sm font-medium text-accent-700 transition-all group-hover:gap-2.5' },
-            'Mehr erfahren',
-            iconArrow('right', 'h-4 w-4'),
-          ),
-        ),
-      ),
-    );
-  };
+        setStatus(matchingStore, 'synced', '');
+        queueUpdate(matchingStore, true);
+        return;
+      }
 
-  const featureIcon = (iconName) => h(
-    'span',
-    { className: 'flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-accent-100 text-accent-700' },
-    h('span', { className: 'text-[10px] font-semibold uppercase tracking-wider' }, String(iconName || 'ic').slice(0, 2)),
-  );
+      if (data.type === MESSAGE_TYPES.ACK) {
+        const ackStatus = typeof data.status === 'string' ? data.status : 'synced';
+        const ackMessage = typeof data.message === 'string' ? data.message : '';
+        setStatus(matchingStore, ackStatus, ackMessage);
+        return;
+      }
 
-  const editorialBlock = (block, lang, index) => {
-    if (!block || !block.type) return null;
+      if (data.type === MESSAGE_TYPES.REQUEST_FOCUS) {
+        const path = typeof data.path === 'string' ? data.path.trim() : '';
+        if (!path) return;
 
-    if (block.type === 'richText') {
-      return h('div', { className: 'editorial-block editorial-block-info', key: `editorial-${index}` }, richTextNode(localized(block.body, lang)));
-    }
+        const input = findBestInputMatch(path);
+        if (input) {
+          input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          if (typeof input.focus === 'function') {
+            input.focus({ preventScroll: true });
+          }
+          setStatus(matchingStore, 'synced', `Focused field for ${path}.`);
+          return;
+        }
 
-    if (block.type === 'callout') {
-      const toneClass = block.tone === 'success'
-        ? 'editorial-block-success'
-        : block.tone === 'warning'
-          ? 'editorial-block-warning'
-          : 'editorial-block-info';
-
-      return h(
-        'div',
-        { className: `editorial-block ${toneClass}`, key: `editorial-${index}` },
-        h('h3', { className: 'font-serif text-xl font-bold text-neutral-900' }, localized(block.title, lang)),
-        richTextNode(localized(block.body, lang), 'mt-3'),
-      );
-    }
-
-    if (block.type === 'ctaRow') {
-      return h(
-        'div',
-        { className: 'editorial-block editorial-block-info flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between', key: `editorial-${index}` },
-        h('p', { className: 'text-sm font-medium text-neutral-800' }, localized(block.text, lang)),
-        h(
-          'a',
-          {
-            href: sanitizeHref(localized(block.buttonHref, lang)),
-            className: 'inline-flex items-center gap-2 rounded-full bg-accent-700 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-accent-800',
-          },
-          localized(block.buttonLabel, lang) || 'Mehr erfahren',
-          iconArrow('right', 'h-4 w-4'),
-        ),
-      );
-    }
-
-    return null;
-  };
-
-  const previewShell = (mainChildren) => h(
-    'div',
-    { className: 'cms-preview-root' },
-    h(
-      'div',
-      { className: 'flex min-h-screen flex-col bg-neutral-50 text-neutral-800 antialiased' },
-      previewHeader(),
-      h('main', { id: 'main-content', className: 'flex-1' }, mainChildren),
-      previewFooter(),
-    ),
-  );
-
-  const HomePreview = ({ entry, getAsset }) => {
-    const data = toJS(entry && entry.get && entry.get('data'), {});
-    const lang = 'de';
-
-    const hero = data.hero || {};
-    const heroImages = hero.images || {};
-    const heroDesktop = resolveAssetUrl(heroImages.desktop, getAsset);
-
-    const sectionSubheadline = localized(data.sectionSubheadline, lang);
-    const features = Array.isArray(data.features) ? data.features : [];
-    const editorialBlocks = Array.isArray(data.editorialBlocks) ? data.editorialBlocks : [];
-    const apartments = HOME_PREVIEW_FALLBACK_APARTMENTS;
-
-    return previewShell([
-      h(
-        'section',
-        { className: 'relative flex min-h-[85vh] items-center justify-center overflow-hidden sm:min-h-screen', key: 'home-hero' },
-        h(
-          'div',
-          { className: 'absolute inset-0' },
-          heroDesktop
-            ? h('img', { src: heroDesktop, alt: '', className: 'h-full w-full object-cover', 'aria-hidden': 'true' })
-            : h('div', { className: 'h-full w-full bg-gradient-to-br from-accent-800 via-accent-700 to-accent-900' }),
-        ),
-        h('div', { className: 'absolute inset-0 bg-gradient-to-b from-accent-950/70 via-accent-950/50 to-accent-950/70' }),
-        h(
-          'div',
-          { className: 'relative z-10 mx-auto max-w-4xl px-4 text-center sm:px-6' },
-          h('h1', { className: 'font-serif text-4xl font-extrabold leading-tight text-white sm:text-5xl md:text-6xl lg:text-7xl' }, localized(hero.headline, lang) || 'Studentisches Wohnen in Vallendar'),
-          h('p', { className: 'mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-white/85 sm:text-xl' }, localized(hero.subheadline, lang)),
-          h(
-            'a',
-            { href: '#wohnungen', className: 'btn-glass mt-16 inline-flex' },
-            localized(hero.cta, lang) || 'Wohnungen entdecken',
-            iconArrow('down', 'h-4 w-4'),
-          ),
-        ),
-      ),
-
-      h(
-        'section',
-        { id: 'wohnungen', className: 'bg-neutral-50 py-20 sm:py-28', key: 'home-apartments' },
-        h(
-          'div',
-          { className: 'mx-auto max-w-6xl px-4 sm:px-6' },
-          h('h2', { className: 'text-center font-serif text-3xl font-bold text-neutral-900 sm:text-4xl' }, 'Unsere Wohnungen'),
-          richTextNode(sectionSubheadline, 'mx-auto mt-4 max-w-2xl text-center'),
-          h(
-            'div',
-            { className: 'mt-14 grid gap-8 sm:grid-cols-2 lg:grid-cols-3' },
-            apartments.map((apartment, index) => apartmentCard(apartment, getAsset, index)),
-          ),
-        ),
-      ),
-
-      editorialBlocks.length > 0
-        ? h(
-          'section',
-          { className: 'bg-white py-16 sm:py-20', key: 'home-editorial' },
-          h(
-            'div',
-            { className: 'mx-auto max-w-4xl px-4 sm:px-6' },
-            h('div', { className: 'space-y-5' }, editorialBlocks.map((block, index) => editorialBlock(block, lang, index))),
-          ),
-        )
-        : null,
-
-      h(
-        'section',
-        { className: 'bg-white py-20 sm:py-28', key: 'home-features' },
-        h(
-          'div',
-          { className: 'mx-auto max-w-6xl px-4 sm:px-6' },
-          h('h2', { className: 'text-center font-serif text-3xl font-bold text-neutral-900 sm:text-4xl' }, 'Ihre Vorteile'),
-          h(
-            'div',
-            { className: 'mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-3' },
-            features.map((feature, index) => h(
-              'div',
-              {
-                className: 'flex items-center gap-4 rounded-xl bg-neutral-50 p-5 ring-1 ring-neutral-100 transition-all duration-200 hover:shadow-md hover:ring-accent-200',
-                key: `feature-${index}`,
-              },
-              featureIcon(feature.icon),
-              h('span', { className: 'text-sm font-semibold text-neutral-800' }, localized(feature.label, lang)),
-            )),
-          ),
-        ),
-      ),
-    ]);
-  };
-
-  const apartmentGallery = (images, getAsset, apartmentName, lang) => {
-    const normalized = normalizeImages(images).sort((a, b) => Number(Boolean(b.isPrimary)) - Number(Boolean(a.isPrimary)));
-
-    if (normalized.length === 0) {
-      return h('div', { className: 'rounded-2xl border border-dashed border-neutral-300 bg-neutral-100 p-10 text-center text-sm text-neutral-500' }, `${apartmentName || 'Wohnung'}: Keine Bilder vorhanden`);
-    }
-
-    return h(
-      'div',
-      { className: 'grid gap-3 sm:grid-cols-2 lg:grid-cols-4 lg:grid-rows-2' },
-      normalized.slice(0, 5).map((entry, index) => {
-        const imageUrl = resolveAssetUrl(entry.image, getAsset);
-        const alt = localized(entry.caption, lang)
-          ? `${apartmentName} - ${localized(entry.caption, lang)}`
-          : `${apartmentName} - ${index + 1}`;
-
-        const className = index === 0
-          ? 'group relative overflow-hidden rounded-xl sm:col-span-2 lg:row-span-2 aspect-[16/10] sm:aspect-[16/10] lg:aspect-auto lg:h-full'
-          : 'group relative overflow-hidden rounded-xl aspect-[4/3]';
-
-        return h(
-          'div',
-          { className, key: `gallery-${index}` },
-          imageUrl
-            ? h('img', {
-              src: imageUrl,
-              alt,
-              loading: index === 0 ? 'eager' : 'lazy',
-              className: 'absolute inset-0 h-full w-full object-cover transition-transform duration-300 group-hover:scale-105',
+        if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+          navigator.clipboard
+            .writeText(path)
+            .then(() => {
+              setStatus(matchingStore, 'render warning', `No direct field match. Copied path: ${path}`);
             })
-            : h('div', { className: 'absolute inset-0 bg-gradient-to-br from-accent-100 to-accent-200' }),
-          h('div', { className: 'absolute inset-0 bg-accent-950/0 transition-colors duration-200 group-hover:bg-accent-950/10' }),
-        );
-      }),
+            .catch(() => {
+              setStatus(matchingStore, 'render warning', `No direct field match for ${path}.`);
+            });
+        } else {
+          setStatus(matchingStore, 'render warning', `No direct field match for ${path}.`);
+        }
+      }
+    });
+
+    document.addEventListener('focusin', (event) => {
+      if (!activeStoreKey || !stores.has(activeStoreKey)) return;
+      const store = stores.get(activeStoreKey);
+      if (!store.highlight) return;
+
+      const target = event.target;
+      if (!(target instanceof HTMLElement)) return;
+
+      const raw = [
+        target.getAttribute('name'),
+        target.getAttribute('id'),
+        target.getAttribute('aria-label'),
+      ].find((value) => typeof value === 'string' && value.trim().length > 0);
+
+      if (!raw) return;
+
+      const normalized = String(raw)
+        .replace(/^data\./, '')
+        .replace(/\[\d+\]/g, '')
+        .replace(/\.?(fields?|widgets?)\.?/g, '.')
+        .replace(/\.+/g, '.')
+        .replace(/^\.|\.$/g, '');
+
+      if (!normalized) return;
+
+      store.activePath = normalized;
+      if (store.latestPayload) {
+        store.latestPayload.payload.activePath = normalized;
+      }
+
+      queueUpdate(store, false);
+    }, true);
+  };
+
+  const renderToolbarButton = (label, id, value, onClick, active) => h(
+    'button',
+    {
+      type: 'button',
+      id,
+      className: ['cms-preview-toolbar-button', active ? 'is-active' : ''].join(' ').trim(),
+      'data-cms-value': value || undefined,
+      onClick,
+    },
+    label,
+  );
+
+  const renderFrame = (props, mode) => {
+    const entryData = toJS(props.entry && props.entry.get && props.entry.get('data'), {});
+    const slug = String(props.entry && props.entry.get ? props.entry.get('slug') || '' : '').trim().toLowerCase();
+    const keyBase = `${mode}-${slug || 'draft'}`.replace(/[^a-z0-9_-]+/gi, '-');
+    const key = keyBase || `${mode}-preview`;
+
+    const store = ensureStore(key, mode);
+    activeStoreKey = key;
+
+    const source = mode === 'apartments'
+      ? `/cms-preview/apartment?cmsPreview=1${slug ? `&slug=${encodeURIComponent(slug)}` : ''}`
+      : '/cms-preview/home?cmsPreview=1';
+
+    store.source = source;
+    store.latestPayload = buildPayload(props, store);
+
+    bindGlobalListeners();
+    setTimeout(() => {
+      bindStoreDom(store);
+      queueUpdate(store, false);
+    }, 0);
+
+    const fallbackJson = JSON.stringify(entryData, null, 2);
+
+    return h(
+      'div',
+      { id: store.rootId, className: 'cms-preview-wrapper', key: store.key },
+      h(
+        'div',
+        { className: 'cms-preview-toolbar' },
+        h(
+          'div',
+          { className: 'cms-preview-toolbar-group', id: store.localeGroupId },
+          renderToolbarButton('DE', undefined, 'de', () => setLocale(store, 'de'), store.locale === 'de'),
+          renderToolbarButton('EN', undefined, 'en', () => setLocale(store, 'en'), store.locale === 'en'),
+        ),
+        h(
+          'div',
+          { className: 'cms-preview-toolbar-group', id: store.viewportGroupId },
+          renderToolbarButton('Desktop', undefined, 'desktop', () => setViewport(store, 'desktop'), store.viewport === 'desktop'),
+          renderToolbarButton('Tablet', undefined, 'tablet', () => setViewport(store, 'tablet'), store.viewport === 'tablet'),
+          renderToolbarButton('Mobile', undefined, 'mobile', () => setViewport(store, 'mobile'), store.viewport === 'mobile'),
+        ),
+        h(
+          'div',
+          { className: 'cms-preview-toolbar-group' },
+          renderToolbarButton(store.highlight ? 'Highlight: On' : 'Highlight: Off', store.highlightButtonId, '', () => toggleHighlight(store), store.highlight),
+          h('span', { id: store.statusId, className: ['cms-preview-status', `status-${store.status.replace(/\s+/g, '-')}`].join(' ') }, store.status),
+        ),
+      ),
+      h('p', { id: store.noteId, className: 'cms-preview-note', style: { display: store.statusNote ? 'block' : 'none' } }, store.statusNote),
+      h(
+        'div',
+        { className: 'cms-preview-frame-stage' },
+        h(
+          'div',
+          { id: store.frameShellId, className: 'cms-preview-frame-shell', style: { width: store.viewport === 'tablet' ? '860px' : store.viewport === 'mobile' ? '430px' : '100%' } },
+          h('iframe', {
+            id: store.iframeId,
+            className: 'cms-preview-iframe',
+            src: store.source,
+            title: 'Visual CMS Preview',
+          }),
+        ),
+      ),
+      h(
+        'div',
+        { id: store.fallbackId, className: 'cms-preview-fallback', style: { display: 'none' } },
+        h('p', { className: 'cms-preview-fallback-title' }, 'Visual bridge unavailable. Showing structured fallback.'),
+        h('pre', { id: store.fallbackJsonId, className: 'cms-preview-fallback-json' }, fallbackJson),
+      ),
     );
   };
 
-  const ApartmentPreview = ({ entry, getAsset }) => {
-    const data = toJS(entry && entry.get && entry.get('data'), {});
-    const lang = 'de';
-
-    const images = normalizeImages(data.images || []);
-
-    const name = data.name || 'Wohnung';
-    const rooms = localized(data.rooms, lang);
-    const floor = localized(data.floor, lang);
-    const description = localized(data.description, lang);
-    const amenities = Array.isArray(data.amenities) ? data.amenities : [];
-
-    const rent = asNumber(data.pricePerMonth);
-    const utilities = asNumber(data.utilitiesPerMonth);
-    const total = rent + utilities;
-
-    return previewShell([
-      h(
-        'section',
-        { className: 'bg-gradient-to-br from-accent-950 via-accent-800 to-accent-950 pb-16 pt-32', key: 'apt-hero' },
-        h(
-          'div',
-          { className: 'mx-auto max-w-6xl px-4 sm:px-6' },
-          h(
-            'a',
-            { href: '#', className: 'inline-flex items-center gap-1 text-sm font-medium text-accent-200 transition-colors hover:text-white' },
-            iconArrow('left', 'h-4 w-4'),
-            'Zurueck zu allen Wohnungen',
-          ),
-          h(
-            'div',
-            { className: 'mt-6 flex flex-wrap items-start gap-4' },
-            h('h1', { className: 'font-serif text-4xl font-bold text-white sm:text-5xl' }, name),
-            h('div', { className: 'mt-1 sm:mt-2' }, availabilityBadge({ available: Boolean(data.available), availableFrom: data.availableFrom, variant: 'hero' })),
-          ),
-          h('p', { className: 'mt-3 text-lg text-accent-100/80' }, localized(data.tagline, lang)),
-        ),
-      ),
-
-      h(
-        'section',
-        { className: 'bg-neutral-50 py-12', key: 'apt-gallery' },
-        h('div', { className: 'mx-auto max-w-6xl px-4 sm:px-6' }, apartmentGallery(images, getAsset, name, lang)),
-      ),
-
-      h(
-        'section',
-        { className: 'bg-white py-16 sm:py-20', key: 'apt-details' },
-        h(
-          'div',
-          { className: 'mx-auto max-w-6xl px-4 sm:px-6' },
-          h(
-            'div',
-            { className: 'grid gap-10 lg:grid-cols-3' },
-            h(
-              'div',
-              { className: 'lg:col-span-2' },
-              h('h2', { className: 'font-serif text-2xl font-bold text-neutral-900' }, name),
-              richTextNode(description, 'mt-4'),
-              h(
-                'div',
-                { className: 'mt-8 grid grid-cols-2 gap-4 sm:grid-cols-4' },
-                h('div', { className: 'rounded-xl bg-neutral-50 p-4 ring-1 ring-neutral-100 transition-shadow duration-200 hover:shadow-sm' }, h('p', { className: 'text-xs font-medium uppercase tracking-wider text-neutral-500' }, 'Groesse'), h('p', { className: 'mt-1 text-lg font-bold text-neutral-900' }, `${data.size || '-'} m2`)),
-                h('div', { className: 'rounded-xl bg-neutral-50 p-4 ring-1 ring-neutral-100 transition-shadow duration-200 hover:shadow-sm' }, h('p', { className: 'text-xs font-medium uppercase tracking-wider text-neutral-500' }, 'Zimmer'), h('p', { className: 'mt-1 text-lg font-bold text-neutral-900' }, rooms || '-')),
-                h('div', { className: 'rounded-xl bg-neutral-50 p-4 ring-1 ring-neutral-100 transition-shadow duration-200 hover:shadow-sm' }, h('p', { className: 'text-xs font-medium uppercase tracking-wider text-neutral-500' }, 'Stockwerk'), h('p', { className: 'mt-1 text-lg font-bold text-neutral-900' }, floor || '-')),
-                h('div', { className: 'rounded-xl bg-neutral-50 p-4 ring-1 ring-neutral-100 transition-shadow duration-200 hover:shadow-sm' }, h('p', { className: 'text-xs font-medium uppercase tracking-wider text-neutral-500' }, 'Max. Bewohner'), h('p', { className: 'mt-1 text-lg font-bold text-neutral-900' }, String(data.maxOccupants || '-'))),
-              ),
-            ),
-            h(
-              'div',
-              null,
-              h(
-                'div',
-                { className: 'rounded-2xl bg-neutral-50 p-6 ring-1 ring-neutral-200' },
-                h('h3', { className: 'text-lg font-bold text-neutral-900' }, 'Mietkosten'),
-                h(
-                  'div',
-                  { className: 'mt-5 space-y-3' },
-                  h('div', { className: 'flex items-center justify-between text-sm' }, h('span', { className: 'text-neutral-600' }, 'Kaltmiete'), h('span', { className: 'font-semibold text-neutral-900' }, `${rent} EUR`)),
-                  h('div', { className: 'flex items-center justify-between text-sm' }, h('span', { className: 'text-neutral-600' }, 'Nebenkosten'), h('span', { className: 'font-semibold text-neutral-900' }, `${utilities} EUR`)),
-                  h('div', { className: 'border-t border-neutral-200 pt-3' }, h('div', { className: 'flex items-center justify-between' }, h('span', { className: 'font-semibold text-neutral-900' }, 'Gesamtmiete'), h('span', { className: 'text-xl font-bold text-accent-700' }, `${total} EUR`, h('span', { className: 'text-sm font-normal text-neutral-500' }, ' / Monat')))),
-                ),
-                h('div', { className: 'mt-6' }, availabilityBadge({ available: Boolean(data.available), availableFrom: data.availableFrom, variant: 'default' })),
-              ),
-            ),
-          ),
-        ),
-      ),
-
-      h(
-        'section',
-        { className: 'bg-neutral-50 py-16 sm:py-20', key: 'apt-amenities' },
-        h(
-          'div',
-          { className: 'mx-auto max-w-6xl px-4 sm:px-6' },
-          h('h2', { className: 'font-serif text-2xl font-bold text-neutral-900' }, 'Ausstattung'),
-          h(
-            'div',
-            { className: 'mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4' },
-            amenities.map((amenity, index) => h(
-              'div',
-              {
-                className: 'flex items-center gap-3 rounded-xl bg-white p-4 ring-1 ring-neutral-200 transition-all duration-200 hover:shadow-sm hover:ring-accent-200',
-                key: `amenity-${index}`,
-              },
-              iconCheck(),
-              h('span', { className: 'min-w-0 break-words text-sm font-medium text-neutral-800' }, localized(amenity, lang)),
-            )),
-          ),
-        ),
-      ),
-
-      h(
-        'section',
-        { className: 'bg-white py-16 sm:py-20', key: 'apt-form' },
-        h(
-          'div',
-          { className: 'mx-auto max-w-3xl px-4 sm:px-6' },
-          h('h2', { className: 'font-serif text-2xl font-bold text-neutral-900' }, 'Anfrage stellen'),
-          h('p', { className: 'mt-3 text-neutral-600' }, 'Formular wird im Live-Frontend unveraendert gerendert.'),
-          h(
-            'div',
-            { className: 'mt-8 rounded-2xl border border-dashed border-neutral-300 bg-neutral-50 p-6 text-sm text-neutral-500' },
-            'Kontaktformular-Layout entspricht der Live-Seite.',
-          ),
-        ),
-      ),
-    ]);
+  const UnsupportedPreview = (props) => {
+    const data = toJS(props.entry && props.entry.get && props.entry.get('data'), {});
+    return h(
+      'div',
+      { className: 'cms-preview-fallback', style: { display: 'block' } },
+      h('p', { className: 'cms-preview-fallback-title' }, 'High-fidelity visual preview is enabled for homepage and apartments in this wave.'),
+      h('pre', { className: 'cms-preview-fallback-json' }, JSON.stringify(data, null, 2)),
+    );
   };
 
-  const PagesPreview = (props) => {
-    const data = toJS(props.entry && props.entry.get && props.entry.get('data'), {});
-    const title = String(data.title || '').trim().toLowerCase();
-    const slug = props.entry && props.entry.get ? String(props.entry.get('slug') || '').trim().toLowerCase() : '';
+  const ApartmentsTemplate = (props) => renderFrame(props, 'apartments');
 
-    if (title === 'home' || slug === 'home') {
-      return h(HomePreview, props);
+  const PagesTemplate = (props) => {
+    const entryData = toJS(props.entry && props.entry.get && props.entry.get('data'), {});
+    const slug = String(props.entry && props.entry.get ? props.entry.get('slug') || '' : '').trim().toLowerCase();
+    if (!isHomeEntry(entryData, slug)) {
+      return h(UnsupportedPreview, props);
     }
 
-    return previewShell([
-      h(
-        'section',
-        { className: 'bg-white py-20', key: 'generic-page-preview' },
-        h(
-          'div',
-          { className: 'mx-auto max-w-3xl rounded-2xl border border-neutral-200 bg-neutral-50 p-8 text-center' },
-          h('h2', { className: 'font-serif text-2xl font-bold text-neutral-900' }, `Preview fuer ${title || 'Seite'}`),
-          h('p', { className: 'mt-3 text-neutral-600' }, 'High-fidelity preview ist in dieser Wave fuer Startseite und Wohnungen aktiv.'),
-        ),
-      ),
-    ]);
+    return renderFrame(props, 'home');
   };
 
-  cms.registerPreviewTemplate('apartments', ApartmentPreview);
-  cms.registerPreviewTemplate('home', HomePreview);
-  cms.registerPreviewTemplate('pages', PagesPreview);
+  cms.registerPreviewTemplate('apartments', ApartmentsTemplate);
+  cms.registerPreviewTemplate('pages', PagesTemplate);
+  cms.registerPreviewTemplate('home', (props) => renderFrame(props, 'home'));
 })();

@@ -19,7 +19,7 @@ public_folder: /images
 
 locale: de
 editor:
-  preview: false
+  preview: true
 
 collections:
   - name: apartments

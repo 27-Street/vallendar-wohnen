@@ -1,0 +1,267 @@
+---
+import { getCollection, getEntry } from 'astro:content';
+import { Icon } from 'astro-icon/components';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ApartmentCard from '../../components/ApartmentCard.astro';
+import RichText from '../../components/RichText.astro';
+import { getTranslation } from '../../i18n/translations';
+import { HOME_PREVIEW_FIELD_MAP } from '../../lib/cms-preview/field-map';
+import {
+  RICH_TEXT_ALLOWED_ATTRIBUTES,
+  RICH_TEXT_ALLOWED_TAGS,
+  RICH_TEXT_CONFIG_SIGNATURE,
+} from '../../lib/rich-text-config';
+
+const lang = 'de' as const;
+const t = getTranslation(lang);
+
+const allApartments = await getCollection('apartments');
+const sortedApartments = allApartments.sort((a, b) => a.data.order - b.data.order);
+
+const homePage = await getEntry('pages', 'home');
+const hero = homePage.data.hero!;
+const sectionSubheadline = homePage.data.sectionSubheadline!;
+const features = homePage.data.features!;
+const editorialBlocks = homePage.data.editorialBlocks ?? [];
+const welcomeSpotlight = homePage.data.welcomeSpotlight;
+const seo = homePage.data.seo;
+const apartmentsAnchorId = 'wohnungen';
+
+const withFormat = (src: string, format: 'avif' | 'webp') => src.replace(/\.(jpe?g|png)$/i, `.${format}`);
+const heroImageMobileAvif = withFormat(hero.images.mobile, 'avif');
+const heroImageTabletAvif = withFormat(hero.images.tablet, 'avif');
+const heroImageDesktopAvif = withFormat(hero.images.desktop, 'avif');
+const heroImageMobileWebp = withFormat(hero.images.mobile, 'webp');
+const heroImageTabletWebp = withFormat(hero.images.tablet, 'webp');
+const heroImageDesktopWebp = withFormat(hero.images.desktop, 'webp');
+
+const apartmentImagePool = sortedApartments.flatMap((apartment) => apartment.data.images.map((image) => ({ image })));
+const spotlightImageRecord = apartmentImagePool.find(({ image }) => image.kind === 'kitchen')
+  ?? apartmentImagePool.find(({ image }) => image.isPrimary)
+  ?? apartmentImagePool[0];
+const fallbackSpotlightImageSrc = spotlightImageRecord?.image.image ?? hero.images.desktop;
+const spotlightImageSrc = welcomeSpotlight?.image?.trim() || fallbackSpotlightImageSrc;
+const spotlightImageAlt = welcomeSpotlight?.imageAlt?.[lang]?.trim()
+  || spotlightImageRecord?.image.caption?.[lang]
+  || 'Einblick in ein Studentenapartment in Vallendar';
+
+const bootstrapPayload = {
+  page: 'home',
+  collection: 'pages',
+  slug: 'home',
+  locale: 'de',
+  highlight: false,
+  activePath: null,
+  data: homePage.data,
+  resolvedAssets: {},
+  sentAt: Date.now(),
+};
+
+const richTextConfig = {
+  allowedTags: [...RICH_TEXT_ALLOWED_TAGS],
+  allowedAttributes: Array.from(new Set(Object.values(RICH_TEXT_ALLOWED_ATTRIBUTES).flat())),
+  signature: RICH_TEXT_CONFIG_SIGNATURE,
+};
+---
+
+<BaseLayout
+  title="CMS Preview — Home"
+  description="Visual preview route for Decap CMS home editing"
+  lang={lang}
+  noindex={true}
+>
+  <Fragment slot="head">
+    <meta name="robots" content="noindex, nofollow" />
+    <script
+      is:inline
+      define:vars={{
+        bootstrapPayload,
+        homeFieldMap: HOME_PREVIEW_FIELD_MAP,
+        richTextConfig,
+      }}
+    >
+      window.__CMS_PREVIEW_BOOTSTRAP__ = {
+        page: 'home',
+        locale: bootstrapPayload.locale,
+        fieldMap: homeFieldMap,
+        richTextConfig,
+        initialPayload: bootstrapPayload,
+      };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dompurify@3.2.5/dist/purify.min.js"></script>
+    <script is:inline src="/admin/preview-frame.js"></script>
+    <style>
+      [data-cms-path] {
+        scroll-margin-top: 96px;
+      }
+
+      .cms-preview-highlightable {
+        outline: 1px dashed rgba(54, 79, 51, 0.4);
+        outline-offset: 4px;
+      }
+
+      .cms-preview-highlight-active {
+        outline: 2px solid rgba(54, 79, 51, 0.8);
+        outline-offset: 4px;
+      }
+    </style>
+  </Fragment>
+
+  <section class="hero-fullscreen relative flex items-end overflow-hidden pb-[2.125rem] pt-[3.4375rem] sm:items-center sm:pb-[3.4375rem] sm:pt-[5.5625rem]">
+    <div class="absolute inset-0">
+      <picture>
+        <source type="image/avif" media="(max-width: 640px)" data-cms-path="hero.images.mobile" srcset={heroImageMobileAvif} />
+        <source type="image/avif" media="(max-width: 1024px)" data-cms-path="hero.images.tablet" srcset={heroImageTabletAvif} />
+        <source type="image/avif" media="(min-width: 1025px)" srcset={heroImageDesktopAvif} />
+        <source type="image/webp" media="(max-width: 640px)" srcset={heroImageMobileWebp} />
+        <source type="image/webp" media="(max-width: 1024px)" srcset={heroImageTabletWebp} />
+        <source type="image/webp" media="(min-width: 1025px)" srcset={heroImageDesktopWebp} />
+        <img
+          data-cms-path="hero.images.desktop"
+          src={hero.images.desktop}
+          alt=""
+          width="2400"
+          height="1350"
+          sizes="100vw"
+          loading="eager"
+          decoding="async"
+          fetchpriority="high"
+          class="h-full w-full object-cover object-[52%_40%] sm:object-center"
+          aria-hidden="true"
+        />
+      </picture>
+    </div>
+    <div class="absolute inset-0 bg-gradient-to-b from-accent-950/68 via-accent-950/48 to-accent-950/84 sm:from-accent-950/75 sm:via-accent-950/55 sm:to-accent-950/75"></div>
+
+    <div class="relative z-10 mx-auto w-full max-w-5xl px-[1.3125rem] text-center sm:px-6">
+      <h1 data-cms-path="hero.headline" class="mx-auto max-w-[12ch] text-balance font-serif text-[clamp(2.25rem,10.5vw,3.65rem)] font-extrabold leading-[1.06] text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.35)] sm:max-w-none sm:text-5xl md:text-6xl lg:text-7xl">
+        {hero.headline[lang]}
+      </h1>
+      <p data-cms-path="hero.subheadline" class="mx-auto mt-[1.3125rem] max-w-[30ch] text-[1.0625rem] leading-relaxed text-white/92 drop-shadow-[0_1px_6px_rgba(0,0,0,0.28)] sm:mt-[2.125rem] sm:max-w-3xl sm:text-xl">
+        {hero.subheadline[lang]}
+      </p>
+      <div class="mt-[2.125rem] sm:mt-[3.4375rem]">
+        <a href={`#${apartmentsAnchorId}`} class="btn btn-secondary w-full max-w-[22rem] justify-center sm:w-auto">
+          <span data-cms-path="hero.cta">{hero.cta[lang]}</span>
+          <Icon name="lucide:arrow-down" class="h-4 w-4" />
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="bg-neutral-100 py-[3.4375rem] sm:py-[5.5625rem] lg:py-[8.9375rem]">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6">
+      <div class="rounded-[2.125rem] bg-neutral-50/90 p-[2.125rem] ring-1 ring-neutral-200 sm:p-[3.4375rem] lg:p-[5.5625rem]">
+        <div class="grid items-center gap-[3.4375rem] lg:grid-cols-[minmax(0,0.618fr)_minmax(0,1fr)] lg:gap-[5.5625rem]">
+          <div class="lg:pr-[1.3125rem]">
+            <p data-cms-path="welcomeSpotlight.eyebrow" class="text-xs font-semibold uppercase tracking-[0.16em] text-neutral-600">
+              {welcomeSpotlight?.eyebrow?.[lang]}
+            </p>
+            <h2 data-cms-path="welcomeSpotlight.headline" class="mt-[1.3125rem] max-w-[10.5ch] font-serif text-4xl font-bold leading-tight text-neutral-900 sm:text-5xl">
+              {welcomeSpotlight?.headline?.[lang]}
+            </h2>
+            <p data-cms-path="welcomeSpotlight.body" class="mt-[2.125rem] max-w-[30ch] text-lg leading-relaxed text-neutral-600">
+              {welcomeSpotlight?.body?.[lang]}
+            </p>
+            <a data-cms-path="welcomeSpotlight.ctaHref" href={welcomeSpotlight?.ctaHref?.[lang] || `#${apartmentsAnchorId}`} class="btn btn-contrast mt-[3.4375rem]">
+              <span data-cms-path="welcomeSpotlight.ctaLabel">{welcomeSpotlight?.ctaLabel?.[lang]}</span>
+              <Icon name="lucide:arrow-right" class="h-4 w-4" />
+            </a>
+          </div>
+          <figure class="overflow-hidden rounded-[2.125rem] bg-white ring-1 ring-neutral-200 shadow-xl shadow-neutral-300/35">
+            <img
+              data-cms-path="welcomeSpotlight.image"
+              src={spotlightImageSrc}
+              alt={spotlightImageAlt}
+              loading="lazy"
+              class="aspect-[1.618/1] w-full object-cover lg:h-full"
+            />
+          </figure>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="bg-neutral-100 pb-[5.5625rem] sm:pb-[8.9375rem]">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6">
+      <h2 class="text-center font-serif text-3xl font-bold text-neutral-900 sm:text-4xl">{t.sections.features}</h2>
+      <div data-cms-path="features" class="mt-[2.125rem] grid gap-[1.3125rem] sm:mt-[3.4375rem] sm:gap-[2.125rem] sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+        {features.map((feature) => (
+          <div class="flex min-h-[12.875rem] flex-col items-center justify-center rounded-3xl bg-white p-[1.3125rem] text-center ring-1 ring-neutral-200 transition-all duration-200 hover:-translate-y-1 hover:shadow-lg sm:p-[2.125rem]">
+            <span class="flex h-12 w-12 items-center justify-center rounded-full bg-neutral-100 text-neutral-900">
+              <Icon name={`lucide:${feature.icon}`} class="h-5 w-5" />
+            </span>
+            <span class="mt-[1.3125rem] text-base font-semibold text-neutral-800">{feature.label[lang]}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section id={apartmentsAnchorId} class="bg-white py-[5.5625rem] sm:py-[8.9375rem]">
+    <div class="mx-auto max-w-6xl px-4 sm:px-6">
+      <h2 class="text-center font-serif text-3xl font-bold text-neutral-900 sm:text-4xl">{t.sections.apartments}</h2>
+      <div data-cms-path="sectionSubheadline" class="richtext mx-auto mt-[1.3125rem] max-w-2xl text-center">
+        <RichText content={sectionSubheadline[lang]} className="text-center" />
+      </div>
+
+      <div class="mt-[3.4375rem] grid gap-[2.125rem] sm:mt-[5.5625rem] sm:grid-cols-2 lg:grid-cols-3">
+        {sortedApartments.map((apt) => (
+          <ApartmentCard apartment={apt} lang={lang} />
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="bg-neutral-100 py-[5.5625rem] sm:py-[8.9375rem]">
+    <div class="mx-auto max-w-4xl px-4 sm:px-6">
+      <h2 class="text-center font-serif text-3xl font-bold text-neutral-900 sm:text-4xl">Redaktions-Blöcke</h2>
+      <div data-cms-path="editorialBlocks" class="mt-[3.4375rem] space-y-[1.3125rem]">
+        {editorialBlocks.map((block) => (
+          block.type === 'richText' ? (
+            <div class="editorial-block editorial-block-info">
+              <RichText content={block.body[lang]} />
+            </div>
+          ) : block.type === 'callout' ? (
+            <div class:list={[
+              'editorial-block',
+              block.tone === 'success'
+                ? 'editorial-block-success'
+                : block.tone === 'warning'
+                  ? 'editorial-block-warning'
+                  : 'editorial-block-info',
+            ]}>
+              <h3 class="font-serif text-xl font-bold text-neutral-900">{block.title[lang]}</h3>
+              <RichText content={block.body[lang]} className="mt-3" />
+            </div>
+          ) : (
+            <div class="editorial-block editorial-block-info flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <p class="text-sm font-medium text-neutral-800">{block.text[lang]}</p>
+              <a href={block.buttonHref[lang]} class="btn btn-primary">
+                {block.buttonLabel[lang]}
+                <Icon name="lucide:arrow-right" class="h-4 w-4" />
+              </a>
+            </div>
+          )
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="bg-white py-16">
+    <div class="mx-auto max-w-4xl px-4 sm:px-6">
+      <div class="rounded-3xl border border-neutral-200 bg-neutral-50 p-6 sm:p-8">
+        <h2 class="font-serif text-2xl font-bold text-neutral-900">SEO Vorschau</h2>
+        <p class="mt-5 text-xs font-semibold uppercase tracking-[0.12em] text-neutral-500">SEO Title</p>
+        <p data-cms-path="seo.title" class="mt-2 text-lg font-semibold text-neutral-900">{seo?.title?.[lang]}</p>
+
+        <p class="mt-6 text-xs font-semibold uppercase tracking-[0.12em] text-neutral-500">SEO Description</p>
+        <p data-cms-path="seo.description" class="mt-2 text-sm leading-relaxed text-neutral-600">{seo?.description?.[lang]}</p>
+
+        <p class="mt-6 text-xs font-semibold uppercase tracking-[0.12em] text-neutral-500">OpenGraph Image</p>
+        <img data-cms-path="seo.ogImage" src={seo?.ogImage} alt="" class="mt-2 max-h-52 w-full rounded-2xl object-cover ring-1 ring-neutral-200" />
+      </div>
+    </div>
+  </section>
+</BaseLayout>

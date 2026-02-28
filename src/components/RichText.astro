@@ -1,6 +1,12 @@
 ---
 import { marked } from 'marked';
 import sanitizeHtml from 'sanitize-html';
+import {
+  RICH_TEXT_ALLOWED_ATTRIBUTES,
+  RICH_TEXT_ALLOWED_SCHEMES,
+  RICH_TEXT_ALLOWED_TAGS,
+  RICH_TEXT_MARKED_OPTIONS,
+} from '../lib/rich-text-config';
 
 interface Props {
   content: string;
@@ -9,28 +15,15 @@ interface Props {
 
 const { content, className = '' } = Astro.props;
 
-const rawHtml = marked.parse(content ?? '', {
-  gfm: true,
-  breaks: true,
-}) as string;
+const rawHtml = marked.parse(content ?? '', RICH_TEXT_MARKED_OPTIONS) as string;
 
 const sanitizedHtml = sanitizeHtml(rawHtml, {
-  allowedTags: [
-    ...sanitizeHtml.defaults.allowedTags,
-    'h1',
-    'h2',
-    'h3',
-    'h4',
-    'h5',
-    'h6',
-    'img',
-  ],
+  allowedTags: [...RICH_TEXT_ALLOWED_TAGS],
   allowedAttributes: {
     ...sanitizeHtml.defaults.allowedAttributes,
-    a: ['href', 'name', 'target', 'rel'],
-    img: ['src', 'alt', 'title', 'loading'],
+    ...RICH_TEXT_ALLOWED_ATTRIBUTES,
   },
-  allowedSchemes: ['http', 'https', 'mailto', 'tel'],
+  allowedSchemes: [...RICH_TEXT_ALLOWED_SCHEMES],
   transformTags: {
     a: (_tagName, attribs) => {
       const href = attribs.href ?? '';

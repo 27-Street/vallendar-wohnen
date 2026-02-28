@@ -61,6 +61,22 @@ Homepage hero media:
 Security note:
 - Unsafe HTML is sanitized before rendering.
 
+## 4.1 Visual Preview (WordPress/Shopify-like)
+
+For **Startseite** and **Wohnungen**, the preview pane now uses a live-layout iframe route (`/cms-preview/*`) with the same site CSS and component structure.
+
+Available controls in preview:
+- `DE` / `EN` locale switch
+- `Desktop` / `Tablet` / `Mobile` viewport widths
+- `Highlight` mode to visualize mapped editable areas
+- Status indicator (`loading`, `updating`, `synced`, `asset pending`, `render warning`)
+
+Behavior:
+- Draft text updates are pushed to preview continuously.
+- Unpublished uploaded images are resolved with local blob URLs and shown immediately.
+- Clicking a highlighted area in preview attempts to focus the matching CMS field.
+- If no direct field match exists, the field path is copied for manual lookup.
+
 ## 5. Homepage Editorial Blocks
 
 `Redaktions-Blöcke` are structured block types (fixed, no free page builder):

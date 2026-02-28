@@ -3,6 +3,11 @@ import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import { basename, join, relative, resolve, sep } from 'node:path';
 import { parse as parseYaml } from 'yaml';
 import { APARTMENT_IMAGE_KIND_OPTIONS, FEATURE_ICON_OPTIONS } from '../src/content/cms-shared';
+import {
+  APARTMENT_REQUIRED_PREVIEW_PATHS,
+  HOME_REQUIRED_PREVIEW_PATHS,
+} from '../src/lib/cms-preview/field-map';
+import { RICH_TEXT_CONFIG_SIGNATURE } from '../src/lib/rich-text-config';
 
 const ROOT = resolve(import.meta.dirname, '..');
 const PUBLIC_DIR = join(ROOT, 'public');
@@ -15,6 +20,10 @@ const HERO_MEDIA_DIR = join(PUBLIC_DIR, 'images/hero');
 const PAGES_MEDIA_DIR = join(PUBLIC_DIR, 'images/pages');
 const GUIDES_MEDIA_DIR = join(PUBLIC_DIR, 'images/guides');
 const DECAP_CONFIG_PATH = join(ROOT, 'public/admin/config.yml');
+const DECAP_ADMIN_INDEX_PATH = join(ROOT, 'public/admin/index.html');
+const CMS_PREVIEW_HOME_ROUTE = join(ROOT, 'src/pages/cms-preview/home.astro');
+const CMS_PREVIEW_APARTMENT_ROUTE = join(ROOT, 'src/pages/cms-preview/apartment.astro');
+const CMS_PREVIEW_FRAME_PATH = join(ROOT, 'public/admin/preview-frame.js');
 
 const nonEmptyString = z.string().refine((value) => value.trim().length > 0, 'Must not be empty');
 
@@ -279,6 +288,84 @@ function getFilesRecursively(dir: string): string[] {
   return files;
 }
 
+function extractDataCmsPaths(filePath: string): string[] {
+  if (!existsSync(filePath)) return [];
+  const source = readFileSync(filePath, 'utf-8');
+  const matches = source.matchAll(/data-cms-path="([^"]+)"/g);
+  return Array.from(matches, (match) => match[1]);
+}
+
+function validatePreviewContracts(): ValidationResult {
+  const result = createResult('cms-preview-contracts');
+
+  if (!existsSync(CMS_PREVIEW_HOME_ROUTE)) {
+    result.errors.push(`  [preview.routes] Missing ${relative(ROOT, CMS_PREVIEW_HOME_ROUTE)}`);
+  }
+  if (!existsSync(CMS_PREVIEW_APARTMENT_ROUTE)) {
+    result.errors.push(`  [preview.routes] Missing ${relative(ROOT, CMS_PREVIEW_APARTMENT_ROUTE)}`);
+  }
+  if (!existsSync(CMS_PREVIEW_FRAME_PATH)) {
+    result.errors.push(`  [preview.frame] Missing ${relative(ROOT, CMS_PREVIEW_FRAME_PATH)}`);
+    return result;
+  }
+
+  const homePaths = extractDataCmsPaths(CMS_PREVIEW_HOME_ROUTE);
+  const apartmentPaths = extractDataCmsPaths(CMS_PREVIEW_APARTMENT_ROUTE);
+
+  const homePathSet = new Set(homePaths);
+  const apartmentPathSet = new Set(apartmentPaths);
+
+  HOME_REQUIRED_PREVIEW_PATHS.forEach((path) => {
+    if (!homePathSet.has(path)) {
+      result.errors.push(`  [preview.home] Missing data-cms-path="${path}"`);
+    }
+  });
+
+  APARTMENT_REQUIRED_PREVIEW_PATHS.forEach((path) => {
+    if (!apartmentPathSet.has(path)) {
+      result.errors.push(`  [preview.apartment] Missing data-cms-path="${path}"`);
+    }
+  });
+
+  const duplicateHomePaths = homePaths.filter((path, index) => homePaths.indexOf(path) !== index);
+  duplicateHomePaths.forEach((path) => {
+    result.errors.push(`  [preview.home] Duplicate data-cms-path="${path}"`);
+  });
+
+  const duplicateApartmentPaths = apartmentPaths.filter((path, index) => apartmentPaths.indexOf(path) !== index);
+  duplicateApartmentPaths.forEach((path) => {
+    result.errors.push(`  [preview.apartment] Duplicate data-cms-path="${path}"`);
+  });
+
+  const frameSource = readFileSync(CMS_PREVIEW_FRAME_PATH, 'utf-8');
+  if (!frameSource.includes(RICH_TEXT_CONFIG_SIGNATURE)) {
+    result.errors.push(`  [preview.frame.richtext] Signature mismatch. Expected "${RICH_TEXT_CONFIG_SIGNATURE}".`);
+  }
+
+  if (!frameSource.includes('CMS_PREVIEW_UPDATE') || !frameSource.includes('CMS_PREVIEW_READY')) {
+    result.errors.push('  [preview.frame.protocol] Missing required preview protocol message handlers.');
+  }
+
+  if (existsSync(DECAP_ADMIN_INDEX_PATH)) {
+    const adminIndex = readFileSync(DECAP_ADMIN_INDEX_PATH, 'utf-8');
+    if (!adminIndex.includes('/admin/preview.js')) {
+      result.errors.push('  [admin.index] Expected /admin/preview.js to be loaded before CMS.init().');
+    }
+
+     const decapPos = adminIndex.indexOf('decap-cms@3.10.1/dist/decap-cms.js');
+     const mediaBackendPos = adminIndex.indexOf('/admin/media-backend.js');
+     const previewPos = adminIndex.indexOf('/admin/preview.js');
+     const initPos = adminIndex.indexOf('window.CMS.init()');
+     if (!(decapPos < mediaBackendPos && mediaBackendPos < previewPos && previewPos < initPos)) {
+       result.errors.push('  [admin.index] Expected load order: decap-cms -> media-backend.js -> preview.js -> CMS.init().');
+     }
+  } else {
+    result.errors.push('  [admin.index] Missing public/admin/index.html');
+  }
+
+  return result;
+}
+
 function validateDecapConfig(): ValidationResult {
   const result = createResult(DECAP_CONFIG_PATH);
 
@@ -294,6 +381,13 @@ function validateDecapConfig(): ValidationResult {
   const publishMode = data.publish_mode;
   if (publishMode !== 'editorial_workflow') {
     result.errors.push('  [publish_mode] Expected "editorial_workflow".');
+  }
+
+  const editor = typeof data.editor === 'object' && data.editor
+    ? data.editor as Record<string, unknown>
+    : null;
+  if (!editor || editor.preview !== true) {
+    result.errors.push('  [editor.preview] Expected true for visual preview.');
   }
 
   if (data.media_folder !== 'public/images') {
@@ -441,6 +535,7 @@ function collectResult(result: ValidationResult): void {
 console.log('=== Content Collection Validation (CMS V2) ===\n');
 
 collectResult(validateDecapConfig());
+collectResult(validatePreviewContracts());
 
 for (const file of getMdFiles(APARTMENTS_DIR)) {
   const result = createResult(file);
