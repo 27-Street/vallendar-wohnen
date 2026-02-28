@@ -29,6 +29,22 @@ jobs:
       - name: Build site
         run: npm run build
 
+      - name: Smoke test CMS admin routes
+        run: |
+          python3 -m http.server 4173 --directory dist >/tmp/cms-smoke-server.log 2>&1 &
+          SERVER_PID=$!
+          trap "kill $SERVER_PID" EXIT
+          sleep 2
+
+          for path in /admin /admin/ /admin/index.html; do
+            echo "Checking $path"
+            status_code=$(curl -sSL -o /dev/null -w "%{http_code}" "http://127.0.0.1:4173${path}")
+            if [ "$status_code" != "200" ]; then
+              echo "Expected HTTP 200 for ${path}, got ${status_code}"
+              exit 1
+            fi
+          done
+
       - name: SEO audit
         run: npm run seo:audit
 
