@@ -95,9 +95,11 @@ while (queue.length > 0) {
 }
 
 const ignoredOrphanCandidates = new Set<string>(['/']);
+const ignoredOrphanPrefixes = ['/cms-preview/'];
 const orphanRoutes = [...knownRoutes]
   .filter((route) => !visited.has(route))
   .filter((route) => !ignoredOrphanCandidates.has(route))
+  .filter((route) => !ignoredOrphanPrefixes.some((prefix) => route.startsWith(prefix)))
   .sort();
 
 const guideRoutes = [...knownRoutes].filter(
