@@ -21,7 +21,7 @@
     "@iconify-json/lucide": "^1.2.94",
     "@tailwindcss/vite": "^4.2.1",
     "@types/sanitize-html": "^2.16.0",
-    "astro": "^5.17.1",
+    "astro": "^5.18.1",
     "astro-icon": "^1.1.5",
     "decap-cms-app": "^3.10.1",
     "marked": "^17.0.3",
